@@ -75,6 +75,6 @@ public class User extends BaseEntity {
             return null;
         }
 
-        return phone.substring(0, 2) + "-****-" + phone.substring(phone.length() - 4);
+        return phone.substring(0, 3) + "-****-" + phone.substring(phone.length() - 4);
     }
 }
