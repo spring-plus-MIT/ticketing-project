@@ -1,9 +1,13 @@
 package com.example.ticketingproject.domain.performancesession.entity;
 
+import com.example.ticketingproject.common.entity.DeletableEntity;
+import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.jdbc.Work;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "performance_sessions")
-public class PerformanceSession extends DeletableEntity{
+public class PerformanceSession extends DeletableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +32,12 @@ public class PerformanceSession extends DeletableEntity{
     private LocalDateTime session_date;
     private LocalDateTime session_time;
 
+    @Builder
+    public PerformanceSession(Long id, Performance performance, Venue venue, LocalDateTime session_date, LocalDateTime session_time) {
+        this.id = id;
+        this.Performance = performance;
+        this.Venue = venue;
+        this.session_date = session_date;
+        this.session_time = session_time;
+    }
 }

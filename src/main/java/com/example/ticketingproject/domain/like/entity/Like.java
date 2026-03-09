@@ -1,8 +1,10 @@
 package com.example.ticketingproject.domain.like.entity;
 
+import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "likes")
-public class Like extends CreatableEntity{
+public class Like extends CreatableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,4 +26,10 @@ public class Like extends CreatableEntity{
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
+    @Builder
+    public Like(Long id, User user, Work work) {
+        this.id = id;
+        this.user = user;
+        this.work = work;
+    }
 }
