@@ -1,5 +1,7 @@
 package com.example.ticketingproject.domain.performance.entity;
 
+import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
