@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "payments")
+@Table(name = "reservations")
 public class Reservation extends ModifiableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
