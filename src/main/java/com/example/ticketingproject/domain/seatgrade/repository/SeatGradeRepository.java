@@ -1,7 +1,7 @@
 package com.example.ticketingproject.domain.seatgrade.repository;
 
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
-import com.example.ticketingproject.domain.performance.entity.PerformanceSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

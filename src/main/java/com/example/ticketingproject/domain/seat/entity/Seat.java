@@ -1,6 +1,8 @@
 package com.example.ticketingproject.domain.seat.entity;
 
+import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.common.enums.SeatGrade;
+import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
