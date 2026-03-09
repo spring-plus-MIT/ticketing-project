@@ -33,6 +33,7 @@ public class Reservation extends ModifiableEntity {
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     @NotNull
