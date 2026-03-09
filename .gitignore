@@ -36,3 +36,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# 설정 파제외일
+src/main/resources/application.properties
