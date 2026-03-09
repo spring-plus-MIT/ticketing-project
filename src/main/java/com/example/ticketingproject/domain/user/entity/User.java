@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.user.entity;
 
-import com.example.ticketingproject.common.entity.BaseEntity;
+import com.example.ticketingproject.common.entity.DeletableEntity;
+import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
-public class User extends BaseEntity {
+public class User extends DeletableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +28,6 @@ public class User extends BaseEntity {
     private BigDecimal balance;
     private UserRole userRole;
     private UserStatus userStatus;
-    private LocalDateTime deletedAt;
 
 
     public User (String name, String email, String password, String phone, BigDecimal balance, UserRole userRole, UserStatus userStatus) {
@@ -45,7 +45,7 @@ public class User extends BaseEntity {
         this.name = maskName(this.name);
         this.email = maskEmail(this.email);
         this.phone = maskPhone(this.phone);
-        this.deletedAt = LocalDateTime.now();
+        deletedAt();
 
     }
 
