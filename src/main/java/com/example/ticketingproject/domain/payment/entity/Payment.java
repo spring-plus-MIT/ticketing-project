@@ -1,13 +1,11 @@
 package com.example.ticketingproject.domain.payment.entity;
 
+import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -32,4 +30,12 @@ public class Payment extends CreatableEntity {
     private BigDecimal amount;
 
     private BigDecimal balanceAfterCharge;
+
+    @Builder
+    public Payment(Reservation reservation, User user, BigDecimal amount, BigDecimal balanceAfterCharge) {
+        this.reservation = reservation;
+        this.user = user;
+        this.amount = amount;
+        this.balanceAfterCharge = balanceAfterCharge;
+    }
 }

@@ -1,10 +1,9 @@
 package com.example.ticketingproject.domain.castmember.entity;
 
+import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Entity
@@ -22,4 +21,11 @@ public class CastMember extends ModifiableEntity {
     private String name;
 
     private String roleName;
+
+    @Builder
+    public CastMember(PerformanceSession performanceSession, String name, String roleName) {
+        this.performanceSession = performanceSession;
+        this.name = name;
+        this.roleName = roleName;
+    }
 }

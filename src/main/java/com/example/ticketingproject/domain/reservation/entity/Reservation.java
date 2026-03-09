@@ -1,13 +1,12 @@
 package com.example.ticketingproject.domain.reservation.entity;
 
+import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,4 +41,15 @@ public class Reservation extends ModifiableEntity {
     private LocalDateTime reservedAt;
 
     private LocalDateTime expiresAt;
+
+    @Builder
+    public Reservation(User user, PerformanceSession performanceSession, Seat seat, ReservationStatus status, BigDecimal totalPrice,
+                       LocalDateTime reservedAt){
+        this.user = user;
+        this.performanceSession = performanceSession;
+        this.seat = seat;
+        this.status = status;
+        this.totalPrice = totalPrice;
+        this.reservedAt = reservedAt;
+    }
 }
