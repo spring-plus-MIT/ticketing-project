@@ -1,6 +1,5 @@
 package com.example.ticketingproject.common.dto;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ public class ErrorResponse {
     private String path;
 
     public static ErrorResponse of(HttpStatus status, String code, String message, String path) {
-        return new ErrorResponse(LocalDateTime.now(),
-                status, code, message, path);
+        return new ErrorResponse(LocalDateTime.now(), status, code, message, path);
     }
 }

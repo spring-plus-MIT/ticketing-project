@@ -19,7 +19,4 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
-
-    @CreatedDate
-    private LocalDateTime deletedAt;
 }
