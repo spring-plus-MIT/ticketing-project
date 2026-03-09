@@ -18,11 +18,11 @@ public class CashCharge extends CreatableEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "users", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "users", nullable = false)
+    @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
     private BigDecimal amount;
