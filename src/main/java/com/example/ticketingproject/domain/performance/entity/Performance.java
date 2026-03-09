@@ -1,5 +1,8 @@
 package com.example.ticketingproject.domain.performance.entity;
 
+import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.venue.entity.Venue;
+import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -41,7 +44,7 @@ public class Performance extends ModifiableEntity {
     private PerformanceStatus status;
 
     @Builder
-    public Performance(Work work, Venue venue, String season, LocalDateTime start_date, LocalDateTime end_date,  PerformanceStatus status) {
+    public Performance(Work work, Venue venue, String season, LocalDateTime start_date, LocalDateTime end_date, PerformanceStatus status) {
         this.work = work;
         this.venue = venue;
         this.season = season;
