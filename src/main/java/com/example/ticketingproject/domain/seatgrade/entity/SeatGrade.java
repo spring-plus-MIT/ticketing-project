@@ -2,7 +2,7 @@ package com.example.ticketingproject.domain.seatgrade.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.common.enums.GradeName; // common에 있는 Enum을 가져옵니다.
-import com.example.ticketingproject.domain.performance_session.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

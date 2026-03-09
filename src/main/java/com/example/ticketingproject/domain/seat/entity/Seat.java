@@ -1,7 +1,7 @@
 package com.example.ticketingproject.domain.seat.entity;
 
 import com.example.ticketingproject.common.entity.CreatableEntity;
-import com.example.ticketingproject.common.enums.SeatGrade;
+import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -26,7 +26,7 @@ public class Seat extends CreatableEntity {
 
     @NotBlank
     @Enumerated(EnumType.STRING)
-    private SeatGrade gradeName;
+    private GradeName gradeName;
 
     @NotBlank
     @Length(max = 10)
@@ -36,7 +36,7 @@ public class Seat extends CreatableEntity {
     private int seatNumber;
 
     @Builder
-    public Seat(Venue venue, SeatGrade gradeName, String rowName, int seatNumber) {
+    public Seat(Venue venue, GradeName gradeName, String rowName, int seatNumber) {
         this.venue = venue;
         this.gradeName = gradeName;
         this.rowName = rowName;
