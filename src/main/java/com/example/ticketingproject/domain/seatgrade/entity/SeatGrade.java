@@ -1,8 +1,8 @@
 package com.example.ticketingproject.domain.seatgrade.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
+import com.example.ticketingproject.common.enums.GradeName; // common에 있는 Enum을 가져옵니다.
 import com.example.ticketingproject.domain.performance_session.entity.PerformanceSession;
-import com.example.ticketingproject.domain.seatgrade.enums.GradeName;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,10 +23,9 @@ public class SeatGrade extends DeletableEntity {
     @JoinColumn(name = "performance_session_id", nullable = false)
     private PerformanceSession performanceSession;
 
-    // String -> GradeName으로 변경하고 @Enumerated 추가
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GradeName gradeName;
+    private GradeName gradeName; // 이제 common의 GradeName을 사용합니다.
 
     @Column(nullable = false)
     private Integer price;
