@@ -6,7 +6,7 @@ import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
-import com.example.ticketingproject.domain.seat.service.SeatService;
+import com.example.ticketingproject.domain.seat.service.AdminSeatService;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,13 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -30,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SeatServiceTest {
+public class AdminSeatServiceTest {
 
     @Mock
     private SeatRepository seatRepository;
@@ -39,7 +34,7 @@ class SeatServiceTest {
     private VenueRepository venueRepository;
 
     @InjectMocks
-    private SeatService seatService;
+    private AdminSeatService adminSeatService;
 
     private Seat seat;
     private Venue venue;
@@ -63,40 +58,18 @@ class SeatServiceTest {
     }
 
     @Test
-    @DisplayName("좌석 목록 조회 성공")
-    void findAll_success() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Seat> seatPage = new PageImpl<>(List.of(seat), pageable, 1);
+    @DisplayName("좌석 생성 성공")
+    void save_success() {
+        CreateSeatRequest request = CreateSeatRequest.builder()
+                .gradeName(GradeName.VIP)
+                .rowName("A")
+                .seatNumber(1)
+                .build();
 
-        given(seatRepository.findAllByVenueId(1L, pageable)).willReturn(seatPage);
+        given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
+        given(seatRepository.save(any(Seat.class))).willReturn(seat);
 
-        Page<SeatResponse> response = seatService.findAll(1L, pageable);
-
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getSeatId()).isEqualTo(1L);
-        assertThat(response.getContent().get(0).getGradeName()).isEqualTo(GradeName.VIP);
-    }
-
-    @Test
-    @DisplayName("좌석 목록 조회 - 결과 없음")
-    void findAll_empty() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Seat> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-
-        given(seatRepository.findAllByVenueId(1L, pageable)).willReturn(emptyPage);
-
-        Page<SeatResponse> response = seatService.findAll(1L, pageable);
-
-        assertThat(response.getTotalElements()).isEqualTo(0);
-        assertThat(response.getContent()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("좌석 단건 조회 성공")
-    void findOne_success() {
-        given(seatRepository.findByIdAndVenueId(1L, 1L)).willReturn(Optional.of(seat));
-
-        SeatResponse response = seatService.findOne(1L, 1L);
+        SeatResponse response = adminSeatService.save(1L, request);
 
         assertThat(response.getSeatId()).isEqualTo(1L);
         assertThat(response.getVenueId()).isEqualTo(1L);
@@ -106,11 +79,17 @@ class SeatServiceTest {
     }
 
     @Test
-    @DisplayName("좌석 단건 조회 실패")
-    void findOne_fail_seatNotFound() {
-        given(seatRepository.findByIdAndVenueId(999L, 1L)).willReturn(Optional.empty());
+    @DisplayName("좌석 생성 실패")
+    void save_fail() {
+        CreateSeatRequest request = CreateSeatRequest.builder()
+                .gradeName(GradeName.VIP)
+                .rowName("A")
+                .seatNumber(1)
+                .build();
 
-        assertThatThrownBy(() -> seatService.findOne(1L, 999L))
+        given(venueRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> adminSeatService.save(999L, request))
                 .isInstanceOf(BaseException.class);
     }
 }
