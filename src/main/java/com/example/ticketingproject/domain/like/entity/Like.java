@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.wishlist.entity;
+package com.example.ticketingproject.domain.like.entity;
 
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "wishlists")
-public class Wishlist extends CreatableEntity{
+@Table(name = "likes")
+public class Like extends CreatableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
