@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.performance_session.entity;
+package com.example.ticketingproject.domain.performancesession.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "performance_sessions")
-public class performance_session extends DeletableEntity{
+public class PerformanceSession extends DeletableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

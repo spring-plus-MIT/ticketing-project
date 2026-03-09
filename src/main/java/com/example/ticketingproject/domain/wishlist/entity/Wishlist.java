@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "wishlists")
-public class wishlist extends CreatableEntity{
+public class Wishlist extends CreatableEntity{
 
     @id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
