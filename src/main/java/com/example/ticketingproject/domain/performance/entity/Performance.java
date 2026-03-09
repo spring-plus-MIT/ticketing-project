@@ -21,11 +21,11 @@ public class Performance extends ModifiableEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_id")
+    @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id")
+    @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
     @Length(max = 20)
