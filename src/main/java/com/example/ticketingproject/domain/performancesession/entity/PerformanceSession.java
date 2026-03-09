@@ -29,21 +29,18 @@ public class PerformanceSession extends DeletableEntity {
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    private LocalDateTime session_date;
-    private LocalDateTime session_time;
+    private LocalDateTime sessionDateTime ;
 
     @Builder
-    public PerformanceSession(Long id, Performance performance, Venue venue, LocalDateTime session_date, LocalDateTime session_time) {
+    public PerformanceSession(Long id, Performance performance, Venue venue, LocalDateTime sessionDateTime ) {
         this.id = id;
         this.performance = performance;
         this.venue = venue;
-        this.session_date = session_date;
-        this.session_time = session_time;
+        this.sessionDateTime  = sessionDateTime ;
     }
 
-    public void update(Venue venue, LocalDateTime session_date, LocalDateTime session_time) {
+    public void update(Venue venue, LocalDateTime sessionDateTime) {
         this.venue = venue;
-        this.session_date = session_date;
-        this.session_time = session_time;
+        this.sessionDateTime  = sessionDateTime ;
     }
 }

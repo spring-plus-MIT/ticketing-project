@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PerformanceSessionService {
 
     private final PerformanceSessionRepository performanceSessionRepository;
@@ -32,23 +33,20 @@ public class PerformanceSessionService {
         Venue venue = venueRepository.findById(request.getVenueId())
                 .orElseThrow(() -> new IllegalArgumentException("장소 정보를 찾을 수 없습니다."));
 
-        validateDuplicateSession(venue, request.getSessionDate(), request.getSessionTime());
+        validateDuplicateSession(venue, request.getSessionDateTime());
 
         performanceSessionRepository.save(PerformanceSession.builder()
                 .performance(performance)
                 .venue(venue)
-                .session_date(request.getSessionDate())
-                .session_time(request.getSessionTime())
+                .sessionDateTime(request.getSessionDateTime())
                 .build());
     }
 
-    @Transactional(readOnly = true)
     public Page<GetSessionResponse> getSessions(Long performanceId, Pageable pageable) {
         return performanceSessionRepository.findByPerformanceId(performanceId, pageable)
                 .map(this::convertToResponse);
     }
 
-    @Transactional(readOnly = true)
     public GetSessionResponse getSessionDetail(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회차를 찾을 수 없습니다."));
@@ -64,21 +62,13 @@ public class PerformanceSessionService {
         Venue venue = venueRepository.findById(request.getVenueId())
                 .orElseThrow(() -> new IllegalArgumentException("장소 정보를 찾을 수 없습니다."));
 
-        validateDuplicateSession(venue, request.getSessionDate(), request.getSessionTime());
+        validateDuplicateSession(venue, request.getSessionDateTime());
 
-        session.update(venue, request.getSessionDate(), request.getSessionTime());
+        session.update(venue, request.getSessionDateTime());
     }
 
-    @Transactional
-    public void deleteSession(Long sessionId) {
-        PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회차를 찾을 수 없습니다."));
-
-        performanceSessionRepository.delete(session);
-    }
-
-    private void validateDuplicateSession(Venue venue, LocalDateTime date, LocalDateTime time) {
-        if (performanceSessionRepository.existsByVenueAndSessionDateAndSessionTime(venue, date, time)) {
+    private void validateDuplicateSession(Venue venue, LocalDateTime datetime) {
+        if (performanceSessionRepository.existsByVenueAndSessionDateAndSessionTime(venue, datetime)) {
             throw new IllegalStateException("해당 장소와 시간에 이미 등록된 공연 회차가 있습니다.");
         }
     }
@@ -88,8 +78,7 @@ public class PerformanceSessionService {
                 s.getId(),
                 s.getPerformance().getWork().getTitle(),
                 s.getVenue().getName(),
-                s.getSession_date(),
-                s.getSession_time()
+                s.getSessionDateTime()
         );
     }
 }

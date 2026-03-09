@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Table(name = "performances")
@@ -35,16 +35,16 @@ public class Performance extends ModifiableEntity {
     private String season;
 
     @NotBlank
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @NotBlank
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private PerformanceStatus status;
 
     @Builder
-    public Performance(Work work, Venue venue, String season, LocalDateTime startDate, LocalDateTime endDate, PerformanceStatus status) {
+    public Performance(Work work, Venue venue, String season, LocalDate startDate, LocalDate endDate, PerformanceStatus status) {
         this.work = work;
         this.venue = venue;
         this.season = season;
@@ -53,7 +53,7 @@ public class Performance extends ModifiableEntity {
         this.status = status != null ? status : PerformanceStatus.UPCOMING;
     }
 
-    public void update(Work work, Venue venue, String season, LocalDateTime startDate, LocalDateTime endDate, PerformanceStatus status) {
+    public void update(Work work, Venue venue, String season, LocalDate startDate, LocalDate endDate, PerformanceStatus status) {
         this.work = work;
         this.venue = venue;
         this.season = season;

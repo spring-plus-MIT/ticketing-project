@@ -11,6 +11,5 @@ public class GetSessionResponse {
     private Long id;
     private String title;
     private String venueName;
-    private LocalDateTime sessionDate;
-    private LocalDateTime sessionTime;
+    private LocalDateTime sessionDateTime;
 }

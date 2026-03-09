@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
@@ -41,13 +42,11 @@ public class PerformanceService {
         performanceRepository.save(performance);
     }
 
-    @Transactional(readOnly = true)
     public Page<PerformanceResponse> getPerformances(Pageable pageable) {
         return performanceRepository.findAll(pageable)
                 .map(this::convertToResponse);
     }
 
-    @Transactional(readOnly = true)
     public PerformanceResponse getPerformanceDetail(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 공연을 찾을 수 없습니다."));

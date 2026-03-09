@@ -26,11 +26,11 @@ public class PerformanceSessionController {
             @RequestBody SessionRequest request
     ) {
         performanceSessionService.createSession(performanceId, request);
-        return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
-                .body(CommonResponse.success(
+        return ResponseEntity.ok(
+                CommonResponse.success(
                         SuccessStatus.CREATED,
                         SuccessStatus.CREATED.getSuccessCode(),
-                        "공연 회차가 성공적으로 생성되었습니다.",
+                        SuccessStatus.CREATED.getMessage(),
                         null
                 ));
     }
@@ -44,12 +44,13 @@ public class PerformanceSessionController {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<GetSessionResponse> response = performanceSessionService.getSessions(performanceId, converted);
 
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.GET_SUCCESS,
-                SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "공연 회차 목록 조회가 완료되었습니다.",
-                response
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.GET_SUCCESS,
+                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
+                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        response
+                ));
     }
 
     @GetMapping("/{performanceId}/sessions/{sessionId}")
@@ -58,12 +59,13 @@ public class PerformanceSessionController {
             @PathVariable Long sessionId
     ) {
         GetSessionResponse response = performanceSessionService.getSessionDetail(sessionId);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.GET_SUCCESS,
-                SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "회차 상세 조회가 완료되었습니다.",
-                response
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.GET_SUCCESS,
+                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
+                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        response
+                ));
     }
 
     @PatchMapping("/{performanceId}/sessions/{sessionId}")
@@ -73,11 +75,12 @@ public class PerformanceSessionController {
             @RequestBody SessionRequest request
     ) {
         performanceSessionService.updateSession(sessionId, request);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.PROCESS_SUCCESS,
-                SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                "회차 정보가 수정되었습니다.",
-                null
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
     }
 }

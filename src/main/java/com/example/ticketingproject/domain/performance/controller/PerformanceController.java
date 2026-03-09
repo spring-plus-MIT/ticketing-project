@@ -29,9 +29,8 @@ public class PerformanceController {
                 .body(CommonResponse.success(
                         SuccessStatus.CREATED,
                         SuccessStatus.CREATED.getSuccessCode(),
-                        "공연 등록이 완료되었습니다.",
-                        null
-                ));
+                        SuccessStatus.CREATED.getMessage(),
+                        null));
     }
 
     @GetMapping
@@ -45,7 +44,7 @@ public class PerformanceController {
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.GET_SUCCESS,
                 SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "공연 목록 조회가 완료되었습니다.",
+                SuccessStatus.GET_SUCCESS.getMessage(),
                 response
         ));
     }
@@ -58,7 +57,7 @@ public class PerformanceController {
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.GET_SUCCESS,
                 SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "공연 상세 조회가 완료되었습니다.",
+                SuccessStatus.GET_SUCCESS.getMessage(),
                 response
         ));
     }
@@ -72,7 +71,7 @@ public class PerformanceController {
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.PROCESS_SUCCESS,
                 SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                "공연 정보가 수정되었습니다.",
+                SuccessStatus.PROCESS_SUCCESS.getMessage(),
                 null
         ));
     }
