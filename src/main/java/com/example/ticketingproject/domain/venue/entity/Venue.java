@@ -1,8 +1,8 @@
 package com.example.ticketingproject.domain.venue.entity;
 
+import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.domain.venue.dto.VenueUpdateRequest;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,10 +40,5 @@ public class Venue extends DeletableEntity {
         this.name = request.getName();
         this.address = request.getAddress();
         this.totalSeats = request.getTotalSeats();
-    }
-
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
-        this.isDeleted() = true;
     }
 }

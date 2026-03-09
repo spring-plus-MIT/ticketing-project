@@ -10,8 +10,11 @@ import java.time.LocalDateTime;
 public abstract class DeletableEntity extends ModifiableEntity{
 
     private LocalDateTime deletedAt;
+    private boolean deleted = false;
 
-    public void deletedAt() {
+    public void delete() {
         this.deletedAt = LocalDateTime.now();
+        this.deleted = true;
     }
 }
+
