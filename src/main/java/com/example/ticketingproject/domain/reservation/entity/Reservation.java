@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reservations")

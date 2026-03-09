@@ -12,7 +12,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Getter
-@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "payments")
