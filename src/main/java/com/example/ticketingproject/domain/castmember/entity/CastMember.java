@@ -16,8 +16,8 @@ public class CastMember extends ModifiableEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "performance_id", nullable = false)
-    private Performance performance;
+    @JoinColumn(name = "performance_session_id", nullable = false)
+    private PerformanceSession performanceSession;
 
     private String name;
 
