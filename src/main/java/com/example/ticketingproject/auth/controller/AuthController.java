@@ -25,11 +25,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<CommonResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(CommonResponse.success(
-                        SuccessStatus.REGISTER_SUCCESS.getStatusCode(),
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.REGISTER_SUCCESS,
+                        SuccessStatus.REGISTER_SUCCESS.getSuccessCode(),
                         SuccessStatus.REGISTER_SUCCESS.getMessage(),
-                        authService.register(request)));
+                        authService.register(request))
+        );
     }
 
     @PostMapping("/login")
@@ -39,7 +41,8 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK)
                 .header("Authorization", "Bearer " + token)
                 .body(CommonResponse.success(
-                        SuccessStatus.LOGIN_SUCCESS.getStatusCode(),
+                        SuccessStatus.LOGIN_SUCCESS,
+                        SuccessStatus.LOGIN_SUCCESS.getSuccessCode(),
                         SuccessStatus.LOGIN_SUCCESS.getMessage(),
                         response));
     }
