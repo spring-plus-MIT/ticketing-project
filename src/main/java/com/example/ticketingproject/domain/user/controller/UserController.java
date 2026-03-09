@@ -39,7 +39,7 @@ public class UserController {
         );
     }
 
-    @PostMapping("/{userId}/delete")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<CommonResponse<Void>> withdrawUser(@PathVariable Long userId) {
         userService.withdrawUser(userId);
         return ResponseEntity.ok(

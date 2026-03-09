@@ -11,23 +11,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AdminUserService {
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public Page<GetUserResponse> findAllUser(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
 
-        return users.map(user -> new GetUserResponse(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getBalance(),
-                user.getUserRole(),
-                user.getUserStatus(),
-                user.getCreatedAt(),
-                user.getModifiedAt()
-        ));
+        return users.map(user -> GetUserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .balance(user.getBalance())
+                .userRole(user.getUserRole())
+                .userStatus(user.getUserStatus())
+                .createdAt(user.getCreatedAt())
+                .modifiedAt(user.getModifiedAt())
+                .build()
+        );
     }
 }

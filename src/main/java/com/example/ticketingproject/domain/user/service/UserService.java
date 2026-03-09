@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public GetUserResponse findOneUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException(
