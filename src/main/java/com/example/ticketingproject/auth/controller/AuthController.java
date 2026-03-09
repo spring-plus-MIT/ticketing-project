@@ -46,4 +46,16 @@ public class AuthController {
                         SuccessStatus.LOGIN_SUCCESS.getMessage(),
                         response));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<CommonResponse<Void>> logout() {
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.LOGOUT_SUCCESS,
+                        SuccessStatus.LOGOUT_SUCCESS.getSuccessCode(),
+                        SuccessStatus.LOGOUT_SUCCESS.getMessage(),
+                        null
+                )
+        );
+    }
 }
