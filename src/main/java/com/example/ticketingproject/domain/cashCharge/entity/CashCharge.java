@@ -45,7 +45,6 @@ public class CashCharge extends CreatableEntity {
         this.balanceAfterCharge = balanceAfterCharge;
     }
 
-    @Builder
     public static CashCharge create(User user,
                                      User admin,
                                      BigDecimal amount,
