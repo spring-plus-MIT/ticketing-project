@@ -15,7 +15,10 @@ public enum ErrorStatus {
     ADMIN_NOT_FOUND(HttpStatus.NOT_FOUND, "404_ADMIN_NOT_FOUND", "관리자가 존재하지 않습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "400_INVALID_PASSWORD", "비밀번호가 일치하지 않습니다."),
     ALREADY_DELETED_USER(HttpStatus.GONE, "410_ALREADY_DELETED_USER", "이미 탈퇴한 회원 입니다."),
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "리뷰가 존재하지 않습니다");
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "리뷰가 존재하지 않습니다."),
+    VENUE_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "장소가 존재하지 않습니다."),
+    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석이 존재하지 않습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String errorCode;

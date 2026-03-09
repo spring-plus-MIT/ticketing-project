@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PerformanceController {
 
     private final PerformanceService performanceService;
