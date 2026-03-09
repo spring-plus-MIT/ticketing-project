@@ -40,4 +40,10 @@ public class PerformanceSession extends DeletableEntity {
         this.session_date = session_date;
         this.session_time = session_time;
     }
+
+    public void update(Venue venue, LocalDateTime session_date, LocalDateTime session_time) {
+        this.venue = venue;
+        this.session_date = session_date;
+        this.session_time = session_time;
+    }
 }

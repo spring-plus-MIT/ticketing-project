@@ -1,10 +1,10 @@
-package com.example.ticketingproject.domain.performance.controller;
+package com.example.ticketingproject.domain.performancesession.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
-import com.example.ticketingproject.domain.performance.dto.PerformanceRequest;
-import com.example.ticketingproject.domain.performance.dto.PerformanceResponse;
-import com.example.ticketingproject.domain.performance.service.PerformanceService;
+import com.example.ticketingproject.domain.performancesession.dto.GetSessionResponse;
+import com.example.ticketingproject.domain.performancesession.dto.SessionRequest;
+import com.example.ticketingproject.domain.performancesession.service.PerformanceSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,63 +16,67 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/performances")
-public class PerformanceController {
+public class PerformanceSessionController {
 
-    private final PerformanceService performanceService;
+    private final PerformanceSessionService performanceSessionService;
 
-    @PostMapping
+    @PostMapping("/{performanceId}/sessions")
     public ResponseEntity<CommonResponse<Void>> create(
-            @RequestBody PerformanceRequest request
+            @PathVariable Long performanceId,
+            @RequestBody SessionRequest request
     ) {
-        performanceService.createPerformance(request);
+        performanceSessionService.createSession(performanceId, request);
         return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
                 .body(CommonResponse.success(
                         SuccessStatus.CREATED,
                         SuccessStatus.CREATED.getSuccessCode(),
-                        "공연 등록이 완료되었습니다.",
+                        "공연 회차가 성공적으로 생성되었습니다.",
                         null
                 ));
     }
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<Page<PerformanceResponse>>> getPages(
+    @GetMapping("/{performanceId}/sessions")
+    public ResponseEntity<CommonResponse<Page<GetSessionResponse>>> getPages(
+            @PathVariable Long performanceId,
             @PageableDefault(size = 10) Pageable pageable,
             @RequestParam(defaultValue = "1") int page
     ) {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        Page<PerformanceResponse> response = performanceService.getPerformances(converted);
+        Page<GetSessionResponse> response = performanceSessionService.getSessions(performanceId, converted);
 
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.GET_SUCCESS,
                 SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "공연 목록 조회가 완료되었습니다.",
+                "공연 회차 목록 조회가 완료되었습니다.",
                 response
         ));
     }
 
-    @GetMapping("/{performanceId}")
-    public ResponseEntity<CommonResponse<PerformanceResponse>> getDetail(
-            @PathVariable Long performanceId
+    @GetMapping("/{performanceId}/sessions/{sessionId}")
+    public ResponseEntity<CommonResponse<GetSessionResponse>> getDetail(
+            @PathVariable Long performanceId,
+            @PathVariable Long sessionId
     ) {
-        PerformanceResponse response = performanceService.getPerformanceDetail(performanceId);
+        GetSessionResponse response = performanceSessionService.getSessionDetail(sessionId);
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.GET_SUCCESS,
                 SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "공연 상세 조회가 완료되었습니다.",
+                "회차 상세 조회가 완료되었습니다.",
                 response
         ));
     }
 
-    @PatchMapping("/{performanceId}")
+    @PatchMapping("/{performanceId}/sessions/{sessionId}")
     public ResponseEntity<CommonResponse<Void>> update(
             @PathVariable Long performanceId,
-            @RequestBody PerformanceRequest request
+            @PathVariable Long sessionId,
+            @RequestBody SessionRequest request
     ) {
-        performanceService.updatePerformance(performanceId, request);
+        performanceSessionService.updateSession(sessionId, request);
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.PROCESS_SUCCESS,
                 SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                "공연 정보가 수정되었습니다.",
+                "회차 정보가 수정되었습니다.",
                 null
         ));
     }

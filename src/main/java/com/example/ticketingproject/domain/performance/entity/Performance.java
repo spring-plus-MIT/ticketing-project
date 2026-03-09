@@ -35,21 +35,30 @@ public class Performance extends ModifiableEntity {
     private String season;
 
     @NotBlank
-    private LocalDateTime start_date;
+    private LocalDateTime startDate;
 
     @NotBlank
-    private LocalDateTime end_date;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     private PerformanceStatus status;
 
     @Builder
-    public Performance(Work work, Venue venue, String season, LocalDateTime start_date, LocalDateTime end_date, PerformanceStatus status) {
+    public Performance(Work work, Venue venue, String season, LocalDateTime startDate, LocalDateTime endDate, PerformanceStatus status) {
         this.work = work;
         this.venue = venue;
         this.season = season;
-        this.start_date = start_date;
-        this.end_date = end_date;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status != null ? status : PerformanceStatus.UPCOMING;
+    }
+
+    public void update(Work work, Venue venue, String season, LocalDateTime startDate, LocalDateTime endDate, PerformanceStatus status) {
+        this.work = work;
+        this.venue = venue;
+        this.season = season;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.status = status;
     }
 }
