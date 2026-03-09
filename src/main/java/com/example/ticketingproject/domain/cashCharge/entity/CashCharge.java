@@ -3,7 +3,9 @@ package com.example.ticketingproject.domain.cashCharge.entity;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,14 +28,13 @@ public class CashCharge extends CreatableEntity {
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
-    @NotBlank
+    @NotNull
     private BigDecimal amount;
 
-    @NotBlank
+    @NotNull
     private BigDecimal balanceAfterCharge;
 
-    protected CashCharge() {}
-
+    @Builder
     private CashCharge (User user,
                         User admin,
                         BigDecimal amount,
@@ -44,6 +45,7 @@ public class CashCharge extends CreatableEntity {
         this.balanceAfterCharge = balanceAfterCharge;
     }
 
+    @Builder
     public static CashCharge create(User user,
                                      User admin,
                                      BigDecimal amount,

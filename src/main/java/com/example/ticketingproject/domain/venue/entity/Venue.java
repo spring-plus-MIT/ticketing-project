@@ -23,9 +23,10 @@ public class Venue extends DeletableEntity {
     @Length(min = 1, max = 100)
     private String name;
 
-    @NotBlank
+    @Length(max = 255)
     private String address;
 
+    @Length(min = 1)
     private int totalSeats;
 
     @Builder
