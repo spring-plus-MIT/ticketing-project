@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "wishlists")
 public class Wishlist extends CreatableEntity{
 
-    @id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
