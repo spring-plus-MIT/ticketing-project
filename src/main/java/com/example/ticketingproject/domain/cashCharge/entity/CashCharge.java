@@ -2,6 +2,7 @@ package com.example.ticketingproject.domain.cashCharge.entity;
 
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,10 @@ public class CashCharge extends CreatableEntity {
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
+    @NotBlank
     private BigDecimal amount;
+
+    @NotBlank
     private BigDecimal balanceAfterCharge;
 
     protected CashCharge() {}
