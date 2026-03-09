@@ -1,5 +1,6 @@
 package com.example.ticketingproject.domain.cashCharge.entity;
 
+import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,27 +16,34 @@ public class CashCharge extends CreatableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
-    private Long adminId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "users", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "users", nullable = false)
+    private User admin;
+
     private BigDecimal amount;
     private BigDecimal balanceAfterCharge;
 
     protected CashCharge() {}
 
-    private CashCharge (Long userId,
-                        Long adminId,
+    private CashCharge (User user,
+                        User admin,
                         BigDecimal amount,
                         BigDecimal balanceAfterCharge) {
-        this.userId = userId;
-        this.adminId = adminId;
+        this.user = user;
+        this.admin = admin;
         this.amount = amount;
         this.balanceAfterCharge = balanceAfterCharge;
     }
 
-    public static CashCharge create(Long userId,
-                                     Long adminId,
+    public static CashCharge create(User user,
+                                     User admin,
                                      BigDecimal amount,
                                      BigDecimal balanceAfterCharge) {
-        return new CashCharge(userId, adminId, amount, balanceAfterCharge);
+        return new CashCharge(user, admin, amount, balanceAfterCharge);
     }
 }
