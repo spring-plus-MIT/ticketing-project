@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.reservation.entity;
 import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
+import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

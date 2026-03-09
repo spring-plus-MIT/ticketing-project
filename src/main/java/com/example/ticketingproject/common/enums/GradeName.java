@@ -1,6 +1,6 @@
 package com.example.ticketingproject.common.enums;
 
-public enum SeatGrade {
+public enum GradeName {
     VIP,
     R,
     S,
