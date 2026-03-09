@@ -21,9 +21,9 @@ server:
   port: 8080
 
 jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: 1800000
-  refresh-token-expiration: 604800000
+  secret:
+    key: ${JWT_SECRET}
+  expiration: 1800000
 
 logging:
   level:
