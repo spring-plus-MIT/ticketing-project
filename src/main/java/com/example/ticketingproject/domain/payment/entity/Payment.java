@@ -28,7 +28,7 @@ public class Payment extends CreatableEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Nullable
+    @JoinColumn(nullable = false)
     private BigDecimal amount;
 
     private BigDecimal balanceAfterCharge;

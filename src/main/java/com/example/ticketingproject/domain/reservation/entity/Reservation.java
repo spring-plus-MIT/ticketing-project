@@ -41,5 +41,5 @@ public class Reservation extends ModifiableEntity {
 
     private LocalDateTime reservedAt;
 
-    private LocalDateTime expiredAt;
+    private LocalDateTime expiresAt;
 }
