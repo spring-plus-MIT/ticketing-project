@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.cashCharge.entity;
+package com.example.ticketingproject.domain.cashcharge.entity;
 
 import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
