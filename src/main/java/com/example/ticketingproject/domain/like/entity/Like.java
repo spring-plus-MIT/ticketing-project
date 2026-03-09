@@ -2,6 +2,7 @@ package com.example.ticketingproject.domain.like.entity;
 
 import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

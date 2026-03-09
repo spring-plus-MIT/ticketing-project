@@ -1,16 +1,17 @@
 package com.example.ticketingproject.domain.user.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
-import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -20,16 +21,29 @@ public class User extends DeletableEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Length(max = 30)
     private String name;
+
     @Column(unique = true)
+    @Length(max = 50)
+    @Email
     private String email;
+
     private String password;
+
+    @Length(max = 14)
     private String phone;
+
     private BigDecimal balance;
+
+    @Enumerated(EnumType.STRING)
     private UserRole userRole;
+
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-
+    @Builder
     public User (String name, String email, String password, String phone, BigDecimal balance, UserRole userRole, UserStatus userStatus) {
         this.name = name;
         this.email = email;
@@ -45,8 +59,7 @@ public class User extends DeletableEntity {
         this.name = maskName(this.name);
         this.email = maskEmail(this.email);
         this.phone = maskPhone(this.phone);
-        deletedAt();
-
+        delete();
     }
 
     public String maskName(String name) {
