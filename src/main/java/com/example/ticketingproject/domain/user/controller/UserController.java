@@ -3,12 +3,9 @@ package com.example.ticketingproject.domain.user.controller;
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
+import com.example.ticketingproject.domain.user.dto.UpdateUserResponse;
 import com.example.ticketingproject.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,27 +15,31 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<Page<GetUserResponse>>> getUsers(
-            @PageableDefault Pageable pageable,
-            @RequestParam(defaultValue = "1") int page
-            ) {
-        Pageable converted = PageRequest.of(
-                page - 1,
-                pageable.getPageSize(),
-                pageable.getSort()
-        );
+    @GetMapping("/{userId}")
+    public ResponseEntity<CommonResponse<GetUserResponse>> getOneUser(@PathVariable Long userId) {
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.FOUND_SUCCESS,
-                        SuccessStatus.FOUND_SUCCESS.getSuccessCode(),
-                        SuccessStatus.FOUND_SUCCESS.getMessage(),
-                        userService.findAllUser(converted)
-                        )
+                        SuccessStatus.READ_SUCCESS,
+                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
+                        SuccessStatus.READ_SUCCESS.getMessage(),
+                        userService.findOneUser(userId)
+                )
         );
     }
 
-    @PostMapping("/withdraw/{userId}")
+    @PutMapping("/{userId}")
+    public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.UPDATE_SUCCESS,
+                        SuccessStatus.UPDATE_SUCCESS.getSuccessCode(),
+                        SuccessStatus.UPDATE_SUCCESS.getMessage(),
+                        userService.updateUser(userId)
+                )
+        );
+    }
+
+    @DeleteMapping("/{userId}")
     public ResponseEntity<CommonResponse<Void>> withdrawUser(@PathVariable Long userId) {
         userService.withdrawUser(userId);
         return ResponseEntity.ok(
@@ -47,26 +48,6 @@ public class UserController {
                         SuccessStatus.DELETE_SUCCESS.getSuccessCode(),
                         SuccessStatus.DELETE_SUCCESS.getMessage(),
                         null
-                )
-        );
-    }
-
-    @GetMapping("/deleted")
-    public ResponseEntity<CommonResponse<Page<GetUserResponse>>> getDeletedUsers(
-            @PageableDefault Pageable pageable,
-            @RequestParam(defaultValue = "1") int page
-    ) {
-        Pageable converted = PageRequest.of(
-                page - 1,
-                pageable.getPageSize(),
-                pageable.getSort()
-        );
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.FOUND_SUCCESS,
-                        SuccessStatus.FOUND_SUCCESS.getSuccessCode(),
-                        SuccessStatus.FOUND_SUCCESS.getMessage(),
-                        userService.findAllDeletedUser(converted)
                 )
         );
     }
