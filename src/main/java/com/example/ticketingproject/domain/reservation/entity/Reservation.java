@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.reservation.entity;
 
 import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.seat.entity.Seat;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reservations")
 public class Reservation extends ModifiableEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,13 +46,27 @@ public class Reservation extends ModifiableEntity {
     private LocalDateTime expiresAt;
 
     @Builder
-    public Reservation(User user, PerformanceSession performanceSession, Seat seat, ReservationStatus status, BigDecimal totalPrice,
-                       LocalDateTime reservedAt){
+    public Reservation(User user, PerformanceSession performanceSession, Seat seat,
+                       ReservationStatus status, BigDecimal totalPrice,
+                       LocalDateTime reservedAt, LocalDateTime expiresAt) {
         this.user = user;
         this.performanceSession = performanceSession;
         this.seat = seat;
         this.status = status;
         this.totalPrice = totalPrice;
         this.reservedAt = reservedAt;
+        this.expiresAt = expiresAt;
+    }
+
+    public void updateStatus(ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void cancel() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
     }
 }
