@@ -17,8 +17,8 @@ public enum ErrorStatus {
     ALREADY_DELETED_USER(HttpStatus.GONE, "410_ALREADY_DELETED_USER", "이미 탈퇴한 회원 입니다."),
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "리뷰가 존재하지 않습니다."),
     VENUE_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "장소가 존재하지 않습니다."),
-    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석이 존재하지 않습니다.");
-
+    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석이 존재하지 않습니다."),
+    VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "400_VALIDATION_ERROR", "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;
