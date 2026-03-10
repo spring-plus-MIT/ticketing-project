@@ -1,16 +1,11 @@
 package com.example.ticketingproject.domain.reservation.exception;
 
 import com.example.ticketingproject.common.enums.ErrorStatus;
-import lombok.Getter;
+import com.example.ticketingproject.common.exception.BaseException;
 
-@Getter
-public class ReservationException extends RuntimeException {
-    private final int httpStatus;
-    private final ErrorStatus errorStatus;
+public class ReservationException extends BaseException {
 
     public ReservationException(ErrorStatus errorStatus) {
-        super(errorStatus.getMessage());
-        this.httpStatus = errorStatus.getHttpStatus().value(); // HttpStatus 객체에서 int 값 추출
-        this.errorStatus = errorStatus;
+        super(errorStatus.getHttpStatus(), errorStatus);
     }
 }
