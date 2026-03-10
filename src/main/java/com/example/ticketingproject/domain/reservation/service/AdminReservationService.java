@@ -23,14 +23,17 @@ public class AdminReservationService {
         return reservationRepository.findAll(pageable)
                 .map(ReservationResponse::from);
     }
+
     public Page<ReservationResponse> getReservationsByUser(Long userId, Pageable pageable) {
         return reservationRepository.findAllByUserId(userId, pageable)
                 .map(ReservationResponse::from);
     }
+
     @Transactional
     public void updateReservationStatusByAdmin(Long reservationId, ReservationStatus newStatus) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationException(ErrorStatus.RESERVATION_NOT_FOUND));
 
+        reservation.updateStatus(newStatus);
     }
 }

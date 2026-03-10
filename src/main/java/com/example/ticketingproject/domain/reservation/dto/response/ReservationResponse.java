@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Builder
@@ -15,7 +15,7 @@ public class ReservationResponse {
     private Long id;
     private Long userId;
     private String performanceTitle;
-    private LocalDateTime performanceDate;
+    private LocalDate performanceDate;
     private String seatInfo;
     private BigDecimal totalPrice;
     private ReservationStatus status;
@@ -24,8 +24,8 @@ public class ReservationResponse {
         return ReservationResponse.builder()
                 .id(reservation.getId())
                 .userId(reservation.getUser().getId())
-                .performanceTitle(reservation.getPerformanceSession().getPerformance().getWork().getTitle())
-                .performanceDate(reservation.getPerformanceSession().getStartTime())
+                .performanceTitle(reservation.getPerformance().getWork().getTitle())
+                .performanceDate(reservation.getPerformance().getStartDate()) // LocalDate로 맞춤
                 .seatInfo(reservation.getSeat().getGradeName().name() + " - " + reservation.getSeat().getSeatNumber())
                 .totalPrice(reservation.getTotalPrice())
                 .status(reservation.getStatus())

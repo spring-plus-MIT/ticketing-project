@@ -5,13 +5,14 @@ import com.example.ticketingproject.domain.reservation.dto.request.ReservationCr
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.service.ReservationService;
 import com.example.ticketingproject.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/reservations") // API 명세에 맞게 /reservations
+@RequestMapping("/reservations")
 @RequiredArgsConstructor
 public class ReservationController {
 
@@ -19,14 +20,10 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<ReservationResponse>> createReservation(
-            @RequestBody ReservationCreateRequest requestDto,
+            @RequestBody @Valid ReservationCreateRequest requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        // 사용자 ID 바로 꺼내서 서비스 호출
-        Long userId = customUserDetails.getId();
-
-        ReservationResponse response = reservationService.createReservation(requestDto, userId);
-
+        ReservationResponse response = reservationService.createReservation(requestDto, customUserDetails.getId());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/works")
 @RequiredArgsConstructor
-public class ReviewController<UserDetailsImpl> {
+public class ReviewController {
 
     private final ReviewService reviewService;
 
@@ -41,13 +41,14 @@ public class ReviewController<UserDetailsImpl> {
         );
     }
 
-    @PostMapping
-    public <ReviewCreateRequest, ReviewResponse> ResponseEntity<CommonResponse<ReviewResponse>> createReview(
+    @PostMapping("/{workId}/reviews")
+    public ResponseEntity<CommonResponse<ReviewResponseDto>> createReview(
             @PathVariable Long workId,
-            @RequestBody ReviewCreateRequest requestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
+            @RequestBody @Valid ReviewRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        ReviewResponseDto response = reviewService.createReview(workId, requestDto, userDetails.getUser().getId());
+
+        ReviewResponseDto response = reviewService.createReview(workId, requestDto, customUserDetails);
 
         return ResponseEntity.ok(
                 CommonResponse.success(

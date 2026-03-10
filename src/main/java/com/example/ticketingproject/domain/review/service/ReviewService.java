@@ -39,9 +39,6 @@ public class ReviewService {
         return reviews.map(ReviewResponseDto::from);
     }
 
-    /**
-     * 리뷰 생성
-     */
     @Transactional
     public ReviewResponseDto createReview(
             Long workId,
@@ -49,21 +46,18 @@ public class ReviewService {
             CustomUserDetails userDetails
     ) {
 
-        // 공연 조회
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new ReviewException(
                         ErrorStatus.WORK_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.WORK_NOT_FOUND
                 ));
 
-        // 유저 조회
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new UserException(
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
                 ));
 
-        // 리뷰 생성
         Review review = Review.builder()
                 .content(requestDto.getContent())
                 .rating(requestDto.getRating())

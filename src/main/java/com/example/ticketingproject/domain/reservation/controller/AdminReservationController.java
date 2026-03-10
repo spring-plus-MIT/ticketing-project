@@ -19,9 +19,6 @@ public class AdminReservationController {
 
     private final AdminReservationService adminReservationService;
 
-    /**
-     * [관리자] 전체 예약 목록 조회
-     */
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getAllReservations(
             @PageableDefault Pageable pageable,
@@ -39,9 +36,6 @@ public class AdminReservationController {
         );
     }
 
-    /**
-     * [관리자] 특정 유저의 예약 목록 조회
-     */
     @GetMapping("/users/{userId}")
     public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getReservationsByUser(
             @PathVariable Long userId,

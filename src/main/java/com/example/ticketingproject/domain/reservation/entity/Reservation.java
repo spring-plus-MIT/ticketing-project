@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.reservation.entity;
 
-import com.example.ticketingproject.common.entity.DeletableEntity; // 상속 변경 확인
+import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.seat.entity.Seat;
@@ -8,17 +9,15 @@ import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.SQLRestriction; // 추가
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@SQLRestriction("deleted_at IS NULL") // 튜터님 피드백 반영
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reservations")
-public class Reservation extends DeletableEntity { // Soft Delete 필드 사용을 위해 변경
+public class Reservation extends ModifiableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +29,7 @@ public class Reservation extends DeletableEntity { // Soft Delete 필드 사용�
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "performance_session_id", nullable = false)
-    private PerformanceSession performanceSession;
+    private Performance performance;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
@@ -51,11 +50,23 @@ public class Reservation extends DeletableEntity { // Soft Delete 필드 사용�
                        ReservationStatus status, BigDecimal totalPrice,
                        LocalDateTime reservedAt, LocalDateTime expiresAt) {
         this.user = user;
-        this.performanceSession = performanceSession;
+        this.performance = performance;
         this.seat = seat;
         this.status = status;
         this.totalPrice = totalPrice;
         this.reservedAt = reservedAt;
         this.expiresAt = expiresAt;
+    }
+
+    public void updateStatus(ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void cancel() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void confirm() {
+        this.status = ReservationStatus.CONFIRMED;
     }
 }
