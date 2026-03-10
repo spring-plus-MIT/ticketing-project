@@ -28,4 +28,10 @@ public class CastMember extends ModifiableEntity {
         this.name = name;
         this.roleName = roleName;
     }
+
+    public void update(String name, String roleName) {
+        this.name = name;
+        this.roleName = roleName;
+    }
 }
+
