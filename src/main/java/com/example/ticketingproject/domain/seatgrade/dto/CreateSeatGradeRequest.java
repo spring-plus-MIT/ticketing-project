@@ -2,7 +2,6 @@ package com.example.ticketingproject.domain.seatgrade.dto;
 
 import com.example.ticketingproject.common.enums.GradeName;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -10,7 +9,6 @@ import java.math.BigDecimal;
 import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
 
 @Getter
-@Builder
 public class CreateSeatGradeRequest {
 
     @NotBlank(message = MSG_VALIDATION_ERROR)

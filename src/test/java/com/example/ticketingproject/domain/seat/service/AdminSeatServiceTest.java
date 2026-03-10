@@ -60,11 +60,10 @@ public class AdminSeatServiceTest {
     @Test
     @DisplayName("좌석 생성 성공")
     void save_success() {
-        CreateSeatRequest request = CreateSeatRequest.builder()
-                .gradeName(GradeName.VIP)
-                .rowName("A")
-                .seatNumber(1)
-                .build();
+        CreateSeatRequest request = mock(CreateSeatRequest.class);
+        given(request.getGradeName()).willReturn(GradeName.VIP);
+        given(request.getRowName()).willReturn("A");
+        given(request.getSeatNumber()).willReturn(1);
 
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
         given(seatRepository.save(any(Seat.class))).willReturn(seat);
@@ -81,11 +80,7 @@ public class AdminSeatServiceTest {
     @Test
     @DisplayName("좌석 생성 실패")
     void save_fail() {
-        CreateSeatRequest request = CreateSeatRequest.builder()
-                .gradeName(GradeName.VIP)
-                .rowName("A")
-                .seatNumber(1)
-                .build();
+        CreateSeatRequest request = mock(CreateSeatRequest.class);
 
         given(venueRepository.findById(999L)).willReturn(Optional.empty());
 
