@@ -17,7 +17,9 @@ public enum ErrorStatus {
     ALREADY_DELETED_USER(HttpStatus.GONE, "410_ALREADY_DELETED_USER", "이미 탈퇴한 회원 입니다."),
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "리뷰가 존재하지 않습니다."),
     VENUE_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "장소가 존재하지 않습니다."),
-    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석이 존재하지 않습니다.");
+    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석이 존재하지 않습니다."),
+    PERFORMANCE_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "공연 회차가 존재하지 않습니다."),
+    SEAT_GRADE_NOT_FOUND(HttpStatus.NOT_FOUND, "404_REVIEW_NOT_FOUND", "좌석 등급이 존재하지 않습니다.");
 
 
     private final HttpStatus httpStatus;

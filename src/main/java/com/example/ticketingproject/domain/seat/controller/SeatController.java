@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +24,7 @@ public class SeatController {
 
     @PostMapping()
     public ResponseEntity<CommonResponse<SeatResponse>> create(@PathVariable(name = "venueId") Long venueId, CreateSeatRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SEAT_SUCCESS, CREATE_SEAT_SUCCESS.getSuccessCode(), CREATE_SEAT_SUCCESS.getMessage(), seatService.save(venueId, request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), seatService.save(venueId, request)));
     }
 
     @GetMapping()
@@ -36,11 +34,11 @@ public class SeatController {
             @RequestParam(defaultValue = "10") int size
             ) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return ResponseEntity.ok(CommonResponse.success(FOUND_SUCCESS, FOUND_SUCCESS.getSuccessCode(), FOUND_SUCCESS.getMessage(), seatService.findAll(venueId, pageable)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatService.findAll(venueId, pageable)));
     }
 
     @GetMapping("/{seatId}")
     public ResponseEntity<CommonResponse<SeatResponse>> getOne(@PathVariable(name = "venueId") Long venueId, @PathVariable(name = "seatGradeId") Long seatId) {
-        return ResponseEntity.ok(CommonResponse.success(FOUND_SUCCESS, FOUND_SUCCESS.getSuccessCode(), FOUND_SUCCESS.getMessage(), seatService.findOne(venueId, seatId)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatService.findOne(venueId, seatId)));
     }
 }
