@@ -10,8 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.example.ticketingproject.common.enums.SuccessStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,11 +29,11 @@ public class PerformanceSessionController {
             @RequestBody SessionRequest request
     ) {
         performanceSessionService.createSession(performanceId, request);
-        return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.success(
-                        SuccessStatus.CREATED,
-                        SuccessStatus.CREATED.getSuccessCode(),
-                        SuccessStatus.CREATED.getMessage(),
+                        CREATE_SUCCESS,
+                        CREATE_SUCCESS.getSuccessCode(),
+                        CREATE_SUCCESS.getMessage(),
                         null
                 ));
     }
@@ -46,9 +49,9 @@ public class PerformanceSessionController {
 
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.GET_SUCCESS,
-                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         response
                 ));
     }
@@ -61,9 +64,9 @@ public class PerformanceSessionController {
         GetSessionResponse response = performanceSessionService.getSessionDetail(sessionId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.GET_SUCCESS,
-                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         response
                 ));
     }
@@ -77,9 +80,9 @@ public class PerformanceSessionController {
         performanceSessionService.updateSession(sessionId, request);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        UPDATE_SUCCESS,
+                        UPDATE_SUCCESS.getSuccessCode(),
+                        UPDATE_SUCCESS.getMessage(),
                         null
                 ));
     }
@@ -92,9 +95,9 @@ public class PerformanceSessionController {
         performanceSessionService.deleteSession(sessionId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        DELETE_SUCCESS,
+                        DELETE_SUCCESS.getSuccessCode(),
+                        DELETE_SUCCESS.getMessage(),
                         null
                 ));
     }

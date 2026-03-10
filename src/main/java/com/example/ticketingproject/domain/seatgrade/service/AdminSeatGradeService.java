@@ -26,7 +26,7 @@ public class AdminSeatGradeService {
 
     public SeatGradeResponse save(Long sessionId, CreateSeatGradeRequest request) {
         PerformanceSession performanceSession = performanceSessionRepository.findById(sessionId).orElseThrow(
-                () -> new PerformanceSessionException(PERFORMANCE_SESSION_NOT_FOUND.getHttpStatus(), PERFORMANCE_SESSION_NOT_FOUND)
+                () -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND)
         );
 
         SeatGrade seatGrade = SeatGrade.builder()
@@ -53,7 +53,7 @@ public class AdminSeatGradeService {
     }
 
     public SeatGradeResponse update(Long sessionId, Long seatGradeId, PutSeatGradeRequest request) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
@@ -73,7 +73,7 @@ public class AdminSeatGradeService {
     }
 
     public void delete(Long sessionId, Long seatGradeId) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
