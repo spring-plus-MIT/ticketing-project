@@ -14,14 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/reviews") // 관리자 전용 경로 분리
+@RequestMapping("/admin/reviews")
 public class AdminReviewController {
 
     private final AdminReviewService adminReviewService;
 
-    /**
-     * [관리자] 전체 리뷰 목록 조회
-     */
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getAllReviewsByAdmin(
             @PageableDefault Pageable pageable,
@@ -39,9 +36,6 @@ public class AdminReviewController {
         );
     }
 
-    /**
-     * [관리자] 리뷰 삭제
-     */
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<CommonResponse<Void>> deleteReviewByAdmin(@PathVariable Long reviewId) {
         adminReviewService.deleteReviewByAdmin(reviewId);

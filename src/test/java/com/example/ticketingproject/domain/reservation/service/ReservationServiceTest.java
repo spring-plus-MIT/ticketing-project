@@ -1,13 +1,11 @@
 package com.example.ticketingproject.domain.reservation.service;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
-import com.example.ticketingproject.domain.reservation.dto.request.ReservationRequestDto;
-import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponseDto;
-import com.example.ticketingproject.domain.reservation.entity.Reservation;
+import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
+import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.exception.ReservationException;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.seat.entity.Seat;
@@ -61,7 +59,7 @@ class ReservationServiceTest {
     void createReservation_Success() {
         // given
         Long userId = 1L;
-        ReservationRequestDto requestDto = new ReservationRequestDto(1L, 1L);
+        ReservationCreateRequest requestDto = new ReservationCreateRequest(1L, 1L);
 
         User user = User.builder().build();
         ReflectionTestUtils.setField(user, "id", userId);
@@ -96,7 +94,7 @@ class ReservationServiceTest {
         given(reservationRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        ReservationResponseDto response = reservationService.createReservation(requestDto, userId);
+        ReservationResponse response = reservationService.createReservation(requestDto, userId);
 
         // then
         assertNotNull(response);
@@ -109,7 +107,7 @@ class ReservationServiceTest {
         given(userRepository.findById(any())).willReturn(Optional.empty());
 
         assertThrows(ReservationException.class, () ->
-                reservationService.createReservation(new ReservationRequestDto(1L, 1L), 1L)
+                reservationService.createReservation(new ReservationCreateRequest(1L, 1L), 1L)
         );
     }
 }

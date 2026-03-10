@@ -2,7 +2,7 @@ package com.example.ticketingproject.domain.reservation.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
-import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponseDto;
+import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.service.AdminReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,7 +23,7 @@ public class AdminReservationController {
      * [관리자] 전체 예약 목록 조회
      */
     @GetMapping
-    public ResponseEntity<CommonResponse<Page<ReservationResponseDto>>> getAllReservations(
+    public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getAllReservations(
             @PageableDefault Pageable pageable,
             @RequestParam(defaultValue = "1") int page) {
 
@@ -43,7 +43,7 @@ public class AdminReservationController {
      * [관리자] 특정 유저의 예약 목록 조회
      */
     @GetMapping("/users/{userId}")
-    public ResponseEntity<CommonResponse<Page<ReservationResponseDto>>> getReservationsByUser(
+    public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getReservationsByUser(
             @PathVariable Long userId,
             @PageableDefault Pageable pageable,
             @RequestParam(defaultValue = "1") int page) {

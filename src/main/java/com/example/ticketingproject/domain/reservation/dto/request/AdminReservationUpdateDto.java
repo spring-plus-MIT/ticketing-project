@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class AdminReservationUpdateDto {
     @NotNull(message = "변경할 상태값은 필수입니다.")
     private ReservationStatus status;

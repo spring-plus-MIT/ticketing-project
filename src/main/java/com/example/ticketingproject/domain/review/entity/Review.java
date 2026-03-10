@@ -35,7 +35,6 @@ public class Review extends DeletableEntity {
     @Column(nullable = false)
     private Integer rating;
 
-    // 생성자에 @Builder를 붙이는 게 가장 깔끔한 관례입니다.
     @Builder
     public Review(User user, Work work, String content, Integer rating) {
         this.user = user;

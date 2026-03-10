@@ -1,9 +1,8 @@
 package com.example.ticketingproject.domain.reservation.service;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
-import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponseDto;
+import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.exception.ReservationException;
@@ -90,7 +89,7 @@ class AdminReservationServiceTest {
 
         given(reservationRepository.findAll(PageRequest.of(0,10))).willReturn(page);
 
-        Page<ReservationResponseDto> result =
+        Page<ReservationResponse> result =
                 adminReservationService.getAllReservations(PageRequest.of(0,10));
 
         assertEquals(1, result.getTotalElements());
@@ -111,7 +110,7 @@ class AdminReservationServiceTest {
         given(reservationRepository.findAllByUserId(userId, PageRequest.of(0,10)))
                 .willReturn(page);
 
-        Page<ReservationResponseDto> result =
+        Page<ReservationResponse> result =
                 adminReservationService.getReservationsByUser(userId, PageRequest.of(0,10));
 
         assertEquals(1, result.getTotalElements());

@@ -17,15 +17,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/works") // 작품 중심의 경로
+@RequestMapping("/works")
 @RequiredArgsConstructor
-public class ReviewController {
+public class ReviewController<UserDetailsImpl> {
 
     private final ReviewService reviewService;
 
-    /**
-     * 특정 작품의 리뷰 목록 조회 (페이징)
-     */
     @GetMapping("/{workId}/reviews")
     public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getReviews(
             @PathVariable Long workId,
@@ -44,21 +41,20 @@ public class ReviewController {
         );
     }
 
-    /**
-     * 리뷰 생성
-     */
-    @PostMapping("/{workId}/reviews")
-    public ResponseEntity<CommonResponse<ReviewResponseDto>> createReview(
+    @PostMapping
+    public <ReviewCreateRequest, ReviewResponse> ResponseEntity<CommonResponse<ReviewResponse>> createReview(
             @PathVariable Long workId,
-            @Valid @RequestBody ReviewRequestDto requestDto,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @RequestBody ReviewCreateRequest requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        ReviewResponseDto response = reviewService.createReview(workId, requestDto, userDetails.getUser().getId());
 
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.CREATE_SUCCESS,
                         SuccessStatus.CREATE_SUCCESS.getSuccessCode(),
                         SuccessStatus.CREATE_SUCCESS.getMessage(),
-                        reviewService.createReview(workId, requestDto, userDetails)
+                        response
                 )
         );
     }

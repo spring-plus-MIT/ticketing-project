@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    Page<Review> findAllByWorkIdAndDeletedAtIsNull(Long workId, Pageable pageable);
+    Page<Review> findAllByWorkId(Long workId, Pageable pageable);
 
-    Optional<Review> findByIdAndDeletedAtIsNull(Long reviewId);
+    Optional<Review> findById(Long reviewId);
 }

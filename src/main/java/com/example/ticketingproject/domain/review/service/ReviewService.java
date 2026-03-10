@@ -7,6 +7,7 @@ import com.example.ticketingproject.domain.review.entity.Review;
 import com.example.ticketingproject.domain.review.exception.ReviewException;
 import com.example.ticketingproject.domain.review.repository.ReviewRepository;
 import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
@@ -26,36 +27,43 @@ public class ReviewService {
     private final WorkRepository workRepository;
     private final UserRepository userRepository;
 
+    /**
+     * 리뷰 목록 조회
+     */
     public Page<ReviewResponseDto> findAll(Long workId, Pageable pageable) {
-        Page<Review> reviews = reviewRepository.findAllByWorkIdAndDeletedAtIsNull(workId, pageable);
 
-        return reviews.map(review -> ReviewResponseDto.builder()
-                .id(review.getId())
-                .content(review.getContent())
-                .rating(review.getRating())
-                .nickname(review.getUser().getName())
-                .createdAt(review.getCreatedAt())
-                .build()
-        );
+        Page<Review> reviews =
+                reviewRepository.findAllByWorkId(workId, pageable);
+
+
+        return reviews.map(ReviewResponseDto::from);
     }
 
+    /**
+     * 리뷰 생성
+     */
     @Transactional
-    public ReviewResponseDto createReview(Long workId, ReviewRequestDto requestDto, CustomUserDetails userDetails) {
-        // UserService의 findOneUser 예외 처리 스타일 반영
-        Work work = workRepository.findById(workId).orElseThrow(
-                () -> new ReviewException(
-                        ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.REVIEW_NOT_FOUND
-                )
-        );
+    public ReviewResponseDto createReview(
+            Long workId,
+            ReviewRequestDto requestDto,
+            CustomUserDetails userDetails
+    ) {
 
-        User user = userRepository.findById(userDetails.getId()).orElseThrow(
-                () -> new ReviewException(
+        // 공연 조회
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new ReviewException(
+                        ErrorStatus.WORK_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.WORK_NOT_FOUND
+                ));
+
+        // 유저 조회
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new UserException(
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
-                )
-        );
+                ));
 
+        // 리뷰 생성
         Review review = Review.builder()
                 .content(requestDto.getContent())
                 .rating(requestDto.getRating())
@@ -65,12 +73,6 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
-        return ReviewResponseDto.builder()
-                .id(savedReview.getId())
-                .content(savedReview.getContent())
-                .rating(savedReview.getRating())
-                .nickname(user.getName())
-                .createdAt(savedReview.getCreatedAt())
-                .build();
+        return ReviewResponseDto.from(savedReview);
     }
 }

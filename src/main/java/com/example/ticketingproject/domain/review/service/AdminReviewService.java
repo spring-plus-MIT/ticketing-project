@@ -20,9 +20,6 @@ public class AdminReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    /**
-     * 관리자용 전체 리뷰 페이징 조회
-     */
     public Page<ReviewResponseDto> findAllReviews(Pageable pageable) {
         Page<Review> reviews = reviewRepository.findAll(pageable);
 
@@ -35,20 +32,15 @@ public class AdminReviewService {
                 .build()
         );
     }
-
-    /**
-     * 관리자 권한 리뷰 삭제
-     * UserService.withdrawUser 예외 처리 스타일 반영
-     */
     @Transactional
     public void deleteReviewByAdmin(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(
-                () -> new ReviewException(
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(
                         REVIEW_NOT_FOUND.getHttpStatus(),
                         REVIEW_NOT_FOUND
-                )
-        );
+                ));
 
-        reviewRepository.delete(review);
+        review.delete();
     }
 }

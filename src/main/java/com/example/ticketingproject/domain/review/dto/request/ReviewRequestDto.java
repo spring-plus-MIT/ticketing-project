@@ -4,16 +4,17 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
+
 @Getter
 @NoArgsConstructor
 public class ReviewRequestDto {
-    @NotBlank(message = "리뷰 내용은 필수입니다.")
-    @Size(min = 10, max = 500)
+
+    @Size(min = 1, max = 200, message = MSG_VALIDATION_ERROR)
     private String content;
 
-    @Min(1) @Max(5)
+    @Min(value = 1, message = MSG_VALIDATION_ERROR)
+    @Max(value = 5, message = MSG_VALIDATION_ERROR)
     private int rating;
 
-    public ReviewRequestDto(String 내용, int i) {
-    }
 }
