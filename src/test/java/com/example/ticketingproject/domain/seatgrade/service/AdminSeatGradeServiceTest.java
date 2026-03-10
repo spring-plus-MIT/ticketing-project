@@ -1,4 +1,4 @@
-package com.example.domain.seatgrade.service;
+package com.example.ticketingproject.domain.seatgrade.service;
 
 import com.example.ticketingproject.common.enums.GradeName;
 
