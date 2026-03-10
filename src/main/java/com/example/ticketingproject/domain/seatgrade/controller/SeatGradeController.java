@@ -19,7 +19,7 @@ public class SeatGradeController {
 
     private final SeatGradeService seatGradeService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<Page<SeatGradeResponse>>> getAll(
             @PathVariable(name = "sessionId") Long sessionId,
             @RequestParam(defaultValue = "1") int page,
