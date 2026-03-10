@@ -41,14 +41,14 @@ public class ReviewController {
         );
     }
 
-    @PostMapping("/{workId}/reviews")
+    @PostMapping
     public ResponseEntity<CommonResponse<ReviewResponseDto>> createReview(
             @PathVariable Long workId,
-            @RequestBody @Valid ReviewRequestDto requestDto,
+            @RequestBody ReviewRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-
-        ReviewResponseDto response = reviewService.createReview(workId, requestDto, customUserDetails);
+        // userId만 Service에 전달
+        ReviewResponseDto response = reviewService.createReview(workId, requestDto, customUserDetails.getId());
 
         return ResponseEntity.ok(
                 CommonResponse.success(
@@ -59,4 +59,5 @@ public class ReviewController {
                 )
         );
     }
+
 }

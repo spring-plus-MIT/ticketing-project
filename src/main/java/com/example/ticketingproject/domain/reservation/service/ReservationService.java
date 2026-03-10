@@ -4,13 +4,15 @@ import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
-import com.example.ticketingproject.domain.reservation.entity.Seat;
-import com.example.ticketingproject.domain.reservation.entity.SeatGrade;
-import com.example.ticketingproject.domain.reservation.entity.User;
+import com.example.ticketingproject.domain.seat.entity.Seat;
+import com.example.ticketingproject.domain.seat.exception.SeatException;
+import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
+import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.exception.ReservationException;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
-import com.example.ticketingproject.domain.reservation.repository.SeatGradeRepository;
+import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
+import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,12 +33,19 @@ public class ReservationService {
     public ReservationResponse createReservation(ReservationCreateRequest requestDto, Long userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ReservationException(ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(
+                        ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.SEAT_NOT_FOUND
+                ));
 
         SeatGrade seatGrade = seatGradeRepository.findById(requestDto.getSeatId())
-                .orElseThrow(() -> new ReservationException(ErrorStatus.SEAT_NOT_FOUND));
+                .orElseThrow(() -> new SeatException(
+                        ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.SEAT_NOT_FOUND
+                ));
 
-        Seat seat = seatGrade.getSeat(); // SeatGrade에서 Seat 가져오기 가정
+
+        Seat seat = seatGrade.getSeat();
 
         Reservation reservation = Reservation.builder()
                 .user(user)

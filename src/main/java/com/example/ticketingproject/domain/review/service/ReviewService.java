@@ -10,8 +10,8 @@ import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
+import com.example.ticketingproject.domain.work.exception.WorkException;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
-import com.example.ticketingproject.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,16 +43,15 @@ public class ReviewService {
     public ReviewResponseDto createReview(
             Long workId,
             ReviewRequestDto requestDto,
-            CustomUserDetails userDetails
+            Long userId
     ) {
-
         Work work = workRepository.findById(workId)
-                .orElseThrow(() -> new ReviewException(
+                .orElseThrow(() -> new WorkException(
                         ErrorStatus.WORK_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.WORK_NOT_FOUND
                 ));
 
-        User user = userRepository.findById(userDetails.getId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
