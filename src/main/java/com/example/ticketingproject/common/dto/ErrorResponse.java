@@ -1,18 +1,18 @@
 package com.example.ticketingproject.common.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ErrorResponse {
-    private LocalDateTime timestamp;
-    private HttpStatus status;
-    private String code;
-    private String message;
-    private String path;
+    private final LocalDateTime timestamp;
+    private final HttpStatus status;
+    private final String code;
+    private final String message;
+    private final String path;
 
     public static ErrorResponse of(HttpStatus status, String code, String message, String path) {
         return new ErrorResponse(LocalDateTime.now(), status, code, message, path);

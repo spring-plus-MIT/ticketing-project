@@ -1,20 +1,20 @@
 package com.example.ticketingproject.common.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ValidationErrorResponse {
-    private LocalDateTime timestamp;
-    private HttpStatus status;
-    private String code;
-    private List<ValidationError> messages;
-    private String path;
+    private final LocalDateTime timestamp;
+    private final HttpStatus status;
+    private final String code;
+    private final List<ValidationError> messages;
+    private final String path;
 
     public static ValidationErrorResponse of(
             HttpStatus status,
