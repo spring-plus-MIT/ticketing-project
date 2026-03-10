@@ -6,6 +6,7 @@ import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
+import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class AdminSeatService {
     @Transactional
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
         Venue venue = venueRepository.findById(venueId).orElseThrow(
-                () -> new SeatException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
+                () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
         );
 
         Seat seat = Seat.builder()

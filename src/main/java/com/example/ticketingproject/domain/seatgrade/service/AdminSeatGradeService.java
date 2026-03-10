@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.seatgrade.service;
 
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seatgrade.dto.CreateSeatGradeRequest;
 import com.example.ticketingproject.domain.seatgrade.dto.PutSeatGradeRequest;
@@ -25,7 +26,7 @@ public class AdminSeatGradeService {
 
     public SeatGradeResponse save(Long sessionId, CreateSeatGradeRequest request) {
         PerformanceSession performanceSession = performanceSessionRepository.findById(sessionId).orElseThrow(
-                () -> new SeatGradeException(PERFORMANCE_SESSION_NOT_FOUND.getHttpStatus(), PERFORMANCE_SESSION_NOT_FOUND)
+                () -> new PerformanceSessionException(PERFORMANCE_SESSION_NOT_FOUND.getHttpStatus(), PERFORMANCE_SESSION_NOT_FOUND)
         );
 
         SeatGrade seatGrade = SeatGrade.builder()
