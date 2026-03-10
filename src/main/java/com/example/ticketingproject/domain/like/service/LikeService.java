@@ -29,17 +29,17 @@ public class LikeService {
     private final LikeRepository likeRepository;
 
     public LikeResponse save(Long workId, Long userId) {
-        if (likeRepository.existsByUserAndWork(userId, workId)) {
-            throw new LikeException(LIKE_ALREADY_EXISTS.getHttpStatus(), LIKE_ALREADY_EXISTS);
-        }
+        Work work = workRepository.findById(workId).orElseThrow(
+                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
+        );
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND)
         );
 
-        Work work = workRepository.findById(workId).orElseThrow(
-                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
-        );
+        if (likeRepository.existsByUserAndWork(user.getId(), work.getId())) {
+            throw new LikeException(LIKE_ALREADY_EXISTS.getHttpStatus(), LIKE_ALREADY_EXISTS);
+        }
 
         Like like = Like.builder()
                 .user(user)
@@ -48,23 +48,23 @@ public class LikeService {
 
         Like savedLike = likeRepository.save(like);
 
-        work.increaseLikeCount();
+        workRepository.incrementLikeCount(work.getId());
 
         return LikeResponse.from(savedLike);
     }
 
     public LikeResponse delete(Long workId, Long likeId, CustomUserDetails customUserDetails) {
+        Work work = workRepository.findById(workId).orElseThrow(
+                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
+        );
+
         Like like = likeRepository.findById(likeId).orElseThrow(
                 () -> new LikeException(LIKE_NOT_FOUND.getHttpStatus(), LIKE_NOT_FOUND)
         );
 
-        if (!like.getWork().getId().equals(workId)) {
+        if (!like.getWork().getId().equals(work.getId())) {
             throw new LikeException(LIKE_NOT_FOUND.getHttpStatus(), LIKE_NOT_FOUND);
         }
-
-        Work work = workRepository.findById(workId).orElseThrow(
-                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
-        );
 
         if(!like.getUser().getId().equals(customUserDetails.getId())) {
             throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(), ACCESS_FORBIDDEN);
@@ -72,7 +72,7 @@ public class LikeService {
 
         likeRepository.delete(like);
 
-        work.decreaseLikeCount();
+        workRepository.decreaseLikeCount(work.getId());
 
         return LikeResponse.from(like);
     }
