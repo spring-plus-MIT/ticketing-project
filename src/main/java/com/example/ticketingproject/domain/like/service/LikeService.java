@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.like.service;
 
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.domain.like.dto.LikeResponse;
 import com.example.ticketingproject.domain.like.entity.Like;
 import com.example.ticketingproject.domain.like.exception.LikeException;
@@ -58,7 +59,7 @@ public class LikeService {
         );
 
         if(!like.getUser().getId().equals(customUserDetails.getId())) {
-            throw new LikeException(LIKE_FORBIDDEN.getHttpStatus(), LIKE_FORBIDDEN);
+            throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(), ACCESS_FORBIDDEN);
         }
 
         likeRepository.delete(like);

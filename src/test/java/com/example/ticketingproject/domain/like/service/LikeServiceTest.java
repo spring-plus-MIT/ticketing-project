@@ -1,5 +1,6 @@
 package com.example.ticketingproject.domain.like.service;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.domain.like.dto.LikeResponse;
 import com.example.ticketingproject.domain.like.entity.Like;
 import com.example.ticketingproject.domain.like.exception.LikeException;
@@ -171,7 +172,7 @@ class LikeServiceTest {
         given(customUserDetails.getId()).willReturn(999L); // 다른 유저 ID
 
         assertThatThrownBy(() -> likeService.delete(1L, 1L, customUserDetails))
-                .isInstanceOf(LikeException.class);
+                .isInstanceOf(AuthException.class);
 
         then(likeRepository).should(never()).delete(any());
     }
