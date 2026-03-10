@@ -21,7 +21,7 @@ public class SeatGradeService {
 
     public Page<SeatGradeResponse> findAll(Long sessionId, Pageable pageable) {
         return seatGradeRepository.findAllByPerformanceSessionId(sessionId, pageable)
-                .map(this::convertToResponse);
+                .map(SeatGradeResponse::from);
     }
 
     public SeatGradeResponse findOne(Long sessionId, Long seatGradeId) {
@@ -29,20 +29,6 @@ public class SeatGradeService {
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
-        return convertToResponse(seatGrade);
-    }
-
-    private SeatGradeResponse convertToResponse(SeatGrade seatGrade) {
-        return SeatGradeResponse.builder()
-                .seatGradeId(seatGrade.getId())
-                .sessionId(seatGrade.getPerformanceSession().getId())
-                .gradeName(seatGrade.getGradeName())
-                .price(seatGrade.getPrice())
-                .totalSeats(seatGrade.getTotalSeats())
-                .remainingSeats(seatGrade.getRemainingSeats())
-                .createdAt(seatGrade.getCreatedAt())
-                .modifiedAt(seatGrade.getModifiedAt())
-                .deletedAt(seatGrade.getDeletedAt())
-                .build();
+        return SeatGradeResponse.from(seatGrade);
     }
 }

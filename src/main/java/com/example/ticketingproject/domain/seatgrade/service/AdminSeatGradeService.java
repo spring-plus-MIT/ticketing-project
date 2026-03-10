@@ -39,7 +39,7 @@ public class AdminSeatGradeService {
 
         SeatGrade savedSeatGrade = seatGradeRepository.save(seatGrade);
 
-        return convertToResponse(savedSeatGrade);
+        return SeatGradeResponse.from(savedSeatGrade);
     }
 
     public SeatGradeResponse update(Long sessionId, Long seatGradeId, PutSeatGradeRequest request) {
@@ -49,7 +49,7 @@ public class AdminSeatGradeService {
 
         seatGrade.update(request.getGradeName());
 
-        return convertToResponse(seatGrade);
+        return SeatGradeResponse.from(seatGrade);
     }
 
     public void delete(Long sessionId, Long seatGradeId) {
@@ -58,19 +58,5 @@ public class AdminSeatGradeService {
         );
 
         seatGrade.delete();
-    }
-
-    private SeatGradeResponse convertToResponse(SeatGrade seatGrade) {
-        return SeatGradeResponse.builder()
-                .seatGradeId(seatGrade.getId())
-                .sessionId(seatGrade.getPerformanceSession().getId())
-                .gradeName(seatGrade.getGradeName())
-                .price(seatGrade.getPrice())
-                .totalSeats(seatGrade.getTotalSeats())
-                .remainingSeats(seatGrade.getRemainingSeats())
-                .createdAt(seatGrade.getCreatedAt())
-                .modifiedAt(seatGrade.getModifiedAt())
-                .deletedAt(seatGrade.getDeletedAt())
-                .build();
     }
 }
