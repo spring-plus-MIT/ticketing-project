@@ -37,7 +37,6 @@ public class AdminUserController {
                         SuccessStatus.READ_SUCCESS.getSuccessCode(),
                         SuccessStatus.READ_SUCCESS.getMessage(),
                         adminUserService.findAllUser(converted)
-
                 )
         );
     }
