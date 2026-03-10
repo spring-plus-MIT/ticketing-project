@@ -5,24 +5,28 @@ import lombok.Getter;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.Length;
+
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 public class RegisterRequest {
-    @NotBlank(message = "이메일은 필수 입력 항목입니다.")
-    @Email
+    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
+    @Email(message = MSG_VALIDATION_EMAIL_ERROR)
     private String email;
 
-    @NotBlank(message = "이름은 필수 입력 항목입니다.")
+    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
     private String name;
 
-    @NotBlank(message = "비밀번호는 필수 입력 항목입니다.")
-    @Size(min = 8, message = "비밀번호는 8자 이상 입력해야 합니다.")
+    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
+    @Length(min = 8, max = 20, message = MSG_VALIDATION_LENGTH_ERROR)
     private String password;
 
-    @NotBlank(message = "전화번호는 필수 입력 항목입니다.")
+    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
+    @Length(max = 14, message = MSG_VALIDATION_LENGTH_ERROR)
     @Pattern(
             regexp = "^010-\\d{4}-\\d{4}$",
-            message = "전화번호 형식이 올바르지 않습니다."
+            message = MSG_VALIDATION_PATTERN_ERROR
     )
     private String phone;
 }
