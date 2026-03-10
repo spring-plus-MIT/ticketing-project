@@ -30,25 +30,11 @@ public class VenueController {
                 pageable.getPageSize(),
                 pageable.getSort()
         );
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        venueService.getVenues(converted)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, venueService.getVenues(converted)));
     }
 
     @GetMapping("/{venueId}")
     public ResponseEntity<CommonResponse<VenueResponse>> getVenue(@PathVariable Long venueId) {
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        venueService.getVenue(venueId)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, venueService.getVenue(venueId)));
     }
 }

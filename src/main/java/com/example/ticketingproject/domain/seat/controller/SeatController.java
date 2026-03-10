@@ -27,11 +27,11 @@ public class SeatController {
             @RequestParam(defaultValue = "10") int size
             ) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatService.findAll(venueId, pageable)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, seatService.findAll(venueId, pageable)));
     }
 
     @GetMapping("/{seatId}")
     public ResponseEntity<CommonResponse<SeatResponse>> getOne(@PathVariable(name = "venueId") Long venueId, @PathVariable(name = "seatGradeId") Long seatId) {
-        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatService.findOne(venueId, seatId)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, seatService.findOne(venueId, seatId)));
     }
 }

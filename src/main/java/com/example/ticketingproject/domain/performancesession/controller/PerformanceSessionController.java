@@ -30,12 +30,7 @@ public class PerformanceSessionController {
     ) {
         performanceSessionService.createSession(performanceId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CommonResponse.success(
-                        CREATE_SUCCESS,
-                        CREATE_SUCCESS.getSuccessCode(),
-                        CREATE_SUCCESS.getMessage(),
-                        null
-                ));
+                .body(CommonResponse.success(CREATE_SUCCESS, null));
     }
 
     @GetMapping("/{performanceId}/sessions")
@@ -47,13 +42,7 @@ public class PerformanceSessionController {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<GetSessionResponse> response = performanceSessionService.getSessions(performanceId, converted);
 
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        response
-                ));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
 
     @GetMapping("/{performanceId}/sessions/{sessionId}")
@@ -62,13 +51,7 @@ public class PerformanceSessionController {
             @PathVariable Long sessionId
     ) {
         GetSessionResponse response = performanceSessionService.getSessionDetail(sessionId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        response
-                ));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
 
     @PatchMapping("/{performanceId}/sessions/{sessionId}")
@@ -78,13 +61,7 @@ public class PerformanceSessionController {
             @RequestBody SessionRequest request
     ) {
         performanceSessionService.updateSession(sessionId, request);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        UPDATE_SUCCESS,
-                        UPDATE_SUCCESS.getSuccessCode(),
-                        UPDATE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, null));
     }
 
     @DeleteMapping("/{performanceId}/sessions/{sessionId}")
@@ -93,12 +70,6 @@ public class PerformanceSessionController {
             @PathVariable Long sessionId
     ) {
         performanceSessionService.deleteSession(sessionId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        DELETE_SUCCESS,
-                        DELETE_SUCCESS.getSuccessCode(),
-                        DELETE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, null));
     }
 }

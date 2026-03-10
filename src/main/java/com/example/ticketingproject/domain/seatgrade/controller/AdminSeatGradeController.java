@@ -21,18 +21,29 @@ public class AdminSeatGradeController {
     private final AdminSeatGradeService adminSeatGradeService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<SeatGradeResponse>> create(@Valid @PathVariable(name = "sessionId") Long sessionId, CreateSeatGradeRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), adminSeatGradeService.save(sessionId, request)));
+    public ResponseEntity<CommonResponse<SeatGradeResponse>> create(
+            @Valid @PathVariable(name = "sessionId") Long sessionId,
+            CreateSeatGradeRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(CommonResponse.success(CREATE_SUCCESS, adminSeatGradeService.save(sessionId, request)));
     }
 
     @PutMapping("/{seatGradeId}")
-    public ResponseEntity<CommonResponse<SeatGradeResponse>> update(@Valid @PathVariable(name = "sessionId") Long sessionId, @PathVariable(name = "seatGradeId") Long seatGradeId, PutSeatGradeRequest request) {
-        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, UPDATE_SUCCESS.getSuccessCode(), UPDATE_SUCCESS.getMessage(), adminSeatGradeService.update(sessionId, seatGradeId, request)));
+    public ResponseEntity<CommonResponse<SeatGradeResponse>> update(
+            @Valid @PathVariable(name = "sessionId") Long sessionId,
+            @PathVariable(name = "seatGradeId") Long seatGradeId,
+            PutSeatGradeRequest request
+    ) {
+        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, adminSeatGradeService.update(sessionId, seatGradeId, request)));
     }
 
     @DeleteMapping("/{seatGradeId}")
-    public ResponseEntity<CommonResponse<Void>> delete(@PathVariable(name = "sessionId") Long sessionId, @PathVariable(name = "seatGradeId") Long seatGradeId) {
+    public ResponseEntity<CommonResponse<Void>> delete(
+            @PathVariable(name = "sessionId") Long sessionId,
+            @PathVariable(name = "seatGradeId") Long seatGradeId
+    ) {
         adminSeatGradeService.delete(sessionId, seatGradeId);
-        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, DELETE_SUCCESS.getSuccessCode(), DELETE_SUCCESS.getMessage(), null));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, null));
     }
 }

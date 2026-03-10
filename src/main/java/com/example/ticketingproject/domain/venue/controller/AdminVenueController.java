@@ -24,12 +24,6 @@ public class AdminVenueController {
     @PostMapping
     public ResponseEntity<CommonResponse<VenueResponse>> createVenue(@Valid @RequestBody CreateVenueRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonResponse.success(
-                        SuccessStatus.CREATE_SUCCESS,
-                        SuccessStatus.CREATE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.CREATE_SUCCESS.getMessage(),
-                        adminVenueService.create(request)
-                )
-        );
+                CommonResponse.success(SuccessStatus.CREATE_SUCCESS, adminVenueService.create(request)));
     }
 }
