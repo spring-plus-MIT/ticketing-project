@@ -37,7 +37,4 @@ public class CustomUserDetails implements UserDetails {
         return null;
     }
 
-    public Long getUserId(){
-        return id;
-    }
 }

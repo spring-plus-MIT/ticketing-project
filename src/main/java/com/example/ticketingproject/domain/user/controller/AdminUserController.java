@@ -3,23 +3,25 @@ package com.example.ticketingproject.domain.user.controller;
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
+import com.example.ticketingproject.domain.user.dto.UpdateUserRequest;
+import com.example.ticketingproject.domain.user.dto.UpdateUserResponse;
 import com.example.ticketingproject.domain.user.service.AdminUserService;
+import com.example.ticketingproject.domain.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
 public class AdminUserController {
     private final AdminUserService adminUserService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<CommonResponse<Page<GetUserResponse>>> getUsers(
@@ -37,8 +39,39 @@ public class AdminUserController {
                         SuccessStatus.READ_SUCCESS.getSuccessCode(),
                         SuccessStatus.READ_SUCCESS.getMessage(),
                         adminUserService.findAllUser(converted)
-
                 )
         );
     }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdateUserRequest request
+    ) {
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.UPDATE_SUCCESS,
+                        SuccessStatus.UPDATE_SUCCESS.getSuccessCode(),
+                        SuccessStatus.UPDATE_SUCCESS.getMessage(),
+                        userService.updateUser(userId, request)
+                )
+        );
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<CommonResponse<Void>> withdrawUser(
+            @PathVariable Long userId
+    ) {
+        userService.withdrawUser(userId);
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.DELETE_SUCCESS,
+                        SuccessStatus.DELETE_SUCCESS.getSuccessCode(),
+                        SuccessStatus.DELETE_SUCCESS.getMessage(),
+                        null
+                )
+        );
+    }
+
+
 }

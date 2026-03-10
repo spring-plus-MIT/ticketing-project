@@ -5,6 +5,7 @@ import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,17 +23,22 @@ public class User extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Length(max = 30)
     private String name;
 
     @Column(unique = true)
     @Length(max = 50)
+    @NotBlank
     @Email
     private String email;
 
+    @NotBlank
+    @Length(min = 8)
     private String password;
 
     @Length(max = 14)
+    @NotBlank
     private String phone;
 
     private BigDecimal balance;
@@ -89,5 +95,11 @@ public class User extends DeletableEntity {
         }
 
         return phone.substring(0, 3) + "-****-" + phone.substring(phone.length() - 4);
+    }
+
+    public void update(String name, String password, String phone) {
+        this.name = name;
+        this.password = password;
+        this.phone = phone;
     }
 }

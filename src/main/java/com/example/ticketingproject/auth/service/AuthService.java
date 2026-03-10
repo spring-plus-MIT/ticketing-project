@@ -13,7 +13,6 @@ import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.security.CustomUserDetails;
 import com.example.ticketingproject.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,14 +51,7 @@ public class AuthService {
         );
         User savedUser = userRepository.save(user);
 
-        return new RegisterResponse(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                savedUser.getName(),
-                savedUser.getPhone(),
-                savedUser.getUserRole().getRoleName(),
-                savedUser.getUserStatus().getStatusName()
-        );
+        return RegisterResponse.from(savedUser);
     }
 
     @Transactional

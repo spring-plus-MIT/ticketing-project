@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface SeatGradeRepository extends JpaRepository<SeatGrade, Long> {
 
-    Optional<SeatGrade> findByPerformanceSessionIdAndGradeNameAndDeletedAtIsNull(Long sessionId, GradeName gradeName);
-    Page<SeatGrade> findAllByPerformanceSessionIdAndDeletedAtIsNull(Long SessionId, Pageable pageable);
-    Optional<SeatGrade> findByIdAndPerformanceSessionIdAndDeletedAtIsNull(Long seatGradeId, Long sessionId);
+    Page<SeatGrade> findAllByPerformanceSessionId(Long sessionId, Pageable pageable);
+    Optional<SeatGrade> findByIdAndPerformanceSessionId(Long seatGradeId, Long sessionId);
 }
