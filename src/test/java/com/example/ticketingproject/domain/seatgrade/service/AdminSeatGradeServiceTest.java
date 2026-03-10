@@ -12,7 +12,6 @@ import com.example.ticketingproject.domain.seatgrade.dto.SeatGradeResponse;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
-import com.example.ticketingproject.domain.seatgrade.service.AdminSeatGradeService;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -89,9 +88,11 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 생성 실패")
     void save_fail() {
+        CreateSeatGradeRequest request = mock(CreateSeatGradeRequest.class);
+
         given(performanceSessionRepository.findById(999L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adminSeatGradeService.save(999L, null))
+        assertThatThrownBy(() -> adminSeatGradeService.save(999L, request))
                 .isInstanceOf(PerformanceSessionException.class);
     }
 

@@ -8,6 +8,7 @@ import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seat.service.AdminSeatService;
 import com.example.ticketingproject.domain.venue.entity.Venue;
+import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,6 +86,6 @@ public class AdminSeatServiceTest {
         given(venueRepository.findById(999L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatService.save(999L, request))
-                .isInstanceOf(BaseException.class);
+                .isInstanceOf(VenueException.class);
     }
 }
