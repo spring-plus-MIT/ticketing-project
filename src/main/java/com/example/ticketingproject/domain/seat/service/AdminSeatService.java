@@ -37,13 +37,6 @@ public class AdminSeatService {
 
         Seat savedSeat = seatRepository.save(seat);
 
-        return SeatResponse.builder()
-                .seatId(savedSeat.getId())
-                .venueId(savedSeat.getVenue().getId())
-                .gradeName(savedSeat.getGradeName())
-                .rowName(savedSeat.getRowName())
-                .seatNumber(savedSeat.getSeatNumber())
-                .createdAt(savedSeat.getCreatedAt())
-                .build();
+        return SeatResponse.from(savedSeat);
     }
 }

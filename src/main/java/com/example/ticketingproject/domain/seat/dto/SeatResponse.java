@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.seat.dto;
 
 import com.example.ticketingproject.common.enums.GradeName;
+import com.example.ticketingproject.domain.seat.entity.Seat;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,4 +17,15 @@ public class SeatResponse {
     private final String rowName;
     private final int seatNumber;
     private final LocalDateTime createdAt;
+
+    public static SeatResponse from(Seat seat) {
+        return SeatResponse.builder()
+                .seatId(seat.getId())
+                .venueId(seat.getVenue().getId())
+                .gradeName(seat.getGradeName())
+                .rowName(seat.getRowName())
+                .seatNumber(seat.getSeatNumber())
+                .createdAt(seat.getCreatedAt())
+                .build();
+    }
 }

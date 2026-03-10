@@ -42,6 +42,10 @@ public class Constants {
 
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
+    public static final String MSG_VALIDATION_NOT_BLANK_ERROR = "필수 입력 값이 누락 되었습니다.";
+    public static final String MSG_VALIDATION_EMAIL_ERROR = "이메일 형식이 올바르지 않습니다.";
+    public static final String MSG_VALIDATION_LENGTH_ERROR = "입력 길이가 잘못되었습니다.";
+    public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
 
 
 }

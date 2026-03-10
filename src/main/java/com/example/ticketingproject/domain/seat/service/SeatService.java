@@ -23,16 +23,7 @@ public class SeatService {
 
     public Page<SeatResponse> findAll(Long venueId, Pageable pageable) {
         return seatRepository.findAllByVenueId(venueId, pageable)
-                .map(
-                        seat -> SeatResponse.builder()
-                                .seatId(seat.getId())
-                                .venueId(seat.getVenue().getId())
-                                .gradeName(seat.getGradeName())
-                                .rowName(seat.getRowName())
-                                .seatNumber(seat.getSeatNumber())
-                                .createdAt(seat.getCreatedAt())
-                                .build()
-                );
+                .map(SeatResponse::from);
     }
 
     public SeatResponse findOne(Long venueId, Long seatId) {
@@ -40,13 +31,6 @@ public class SeatService {
                 () -> new SeatException(SEAT_NOT_FOUND.getHttpStatus(), SEAT_NOT_FOUND)
         );
 
-        return SeatResponse.builder()
-                .seatId(seat.getId())
-                .venueId(seat.getVenue().getId())
-                .gradeName(seat.getGradeName())
-                .rowName(seat.getRowName())
-                .seatNumber(seat.getSeatNumber())
-                .createdAt(seat.getCreatedAt())
-                .build();
+        return SeatResponse.from(seat);
     }
 }
