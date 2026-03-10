@@ -1,9 +1,9 @@
 package com.example.ticketingproject.domain.seat.service;
 
-import com.example.ticketingproject.common.exception.BaseException;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
+import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
@@ -24,7 +24,7 @@ public class AdminSeatService {
     @Transactional
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
         Venue venue = venueRepository.findById(venueId).orElseThrow(
-                () -> new BaseException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
+                () -> new SeatException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
         );
 
         Seat seat = Seat.builder()

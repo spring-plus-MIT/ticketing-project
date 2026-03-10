@@ -1,9 +1,8 @@
 package com.example.ticketingproject.domain.seat.service;
 
-
-import com.example.ticketingproject.common.exception.BaseException;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
+import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +35,7 @@ public class SeatService {
 
     public SeatResponse findOne(Long venueId, Long seatId) {
         Seat seat = seatRepository.findByIdAndVenueId(seatId, venueId).orElseThrow(
-                () -> new BaseException(SEAT_NOT_FOUND.getHttpStatus(), SEAT_NOT_FOUND)
+                () -> new SeatException(SEAT_NOT_FOUND.getHttpStatus(), SEAT_NOT_FOUND)
         );
 
         return SeatResponse.builder()
