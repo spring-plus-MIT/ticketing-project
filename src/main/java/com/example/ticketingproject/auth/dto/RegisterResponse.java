@@ -1,8 +1,11 @@
 package com.example.ticketingproject.auth.dto;
 
+import com.example.ticketingproject.domain.user.entity.User;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class RegisterResponse {
     private final Long id;
     private final String email;
@@ -11,12 +14,15 @@ public class RegisterResponse {
     private final String role;
     private final String status;
 
-    public RegisterResponse(Long id, String email, String name, String phone, String role, String status) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.phone = phone;
-        this.role = role;
-        this.status = status;
+    public static RegisterResponse from(User user) {
+        return RegisterResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .role(user.getUserRole().getRoleName())
+                .status(user.getUserStatus().getStatusName())
+                .build();
     }
+
 }
