@@ -20,7 +20,7 @@ public class AdminSeatGradeController {
 
     private final AdminSeatGradeService adminSeatGradeService;
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<CommonResponse<SeatGradeResponse>> create(@Valid @PathVariable(name = "sessionId") Long sessionId, CreateSeatGradeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), adminSeatGradeService.save(sessionId, request)));
     }

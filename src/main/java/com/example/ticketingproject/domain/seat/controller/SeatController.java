@@ -20,7 +20,7 @@ public class SeatController {
 
     private final SeatService seatService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<Page<SeatResponse>>> getAll(
             @PathVariable(name = "venueId")  Long venueId,
             @RequestParam(defaultValue = "1") int page,
