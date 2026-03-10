@@ -16,7 +16,7 @@ import static com.example.ticketingproject.common.enums.SuccessStatus.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/works/{workId}/likes")
-public class ListController {
+public class LikeController {
 
     private final LikeService likeService;
 

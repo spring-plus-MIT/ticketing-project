@@ -43,6 +43,7 @@ public class Constants {
 
     // Like
     public static final String MSG_LIKE_NOT_FOUND = "찜이 존재하지 않습니다.";
+    public static final String MSG_LIKE_ALREADY_EXISTS = "이미 찜한 작품입니다.";
 
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";

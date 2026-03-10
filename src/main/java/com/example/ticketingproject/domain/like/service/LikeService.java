@@ -29,6 +29,10 @@ public class LikeService {
     private final LikeRepository likeRepository;
 
     public LikeResponse save(Long workId, Long userId) {
+        if (likeRepository.existsByUserAndWork(userId, workId)) {
+            throw new LikeException(LIKE_ALREADY_EXISTS.getHttpStatus(), LIKE_ALREADY_EXISTS);
+        }
+
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND)
         );
@@ -50,12 +54,16 @@ public class LikeService {
     }
 
     public LikeResponse delete(Long workId, Long likeId, CustomUserDetails customUserDetails) {
-        Work work = workRepository.findById(workId).orElseThrow(
-                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
-        );
-
         Like like = likeRepository.findById(likeId).orElseThrow(
                 () -> new LikeException(LIKE_NOT_FOUND.getHttpStatus(), LIKE_NOT_FOUND)
+        );
+
+        if (!like.getWork().getId().equals(workId)) {
+            throw new LikeException(LIKE_NOT_FOUND.getHttpStatus(), LIKE_NOT_FOUND);
+        }
+
+        Work work = workRepository.findById(workId).orElseThrow(
+                () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
         );
 
         if(!like.getUser().getId().equals(customUserDetails.getId())) {
