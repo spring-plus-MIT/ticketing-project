@@ -3,7 +3,7 @@ package com.example.ticketingproject.domain.venue.controller;
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.venue.dto.CreateVenueRequest;
-import com.example.ticketingproject.domain.venue.dto.CreateVenueResponse;
+import com.example.ticketingproject.domain.venue.dto.VenueResponse;
 import com.example.ticketingproject.domain.venue.service.AdminVenueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class AdminVenueController {
     private final AdminVenueService adminVenueService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<CreateVenueResponse>> createVenue(CreateVenueRequest request) {
+    public ResponseEntity<CommonResponse<VenueResponse>> createVenue(CreateVenueRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonResponse.success(
                         SuccessStatus.CREATE_SUCCESS,
