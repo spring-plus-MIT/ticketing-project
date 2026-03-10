@@ -34,8 +34,8 @@ public class ReservationService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(
-                        ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.SEAT_NOT_FOUND
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND
                 ));
 
         SeatGrade seatGrade = seatGradeRepository.findById(requestDto.getSeatId())

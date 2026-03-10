@@ -13,7 +13,7 @@ public class ReviewResponseDto {
     private Long id;
     private String content;
     private int rating;
-    private String userName; // nickname 대신 userName으로 변경
+    private String userName;
     private LocalDateTime createdAt;
 
     public static ReviewResponseDto from(Review review) {
@@ -21,7 +21,7 @@ public class ReviewResponseDto {
                 .id(review.getId())
                 .content(review.getContent())
                 .rating(review.getRating())
-                .userName(review.getUser().getName()) // Review 엔티티에는 nickname 없음, User 이름으로 대체
+                .userName(review.getUser().getName())
                 .createdAt(review.getCreatedAt())
                 .build();
     }

@@ -47,7 +47,6 @@ public class ReviewController {
             @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        // userId만 Service에 전달
         ReviewResponseDto response = reviewService.createReview(workId, requestDto, customUserDetails.getId());
 
         return ResponseEntity.ok(
