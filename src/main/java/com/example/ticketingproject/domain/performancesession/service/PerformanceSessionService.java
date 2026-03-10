@@ -1,6 +1,5 @@
 package com.example.ticketingproject.domain.performancesession.service;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performance.exception.PerformanceException;
 import com.example.ticketingproject.domain.performance.repository.PerformanceRepository;
@@ -15,11 +14,12 @@ import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +33,10 @@ public class PerformanceSessionService {
     @Transactional
     public void createSession(Long performanceId, SessionRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new PerformanceException(HttpStatus.NOT_FOUND, ErrorStatus.PERFORMANCE_NOT_FOUND));
+                .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
 
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
+                .orElseThrow(() -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND));
 
         validateDuplicateSession(venue, request.getStartTime());
 
@@ -55,7 +55,7 @@ public class PerformanceSessionService {
 
     public GetSessionResponse getSessionDetail(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
+                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
 
         return convertToResponse(session);
     }
@@ -63,10 +63,10 @@ public class PerformanceSessionService {
     @Transactional
     public void updateSession(Long sessionId, SessionRequest request) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
+                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
 
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
+                .orElseThrow(() -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND));
 
         validateDuplicateSession(venue, request.getStartTime());
 
@@ -76,14 +76,14 @@ public class PerformanceSessionService {
     @Transactional
     public void deleteSession(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
+                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
 
         session.delete();
     }
 
     private void validateDuplicateSession(Venue venue, LocalDateTime startTime) {
         if (performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)) {
-            throw new PerformanceSessionException(HttpStatus.CONFLICT, ErrorStatus.DUPLICATE_SESSION);
+            throw new PerformanceSessionException(DUPLICATE_SESSION.getHttpStatus(), DUPLICATE_SESSION);
         }
     }
 

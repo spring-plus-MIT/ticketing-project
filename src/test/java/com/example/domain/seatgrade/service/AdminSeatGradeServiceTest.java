@@ -109,7 +109,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
 
         SeatGradeResponse response = adminSeatGradeService.update(1L, 1L, request);
@@ -126,7 +126,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(999L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(999L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.update(1L, 999L, request))
@@ -140,7 +140,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 999L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 999L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.update(999L, 1L, request))
@@ -150,7 +150,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 성공")
     void delete_success() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
 
         assertThatNoException()
@@ -162,7 +162,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 실패 - 존재하지 않는 좌석 등급")
     void delete_fail_seatGradeNotFound() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(999L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(999L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.delete(1L, 999L))
@@ -172,7 +172,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 실패 - 세션 ID 불일치")
     void delete_fail_sessionIdMismatch() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 999L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 999L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.delete(999L, 1L))

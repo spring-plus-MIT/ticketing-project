@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,7 +29,7 @@ public class CastMemberService {
     @Transactional
     public void createCastMember(Long sessionId, CastMemberRequest request) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
+                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
 
         CastMember castMember = CastMember.builder()
                 .performanceSession(session)
@@ -47,7 +49,7 @@ public class CastMemberService {
     @Transactional
     public void updateCastMember(Long castId, CastMemberRequest request) {
         CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(HttpStatus.NOT_FOUND, ErrorStatus.CAST_MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
 
         castMember.update(request.getName(), request.getRoleName());
     }
@@ -55,7 +57,7 @@ public class CastMemberService {
     @Transactional
     public void deleteCastMember(Long castId) {
         CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(HttpStatus.NOT_FOUND, ErrorStatus.CAST_MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
 
         castMemberRepository.delete(castMember);
     }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.ticketingproject.common.enums.SuccessStatus.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/performances/{performanceId}/sessions/{sessionId}/casts")
@@ -27,9 +29,9 @@ public class CastMemberController {
         castMemberService.createCastMember(sessionId, request);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.CREATED,
-                        SuccessStatus.CREATED.getSuccessCode(),
-                        SuccessStatus.CREATED.getMessage(),
+                        CREATE_SUCCESS,
+                        CREATE_SUCCESS.getSuccessCode(),
+                        CREATE_SUCCESS.getMessage(),
                         null
                 ));
     }
@@ -42,9 +44,9 @@ public class CastMemberController {
         List<CastMemberResponse> response = castMemberService.getCastMembers(sessionId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.GET_SUCCESS,
-                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         response
                 ));
     }
@@ -59,9 +61,9 @@ public class CastMemberController {
         castMemberService.updateCastMember(castId, request);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        UPDATE_SUCCESS,
+                        UPDATE_SUCCESS.getSuccessCode(),
+                        UPDATE_SUCCESS.getMessage(),
                         null
                 ));
     }
@@ -75,9 +77,9 @@ public class CastMemberController {
         castMemberService.deleteCastMember(castId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        DELETE_SUCCESS,
+                        DELETE_SUCCESS.getSuccessCode(),
+                        DELETE_SUCCESS.getMessage(),
                          null
                 ));
     }

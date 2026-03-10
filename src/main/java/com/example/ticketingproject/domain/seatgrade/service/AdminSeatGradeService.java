@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.seatgrade.service;
 
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seatgrade.dto.CreateSeatGradeRequest;
 import com.example.ticketingproject.domain.seatgrade.dto.PutSeatGradeRequest;
@@ -25,7 +26,7 @@ public class AdminSeatGradeService {
 
     public SeatGradeResponse save(Long sessionId, CreateSeatGradeRequest request) {
         PerformanceSession performanceSession = performanceSessionRepository.findById(sessionId).orElseThrow(
-                () -> new SeatGradeException(PERFORMANCE_SESSION_NOT_FOUND.getHttpStatus(), PERFORMANCE_SESSION_NOT_FOUND)
+                () -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND)
         );
 
         SeatGrade seatGrade = SeatGrade.builder()
@@ -52,7 +53,7 @@ public class AdminSeatGradeService {
     }
 
     public SeatGradeResponse update(Long sessionId, Long seatGradeId, PutSeatGradeRequest request) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
@@ -72,7 +73,7 @@ public class AdminSeatGradeService {
     }
 
     public void delete(Long sessionId, Long seatGradeId) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
