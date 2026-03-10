@@ -1,6 +1,5 @@
 package com.example.ticketingproject.domain.seatgrade.repository;
 
-import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

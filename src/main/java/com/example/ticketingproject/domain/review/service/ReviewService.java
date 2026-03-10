@@ -4,7 +4,6 @@ import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.review.dto.request.ReviewRequestDto;
 import com.example.ticketingproject.domain.review.dto.response.ReviewResponseDto;
 import com.example.ticketingproject.domain.review.entity.Review;
-import com.example.ticketingproject.domain.review.exception.ReviewException;
 import com.example.ticketingproject.domain.review.repository.ReviewRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;

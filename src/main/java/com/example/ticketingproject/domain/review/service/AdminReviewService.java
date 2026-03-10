@@ -21,7 +21,7 @@ public class AdminReviewService {
 
     public Page<ReviewResponseDto> findAllReviews(Long workId, Pageable pageable) {
         Page<Review> reviews = reviewRepository.findAllByWorkId(workId, pageable);
-        return reviews.map(ReviewResponseDto::from); // ReviewResponseDto.from() 사용
+        return reviews.map(ReviewResponseDto::from);
     }
 
 

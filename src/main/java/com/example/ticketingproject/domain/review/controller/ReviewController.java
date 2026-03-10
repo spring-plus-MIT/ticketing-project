@@ -44,7 +44,7 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<CommonResponse<ReviewResponseDto>> createReview(
             @PathVariable Long workId,
-            @RequestBody ReviewRequestDto requestDto,
+            @RequestBody @Valid ReviewRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         // userId만 Service에 전달

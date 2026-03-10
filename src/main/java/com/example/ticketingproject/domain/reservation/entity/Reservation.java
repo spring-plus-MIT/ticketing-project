@@ -29,7 +29,7 @@ public class Reservation extends ModifiableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "performance_session_id", nullable = false)
-    private Performance performance;
+    private PerformanceSession performanceSession;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
@@ -50,7 +50,7 @@ public class Reservation extends ModifiableEntity {
                        ReservationStatus status, BigDecimal totalPrice,
                        LocalDateTime reservedAt, LocalDateTime expiresAt) {
         this.user = user;
-        this.performance = performance;
+        this.performanceSession = performanceSession;
         this.seat = seat;
         this.status = status;
         this.totalPrice = totalPrice;
