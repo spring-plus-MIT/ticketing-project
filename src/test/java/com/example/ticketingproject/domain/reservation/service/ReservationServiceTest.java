@@ -44,7 +44,6 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        // ⭐ InjectMocks 대신 수동으로 생성자에 주입해서 null 방지
         reservationService = new ReservationService(
                 reservationRepository,
                 userRepository,

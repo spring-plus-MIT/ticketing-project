@@ -11,4 +11,7 @@ public class ReservationCreateRequest {
 
     @NotNull(message = "좌석 ID는 필수입니다.")
     private Long seatId;
+
+    public ReservationCreateRequest(long l, long l1) {
+    }
 }
