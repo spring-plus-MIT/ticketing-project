@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.ticketingproject.common.enums.SuccessStatus.FOUND_SUCCESS;
+import static com.example.ticketingproject.common.enums.SuccessStatus.READ_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,11 +26,11 @@ public class SeatGradeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return ResponseEntity.ok(CommonResponse.success(FOUND_SUCCESS, FOUND_SUCCESS.getSuccessCode(), FOUND_SUCCESS.getMessage(), seatGradeService.findAll(sessionId, pageable)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatGradeService.findAll(sessionId, pageable)));
     }
 
     @GetMapping("/{seatGradeId}")
     public ResponseEntity<CommonResponse<SeatGradeResponse>> getOne(@PathVariable(name = "sessionId") Long sessionId, @PathVariable(name = "seatGradeId") Long seatGradeId) {
-        return ResponseEntity.ok(CommonResponse.success(FOUND_SUCCESS, FOUND_SUCCESS.getSuccessCode(), FOUND_SUCCESS.getMessage(), seatGradeService.findOne(sessionId, seatGradeId)));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, READ_SUCCESS.getSuccessCode(), READ_SUCCESS.getMessage(), seatGradeService.findOne(sessionId, seatGradeId)));
     }
 }

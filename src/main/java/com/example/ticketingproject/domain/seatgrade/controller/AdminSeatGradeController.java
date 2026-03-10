@@ -22,12 +22,12 @@ public class AdminSeatGradeController {
 
     @PostMapping()
     public ResponseEntity<CommonResponse<SeatGradeResponse>> create(@Valid @PathVariable(name = "sessionId") Long sessionId, CreateSeatGradeRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SEAT_GRADE_SUCCESS, CREATE_SEAT_GRADE_SUCCESS.getSuccessCode(), CREATE_SEAT_GRADE_SUCCESS.getMessage(), adminSeatGradeService.save(sessionId, request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), adminSeatGradeService.save(sessionId, request)));
     }
 
     @PutMapping("/{seatGradeId}")
     public ResponseEntity<CommonResponse<SeatGradeResponse>> update(@Valid @PathVariable(name = "sessionId") Long sessionId, @PathVariable(name = "seatGradeId") Long seatGradeId, PutSeatGradeRequest request) {
-        return ResponseEntity.ok(CommonResponse.success(UPDATE_SEAT_GRADE_SUCCESS, UPDATE_SEAT_GRADE_SUCCESS.getSuccessCode(), UPDATE_SEAT_GRADE_SUCCESS.getMessage(), adminSeatGradeService.update(sessionId, seatGradeId, request)));
+        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, UPDATE_SUCCESS.getSuccessCode(), UPDATE_SUCCESS.getMessage(), adminSeatGradeService.update(sessionId, seatGradeId, request)));
     }
 
     @DeleteMapping("/{seatGradeId}")
