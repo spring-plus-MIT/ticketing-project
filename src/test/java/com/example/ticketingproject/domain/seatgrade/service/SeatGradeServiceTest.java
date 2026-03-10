@@ -137,7 +137,7 @@ public class SeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 단건 조회 성공")
     void findOne_success() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
 
         SeatGradeResponse response = seatGradeService.findOne(1L, 1L);
@@ -153,7 +153,7 @@ public class SeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 단건 조회 실패 - 존재하지 않는 좌석 등급")
     void findOne_fail_seatGradeNotFound() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(999L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(999L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> seatGradeService.findOne(1L, 999L))
@@ -163,7 +163,7 @@ public class SeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 단건 조회 실패 - 세션 ID 불일치")
     void findOne_fail_sessionIdMismatch() {
-        given(seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(1L, 999L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 999L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> seatGradeService.findOne(999L, 1L))

@@ -1,7 +1,6 @@
 package com.example.ticketingproject.domain.performance.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
-import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.performance.dto.PerformanceRequest;
 import com.example.ticketingproject.domain.performance.dto.PerformanceResponse;
 import com.example.ticketingproject.domain.performance.service.PerformanceService;
@@ -10,8 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.example.ticketingproject.common.enums.SuccessStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,11 +27,11 @@ public class PerformanceController {
             @RequestBody PerformanceRequest request
     ) {
         performanceService.createPerformance(request);
-        return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.success(
-                        SuccessStatus.CREATED,
-                        SuccessStatus.CREATED.getSuccessCode(),
-                        SuccessStatus.CREATED.getMessage(),
+                        CREATE_SUCCESS,
+                        CREATE_SUCCESS.getSuccessCode(),
+                        CREATE_SUCCESS.getMessage(),
                         null));
     }
 
@@ -43,9 +45,9 @@ public class PerformanceController {
 
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.GET_SUCCESS,
-                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         response
                 ));
     }
@@ -57,9 +59,9 @@ public class PerformanceController {
         PerformanceResponse response = performanceService.getPerformanceDetail(performanceId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.GET_SUCCESS,
-                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         response
                 ));
     }
@@ -72,9 +74,9 @@ public class PerformanceController {
         performanceService.updatePerformance(performanceId, request);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        UPDATE_SUCCESS,
+                        UPDATE_SUCCESS.getSuccessCode(),
+                        UPDATE_SUCCESS.getMessage(),
                         null
                 ));
     }
@@ -86,9 +88,9 @@ public class PerformanceController {
         performanceService.closePerformance(performanceId);
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.PROCESS_SUCCESS,
-                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        DELETE_SUCCESS,
+                        DELETE_SUCCESS.getSuccessCode(),
+                        DELETE_SUCCESS.getMessage(),
                         null
                 ));
     }

@@ -37,7 +37,7 @@ public class SeatGradeService {
     }
 
     public SeatGradeResponse findOne(Long sessionId, Long seatGradeId) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
