@@ -40,6 +40,10 @@ public class Constants {
     // SeatGrade
     public static final String MSG_SEAT_GRADE_NOT_FOUND = "좌석 등급이 존재하지 않습니다.";
 
+    // Like
+    public static final String MSG_LIKE_NOT_FOUND = "찜이 존재하지 않습니다.";
+    public static final String MSG_LIKE_FORBIDDEN = "본인의 찜만 취소할 수 있습니다.";
+
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
 

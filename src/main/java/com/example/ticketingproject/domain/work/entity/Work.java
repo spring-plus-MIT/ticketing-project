@@ -31,4 +31,12 @@ public class Work extends ModifiableEntity {
 
     private Long likeCount;
 
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
+    }
+
 }

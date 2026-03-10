@@ -28,8 +28,7 @@ public class Like extends CreatableEntity {
     private Work work;
 
     @Builder
-    public Like(Long id, User user, Work work) {
-        this.id = id;
+    public Like(User user, Work work) {
         this.user = user;
         this.work = work;
     }
