@@ -1,0 +1,76 @@
+package com.example.ticketingproject.domain.review.service;
+
+import com.example.ticketingproject.common.enums.ErrorStatus;
+import com.example.ticketingproject.domain.review.dto.request.ReviewRequestDto;
+import com.example.ticketingproject.domain.review.dto.response.ReviewResponseDto;
+import com.example.ticketingproject.domain.review.entity.Review;
+import com.example.ticketingproject.domain.review.exception.ReviewException;
+import com.example.ticketingproject.domain.review.repository.ReviewRepository;
+import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.repository.UserRepository;
+import com.example.ticketingproject.domain.work.entity.Work;
+import com.example.ticketingproject.domain.work.repository.WorkRepository;
+import com.example.ticketingproject.security.CustomUserDetails;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final WorkRepository workRepository;
+    private final UserRepository userRepository;
+
+    public Page<ReviewResponseDto> findAll(Long workId, Pageable pageable) {
+        Page<Review> reviews = reviewRepository.findAllByWorkIdAndDeletedAtIsNull(workId, pageable);
+
+        return reviews.map(review -> ReviewResponseDto.builder()
+                .id(review.getId())
+                .content(review.getContent())
+                .rating(review.getRating())
+                .nickname(review.getUser().getName())
+                .createdAt(review.getCreatedAt())
+                .build()
+        );
+    }
+
+    @Transactional
+    public ReviewResponseDto createReview(Long workId, ReviewRequestDto requestDto, CustomUserDetails userDetails) {
+        // UserService의 findOneUser 예외 처리 스타일 반영
+        Work work = workRepository.findById(workId).orElseThrow(
+                () -> new ReviewException(
+                        ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.REVIEW_NOT_FOUND
+                )
+        );
+
+        User user = userRepository.findById(userDetails.getId()).orElseThrow(
+                () -> new ReviewException(
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND
+                )
+        );
+
+        Review review = Review.builder()
+                .content(requestDto.getContent())
+                .rating(requestDto.getRating())
+                .user(user)
+                .work(work)
+                .build();
+
+        Review savedReview = reviewRepository.save(review);
+
+        return ReviewResponseDto.builder()
+                .id(savedReview.getId())
+                .content(savedReview.getContent())
+                .rating(savedReview.getRating())
+                .nickname(user.getName())
+                .createdAt(savedReview.getCreatedAt())
+                .build();
+    }
+}
