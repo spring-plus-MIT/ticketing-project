@@ -73,6 +73,14 @@ public class PerformanceSessionService {
         session.update(venue, request.getStartTime(), request.getEndTime());
     }
 
+    @Transactional
+    public void deleteSession(Long sessionId) {
+        PerformanceSession session = performanceSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
+
+        session.delete();
+    }
+
     private void validateDuplicateSession(Venue venue, LocalDateTime startTime) {
         if (performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)) {
             throw new PerformanceSessionException(HttpStatus.CONFLICT, ErrorStatus.DUPLICATE_SESSION);

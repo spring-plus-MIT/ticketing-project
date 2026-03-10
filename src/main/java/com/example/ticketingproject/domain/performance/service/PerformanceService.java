@@ -76,6 +76,14 @@ public class PerformanceService {
         );
     }
 
+    @Transactional
+    public void closePerformance(Long performanceId) {
+        Performance performance = performanceRepository.findById(performanceId)
+                .orElseThrow(() -> new PerformanceException(HttpStatus.NOT_FOUND, ErrorStatus.PERFORMANCE_NOT_FOUND));
+
+        performance.close();
+    }
+
     private PerformanceResponse convertToResponse(Performance p) {
         return PerformanceResponse.builder()
                 .id(p.getId())

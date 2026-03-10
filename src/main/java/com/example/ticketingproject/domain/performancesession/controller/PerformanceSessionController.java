@@ -83,4 +83,19 @@ public class PerformanceSessionController {
                         null
                 ));
     }
+
+    @DeleteMapping("/{performanceId}/sessions/{sessionId}")
+    public ResponseEntity<CommonResponse<Void>> delete(
+            @PathVariable Long performanceId,
+            @PathVariable Long sessionId
+    ) {
+        performanceSessionService.deleteSession(sessionId);
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
+    }
 }

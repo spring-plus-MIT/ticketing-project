@@ -61,4 +61,8 @@ public class Performance extends ModifiableEntity {
         this.endDate = endDate;
         this.status = status;
     }
+
+    public void close() {
+        this.status = PerformanceStatus.CLOSED;
+    }
 }

@@ -78,4 +78,18 @@ public class PerformanceController {
                         null
                 ));
     }
+
+    @DeleteMapping("/{performanceId}")
+    public ResponseEntity<CommonResponse<Void>> close(
+            @PathVariable Long performanceId
+    ) {
+        performanceService.closePerformance(performanceId);
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
+    }
 }
