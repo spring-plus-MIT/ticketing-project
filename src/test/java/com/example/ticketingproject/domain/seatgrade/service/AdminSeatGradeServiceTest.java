@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.enums.GradeName;
 
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seatgrade.dto.CreateSeatGradeRequest;
 import com.example.ticketingproject.domain.seatgrade.dto.PutSeatGradeRequest;
@@ -99,7 +100,7 @@ public class AdminSeatGradeServiceTest {
         given(performanceSessionRepository.findById(999L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.save(999L, request))
-                .isInstanceOf(SeatGradeException.class);
+                .isInstanceOf(PerformanceSessionException.class);
     }
 
     @Test
