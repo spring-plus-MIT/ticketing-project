@@ -15,8 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.example.ticketingproject.common.enums.ErrorStatus.VENUE_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -103,5 +106,38 @@ class VenueServiceTest {
         assertThat(result.getSize()).isEqualTo(2);
 
         then(venueRepository).should().findAll(pageable);
+    }
+
+    @Test
+    void getVenue_정상_반환() {
+        // given
+        Venue venue = Venue.builder().name("올림픽 경기장").address("서울특별시 송파구 올림픽로 424").totalSeats(50000).build();
+        ReflectionTestUtils.setField(venue, "id", 1L);
+
+        given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
+
+        // when
+        VenueResponse result = venueService.getVenue(1L);
+
+        // then
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("올림픽 경기장");
+        assertThat(result.getAddress()).isEqualTo("서울특별시 송파구 올림픽로 424");
+        assertThat(result.getTotalSeats()).isEqualTo(50000);
+
+        then(venueRepository).should().findById(1L);
+    }
+
+    @Test
+    void getVenue_존재하지_않는_공연장_예외() {
+        // given
+        given(venueRepository.findById(999L)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> venueService.getVenue(999L))
+                .isInstanceOf(com.example.ticketingproject.domain.venue.exception.VenueException.class)
+                .hasMessage(VENUE_NOT_FOUND.getMessage());
+
+        then(venueRepository).should().findById(999L);
     }
 }

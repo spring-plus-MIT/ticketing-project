@@ -10,10 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static com.example.ticketingproject.common.enums.SuccessStatus.READ_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,10 +32,22 @@ public class VenueController {
         );
         return ResponseEntity.ok(
                 CommonResponse.success(
-                        SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
                         venueService.getVenues(converted)
+                )
+        );
+    }
+
+    @GetMapping("/{venueId}")
+    public ResponseEntity<CommonResponse<VenueResponse>> getVenue(@PathVariable Long venueId) {
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        READ_SUCCESS,
+                        READ_SUCCESS.getSuccessCode(),
+                        READ_SUCCESS.getMessage(),
+                        venueService.getVenue(venueId)
                 )
         );
     }
