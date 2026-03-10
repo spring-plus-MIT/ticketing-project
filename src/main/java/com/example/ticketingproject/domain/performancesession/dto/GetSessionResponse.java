@@ -1,15 +1,16 @@
 package com.example.ticketingproject.domain.performancesession.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class GetSessionResponse {
-    private Long id;
-    private String title;
-    private String venueName;
-    private LocalDateTime sessionDateTime;
+    private final Long id;
+    private final String title;
+    private final String venueName;
+    private final LocalDateTime startTime;
+    private final LocalDateTime endTime;
 }

@@ -6,9 +6,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class CastMemberResponse {
-    private Long id;
-    private String name;
-    private String roleName;
+    private final Long id;
+    private final String name;
+    private final String roleName;
 }

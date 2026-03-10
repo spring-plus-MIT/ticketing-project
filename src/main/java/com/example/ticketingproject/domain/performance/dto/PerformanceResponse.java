@@ -1,7 +1,6 @@
 package com.example.ticketingproject.domain.performance.dto;
 
 import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,13 +8,12 @@ import java.time.LocalDate;
 
 @Getter
 @Builder
-@AllArgsConstructor
 public class PerformanceResponse {
-    private Long id;
-    private String workTitle;
-    private String venueName;
-    private String season;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private PerformanceStatus status;
+    private final Long id;
+    private final String workTitle;
+    private final String venueName;
+    private final String season;
+    private final LocalDate startDate;
+    private final LocalDate endDate;
+    private final PerformanceStatus status;
 }

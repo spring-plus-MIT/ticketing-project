@@ -41,12 +41,13 @@ public class PerformanceController {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<PerformanceResponse> response = performanceService.getPerformances(converted);
 
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.GET_SUCCESS,
-                SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                SuccessStatus.GET_SUCCESS.getMessage(),
-                response
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.GET_SUCCESS,
+                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
+                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        response
+                ));
     }
 
     @GetMapping("/{performanceId}")
@@ -54,12 +55,13 @@ public class PerformanceController {
             @PathVariable Long performanceId
     ) {
         PerformanceResponse response = performanceService.getPerformanceDetail(performanceId);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.GET_SUCCESS,
-                SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                SuccessStatus.GET_SUCCESS.getMessage(),
-                response
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.GET_SUCCESS,
+                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
+                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        response
+                ));
     }
 
     @PatchMapping("/{performanceId}")
@@ -68,11 +70,12 @@ public class PerformanceController {
             @RequestBody PerformanceRequest request
     ) {
         performanceService.updatePerformance(performanceId, request);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.PROCESS_SUCCESS,
-                SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                SuccessStatus.PROCESS_SUCCESS.getMessage(),
-                null
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
     }
 }

@@ -1,16 +1,21 @@
 package com.example.ticketingproject.domain.performancesession.service;
 
+import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.performance.entity.Performance;
+import com.example.ticketingproject.domain.performance.exception.PerformanceException;
 import com.example.ticketingproject.domain.performance.repository.PerformanceRepository;
 import com.example.ticketingproject.domain.performancesession.dto.GetSessionResponse;
 import com.example.ticketingproject.domain.performancesession.dto.SessionRequest;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
+import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,17 +33,18 @@ public class PerformanceSessionService {
     @Transactional
     public void createSession(Long performanceId, SessionRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new IllegalArgumentException("공연 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PerformanceException(HttpStatus.NOT_FOUND, ErrorStatus.PERFORMANCE_NOT_FOUND));
 
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("장소 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
 
-        validateDuplicateSession(venue, request.getSessionDateTime());
+        validateDuplicateSession(venue, request.getStartTime());
 
         performanceSessionRepository.save(PerformanceSession.builder()
                 .performance(performance)
                 .venue(venue)
-                .sessionDateTime(request.getSessionDateTime())
+                .startTime(request.getStartTime())
+                .endTime(request.getEndTime())
                 .build());
     }
 
@@ -49,7 +55,7 @@ public class PerformanceSessionService {
 
     public GetSessionResponse getSessionDetail(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회차를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
 
         return convertToResponse(session);
     }
@@ -57,28 +63,29 @@ public class PerformanceSessionService {
     @Transactional
     public void updateSession(Long sessionId, SessionRequest request) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회차를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PerformanceSessionException(HttpStatus.NOT_FOUND, ErrorStatus.SESSION_NOT_FOUND));
 
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("장소 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
 
-        validateDuplicateSession(venue, request.getSessionDateTime());
+        validateDuplicateSession(venue, request.getStartTime());
 
-        session.update(venue, request.getSessionDateTime());
+        session.update(venue, request.getStartTime(), request.getEndTime());
     }
 
-    private void validateDuplicateSession(Venue venue, LocalDateTime datetime) {
-        if (performanceSessionRepository.existsByVenueAndSessionDateAndSessionTime(venue, datetime)) {
-            throw new IllegalStateException("해당 장소와 시간에 이미 등록된 공연 회차가 있습니다.");
+    private void validateDuplicateSession(Venue venue, LocalDateTime startTime) {
+        if (performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)) {
+            throw new PerformanceSessionException(HttpStatus.CONFLICT, ErrorStatus.DUPLICATE_SESSION);
         }
     }
 
     private GetSessionResponse convertToResponse(PerformanceSession s) {
-        return new GetSessionResponse(
-                s.getId(),
-                s.getPerformance().getWork().getTitle(),
-                s.getVenue().getName(),
-                s.getSessionDateTime()
-        );
+        return GetSessionResponse.builder()
+                .id(s.getId())
+                .title(s.getPerformance().getWork().getTitle())
+                .venueName(s.getVenue().getName())
+                .startTime(s.getStartTime())
+                .endTime(s.getEndTime())
+                .build();
     }
 }

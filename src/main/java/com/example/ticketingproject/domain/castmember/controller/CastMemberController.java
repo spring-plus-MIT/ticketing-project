@@ -25,27 +25,28 @@ public class CastMemberController {
             @RequestBody CastMemberRequest request
     ) {
         castMemberService.createCastMember(sessionId, request);
-        return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
-                .body(CommonResponse.success(
+        return ResponseEntity.ok(
+                CommonResponse.success(
                         SuccessStatus.CREATED,
                         SuccessStatus.CREATED.getSuccessCode(),
-                        "출연진 등록이 완료되었습니다.",
+                        SuccessStatus.CREATED.getMessage(),
                         null
                 ));
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<List<CastMemberResponse>>> getCasts(
+    public ResponseEntity<CommonResponse<List<CastMemberResponse>>> getPages(
             @PathVariable Long performanceId,
             @PathVariable Long sessionId
     ) {
         List<CastMemberResponse> response = castMemberService.getCastMembers(sessionId);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.GET_SUCCESS,
-                SuccessStatus.GET_SUCCESS.getSuccessCode(),
-                "출연진 목록 조회가 완료되었습니다.",
-                response
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.GET_SUCCESS,
+                        SuccessStatus.GET_SUCCESS.getSuccessCode(),
+                        SuccessStatus.GET_SUCCESS.getMessage(),
+                        response
+                ));
     }
 
     @PatchMapping("/{castId}")
@@ -56,26 +57,28 @@ public class CastMemberController {
             @RequestBody CastMemberRequest request
     ) {
         castMemberService.updateCastMember(castId, request);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.PROCESS_SUCCESS,
-                SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                "출연진 정보가 수정되었습니다.",
-                null
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
     }
 
-    @PostMapping("/{castId}/delete")
+    @DeleteMapping("/{castId}")
     public ResponseEntity<CommonResponse<Void>> delete(
             @PathVariable Long performanceId,
             @PathVariable Long sessionId,
             @PathVariable Long castId
     ) {
         castMemberService.deleteCastMember(castId);
-        return ResponseEntity.ok(CommonResponse.success(
-                SuccessStatus.PROCESS_SUCCESS,
-                SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
-                "출연진 정보가 삭제되었습니다.",
-                null
-        ));
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.PROCESS_SUCCESS,
+                        SuccessStatus.PROCESS_SUCCESS.getSuccessCode(),
+                        SuccessStatus.PROCESS_SUCCESS.getMessage(),
+                        null
+                ));
     }
 }

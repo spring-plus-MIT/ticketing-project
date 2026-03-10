@@ -17,11 +17,10 @@ public interface PerformanceSessionRepository extends JpaRepository<PerformanceS
 
     @Query("SELECT COUNT(ps) > 0 FROM PerformanceSession ps " +
             "WHERE ps.venue = :venue " +
-            "AND ps.sessionDateTime = :time " +
-            "AND ps.deletedAt IS NULL") // deleted_at -> deletedAt 으로 수정
-    boolean existsByVenueAndSessionDateAndSessionTime(
+            "AND ps.startTime = :startTime " +
+            "AND ps.deletedAt IS NULL")
+    boolean existsByVenueAndStartTime(
             @Param("venue") Venue venue,
-            @Param("datetime") LocalDateTime datetime
+            @Param("startTime") LocalDateTime startTime
     );
-
 }

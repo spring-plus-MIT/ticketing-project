@@ -26,8 +26,8 @@ public class PerformanceSessionController {
             @RequestBody SessionRequest request
     ) {
         performanceSessionService.createSession(performanceId, request);
-        return ResponseEntity.ok(
-                CommonResponse.success(
+        return ResponseEntity.status(SuccessStatus.CREATED.getHttpStatus())
+                .body(CommonResponse.success(
                         SuccessStatus.CREATED,
                         SuccessStatus.CREATED.getSuccessCode(),
                         SuccessStatus.CREATED.getMessage(),

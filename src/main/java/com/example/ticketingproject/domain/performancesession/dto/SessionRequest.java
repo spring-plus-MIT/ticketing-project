@@ -8,5 +8,6 @@ import java.time.LocalDateTime;
 @Getter
 public class SessionRequest {
     private Long venueId;
-    private LocalDateTime sessionDateTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 }

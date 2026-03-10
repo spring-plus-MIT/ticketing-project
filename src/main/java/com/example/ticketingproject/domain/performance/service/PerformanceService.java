@@ -1,8 +1,10 @@
 package com.example.ticketingproject.domain.performance.service;
 
+import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.performance.dto.PerformanceRequest;
 import com.example.ticketingproject.domain.performance.dto.PerformanceResponse;
 import com.example.ticketingproject.domain.performance.entity.Performance;
+import com.example.ticketingproject.domain.performance.exception.PerformanceException;
 import com.example.ticketingproject.domain.performance.repository.PerformanceRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
@@ -11,6 +13,7 @@ import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +29,9 @@ public class PerformanceService {
     @Transactional
     public void createPerformance(PerformanceRequest request) {
         Work work = workRepository.findById(request.getWorkId())
-                .orElseThrow(() -> new IllegalArgumentException("작품 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new WorkException(HttpStatus.NOT_FOUND, ErrorStatus.WORK_NOT_FOUND));
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("공연장 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
 
         Performance performance = Performance.builder()
                 .work(work)
@@ -49,19 +52,19 @@ public class PerformanceService {
 
     public PerformanceResponse getPerformanceDetail(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 공연을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PerformanceException(HttpStatus.NOT_FOUND, ErrorStatus.PERFORMANCE_NOT_FOUND));
         return convertToResponse(performance);
     }
 
     @Transactional
     public void updatePerformance(Long performanceId, PerformanceRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 공연을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PerformanceException(HttpStatus.NOT_FOUND, ErrorStatus.PERFORMANCE_NOT_FOUND));
 
         Work work = workRepository.findById(request.getWorkId())
-                .orElseThrow(() -> new IllegalArgumentException("작품 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new WorkException(HttpStatus.NOT_FOUND, ErrorStatus.WORK_NOT_FOUND));
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new IllegalArgumentException("공연장 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
 
         performance.update(
                 work,
