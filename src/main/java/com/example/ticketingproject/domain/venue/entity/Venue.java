@@ -1,15 +1,13 @@
 package com.example.ticketingproject.domain.venue.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
-import com.example.ticketingproject.domain.venue.dto.VenueUpdateRequest;
+import com.example.ticketingproject.domain.venue.dto.UpdateVenueRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -36,7 +34,7 @@ public class Venue extends DeletableEntity {
         this.totalSeats = totalSeats;
     }
 
-    public void update(VenueUpdateRequest request) {
+    public void update(UpdateVenueRequest request) {
         this.name = request.getName();
         this.address = request.getAddress();
         this.totalSeats = request.getTotalSeats();
