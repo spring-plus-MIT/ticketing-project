@@ -7,16 +7,18 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
+
 @Getter
 @Builder
 public class CreateSeatGradeRequest {
 
-    @NotBlank(message = "")
+    @NotBlank(message = MSG_VALIDATION_ERROR)
     private GradeName gradeName;
 
-    @NotBlank(message = "")
-    @DecimalMin(value = "0.0", inclusive = true, message = "가격은 0 이상이어야 합니다.")
-    @Digits(integer = 8, fraction = 2, message = "가격은 정수 8자리, 소수 2자리까지 허용됩니다.")
+    @NotBlank(message = MSG_VALIDATION_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
     private BigDecimal price;
 
     @NotBlank
