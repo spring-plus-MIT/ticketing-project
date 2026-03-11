@@ -35,7 +35,7 @@ public class Charge extends CreatableEntity {
     private BigDecimal balanceAfterCharge;
 
     @Builder
-    private Charge(User user,
+    public Charge(User user,
                    User admin,
                    BigDecimal amount,
                    BigDecimal balanceAfterCharge) {
