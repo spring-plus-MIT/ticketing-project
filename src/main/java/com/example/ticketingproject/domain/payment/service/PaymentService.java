@@ -28,6 +28,7 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException(
