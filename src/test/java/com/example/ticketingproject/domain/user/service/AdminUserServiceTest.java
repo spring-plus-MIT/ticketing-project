@@ -48,7 +48,6 @@ public class AdminUserServiceTest {
         // when
         Page<GetUserResponse> result = adminUserService.findAllUser(pageable);
 
-        // then DB user에 저장된 값이 1개 있어서 6으로 테스트
         assertThat(result.getContent().size()).isEqualTo(5);
         assertThat(result.getContent().get(0).getEmail()).contains("@test.com");
     }
