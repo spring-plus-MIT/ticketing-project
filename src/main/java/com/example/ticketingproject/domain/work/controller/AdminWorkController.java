@@ -24,7 +24,7 @@ public class AdminWorkController {
                 CommonResponse.success(SuccessStatus.CREATE_SUCCESS, adminWorkService.createWork(request)));
     }
 
-    @PostMapping("/{workId}")
+    @PutMapping("/{workId}")
     public ResponseEntity<CommonResponse<WorkResponse>> updateWork (
             @PathVariable Long workId,
             @Valid @RequestBody UpdateWorkRequest request
