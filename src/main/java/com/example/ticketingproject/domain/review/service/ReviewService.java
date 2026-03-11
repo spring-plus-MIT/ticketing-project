@@ -27,9 +27,6 @@ public class ReviewService {
     private final WorkRepository workRepository;
     private final UserRepository userRepository;
 
-    /**
-     * 리뷰 목록 조회
-     */
     public Page<ReviewResponseDto> findAll(Long workId, Pageable pageable) {
 
         Page<Review> reviews =
@@ -86,6 +83,9 @@ public class ReviewService {
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
                 ));
+        if (!review.getUser().getId().equals(userId)) {
+            throw new ReviewException(ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(), ErrorStatus.REVIEW_NOT_FOUND);
+        }
         review.update(requestDto.getContent(), requestDto.getRating());
 
         return ReviewResponseDto.from(review);
@@ -110,6 +110,9 @@ public class ReviewService {
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
                 ));
+        if (!review.getUser().getId().equals(userId)) {
+            throw new ReviewException(ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(), ErrorStatus.REVIEW_NOT_FOUND);
+        }
         review.delete();
     }
 }

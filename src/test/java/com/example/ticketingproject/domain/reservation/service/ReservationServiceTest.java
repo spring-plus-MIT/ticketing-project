@@ -78,7 +78,6 @@ class ReservationServiceTest {
 
         Reservation reservation = mock(Reservation.class);
 
-        // NPE 방지용 mock 세팅
         when(reservation.getUser()).thenReturn(user);
         when(reservation.getSeat()).thenReturn(seat);
         when(reservation.getPerformanceSession()).thenReturn(performanceSession);
