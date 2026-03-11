@@ -28,11 +28,7 @@ public class PerformanceController {
     ) {
         performanceService.createPerformance(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(CommonResponse.success(
-                        CREATE_SUCCESS,
-                        CREATE_SUCCESS.getSuccessCode(),
-                        CREATE_SUCCESS.getMessage(),
-                        null));
+                .body(CommonResponse.success(CREATE_SUCCESS, null));
     }
 
     @GetMapping
@@ -43,13 +39,7 @@ public class PerformanceController {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
         Page<PerformanceResponse> response = performanceService.getPerformances(converted);
 
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        response
-                ));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
 
     @GetMapping("/{performanceId}")
@@ -57,13 +47,7 @@ public class PerformanceController {
             @PathVariable Long performanceId
     ) {
         PerformanceResponse response = performanceService.getPerformanceDetail(performanceId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        response
-                ));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
 
     @PatchMapping("/{performanceId}")
@@ -72,13 +56,7 @@ public class PerformanceController {
             @RequestBody PerformanceRequest request
     ) {
         performanceService.updatePerformance(performanceId, request);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        UPDATE_SUCCESS,
-                        UPDATE_SUCCESS.getSuccessCode(),
-                        UPDATE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, null));
     }
 
     @DeleteMapping("/{performanceId}")
@@ -86,12 +64,6 @@ public class PerformanceController {
             @PathVariable Long performanceId
     ) {
         performanceService.closePerformance(performanceId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        DELETE_SUCCESS,
-                        DELETE_SUCCESS.getSuccessCode(),
-                        DELETE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, null));
     }
 }

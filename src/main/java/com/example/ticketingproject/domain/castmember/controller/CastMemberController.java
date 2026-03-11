@@ -1,7 +1,6 @@
 package com.example.ticketingproject.domain.castmember.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
-import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.castmember.dto.CastMemberRequest;
 import com.example.ticketingproject.domain.castmember.dto.CastMemberResponse;
 import com.example.ticketingproject.domain.castmember.service.CastMemberService;
@@ -27,13 +26,7 @@ public class CastMemberController {
             @RequestBody CastMemberRequest request
     ) {
         castMemberService.createCastMember(sessionId, request);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        CREATE_SUCCESS,
-                        CREATE_SUCCESS.getSuccessCode(),
-                        CREATE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(CREATE_SUCCESS, null));
     }
 
     @GetMapping
@@ -42,13 +35,7 @@ public class CastMemberController {
             @PathVariable Long sessionId
     ) {
         List<CastMemberResponse> response = castMemberService.getCastMembers(sessionId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        READ_SUCCESS,
-                        READ_SUCCESS.getSuccessCode(),
-                        READ_SUCCESS.getMessage(),
-                        response
-                ));
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
 
     @PatchMapping("/{castId}")
@@ -59,13 +46,7 @@ public class CastMemberController {
             @RequestBody CastMemberRequest request
     ) {
         castMemberService.updateCastMember(castId, request);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        UPDATE_SUCCESS,
-                        UPDATE_SUCCESS.getSuccessCode(),
-                        UPDATE_SUCCESS.getMessage(),
-                        null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, null));
     }
 
     @DeleteMapping("/{castId}")
@@ -75,12 +56,6 @@ public class CastMemberController {
             @PathVariable Long castId
     ) {
         castMemberService.deleteCastMember(castId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        DELETE_SUCCESS,
-                        DELETE_SUCCESS.getSuccessCode(),
-                        DELETE_SUCCESS.getMessage(),
-                         null
-                ));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, null));
     }
-    }
+}

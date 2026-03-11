@@ -22,14 +22,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<CommonResponse<GetUserResponse>> getOneUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         Long userId = customUserDetails.getId();
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
-                        userService.findOneUser(userId)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.READ_SUCCESS, userService.findOneUser(userId)));
     }
 
     @PutMapping("/me")
@@ -38,14 +31,7 @@ public class UserController {
             @Valid @RequestBody UpdateUserRequest request
     ) {
         Long userId = customUserDetails.getId();
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.UPDATE_SUCCESS,
-                        SuccessStatus.UPDATE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.UPDATE_SUCCESS.getMessage(),
-                        userService.updateUser(userId, request)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.UPDATE_SUCCESS, userService.updateUser(userId, request)));
     }
 
     @DeleteMapping("/delete")
@@ -54,13 +40,6 @@ public class UserController {
     ) {
         Long userId = customUserDetails.getId();
         userService.withdrawUser(userId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.DELETE_SUCCESS,
-                        SuccessStatus.DELETE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.DELETE_SUCCESS.getMessage(),
-                        null
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.DELETE_SUCCESS, null));
     }
 }

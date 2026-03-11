@@ -33,14 +33,7 @@ public class AdminUserController {
                 pageable.getPageSize(),
                 pageable.getSort()
         );
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
-                        adminUserService.findAllUser(converted)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.READ_SUCCESS, adminUserService.findAllUser(converted)));
     }
 
     @PutMapping("/{userId}")
@@ -48,14 +41,7 @@ public class AdminUserController {
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequest request
     ) {
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.UPDATE_SUCCESS,
-                        SuccessStatus.UPDATE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.UPDATE_SUCCESS.getMessage(),
-                        userService.updateUser(userId, request)
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.UPDATE_SUCCESS, userService.updateUser(userId, request)));
     }
 
     @DeleteMapping("/{userId}")
@@ -63,14 +49,7 @@ public class AdminUserController {
             @PathVariable Long userId
     ) {
         userService.withdrawUser(userId);
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.DELETE_SUCCESS,
-                        SuccessStatus.DELETE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.DELETE_SUCCESS.getMessage(),
-                        null
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.DELETE_SUCCESS, null));
     }
 
 
