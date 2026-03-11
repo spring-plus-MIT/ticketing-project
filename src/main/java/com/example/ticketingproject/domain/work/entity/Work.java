@@ -30,5 +30,4 @@ public class Work extends ModifiableEntity {
     private BigDecimal minPrice;
 
     private Long likeCount;
-
 }

@@ -12,7 +12,6 @@ import com.example.ticketingproject.domain.seatgrade.dto.SeatGradeResponse;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
-import com.example.ticketingproject.domain.seatgrade.service.AdminSeatGradeService;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
