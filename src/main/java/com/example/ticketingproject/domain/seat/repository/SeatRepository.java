@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface SeatRepository extends JpaRepository<Seat, Long> {
     Page<Seat> findAllByVenueId(Long venueId, Pageable pageable);
     Optional<Seat> findByIdAndVenueId(Long seatId, Long venueId);
+    int countByVenue_Id(Long venueId);
 }

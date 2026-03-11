@@ -5,6 +5,9 @@ import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
+import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
+import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
+import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
@@ -12,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.ticketingproject.common.enums.ErrorStatus.VENUE_NOT_FOUND;
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class AdminSeatService {
 
     private final SeatRepository seatRepository;
     private final VenueRepository venueRepository;
+    private final SeatGradeRepository seatGradeRepository;
 
     @Transactional
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
@@ -28,9 +32,21 @@ public class AdminSeatService {
                 () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
         );
 
+        SeatGrade seatGrade = seatGradeRepository.findByGradeName(request.getGradeName()).orElseThrow(
+                () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
+        );
+
+        int currentSeatCount = seatRepository.countByVenue_Id(venue.getId());
+
+        if(currentSeatCount >= venue.getTotalSeats()) {
+            throw new SeatException(SEAT_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_CAPACITY_EXCEEDED);
+        }
+
+        seatGrade.decreaseRemainingSeats();
+
         Seat seat = Seat.builder()
                 .venue(venue)
-                .gradeName(request.getGradeName())
+                .seatGrade(seatGrade)
                 .rowName(request.getRowName())
                 .seatNumber(request.getSeatNumber())
                 .build();
