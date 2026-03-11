@@ -56,4 +56,36 @@ public class ReviewController {
         );
     }
 
+    @PutMapping("/{reviewId}")
+    public ResponseEntity<CommonResponse<ReviewResponseDto>> updateReview(
+            @PathVariable Long workId,
+            @PathVariable Long reviewId,
+            @RequestBody @Valid ReviewRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        ReviewResponseDto response = reviewService.updateReview(workId, reviewId, requestDto, customUserDetails.getId());
+
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.UPDATE_SUCCESS,
+                        response
+                )
+        );
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<CommonResponse<Void>> deleteReview(
+            @PathVariable Long workId,
+            @PathVariable Long reviewId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        reviewService.deleteReview(workId, reviewId, customUserDetails.getId());
+
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.DELETE_SUCCESS,
+                        null
+                )
+        );
+    }
 }

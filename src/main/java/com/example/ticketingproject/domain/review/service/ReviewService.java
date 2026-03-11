@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.review.dto.request.ReviewRequestDto;
 import com.example.ticketingproject.domain.review.dto.response.ReviewResponseDto;
 import com.example.ticketingproject.domain.review.entity.Review;
+import com.example.ticketingproject.domain.review.exception.ReviewException;
 import com.example.ticketingproject.domain.review.repository.ReviewRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
@@ -66,5 +67,49 @@ public class ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         return ReviewResponseDto.from(savedReview);
+    }
+
+    @Transactional
+    public ReviewResponseDto updateReview(Long workId, Long reviewId, ReviewRequestDto requestDto, Long userId) {
+        workRepository.findById(workId)
+                .orElseThrow(() -> new WorkException(
+                        ErrorStatus.WORK_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.WORK_NOT_FOUND
+                ));
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(
+                        ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.REVIEW_NOT_FOUND
+                ));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND
+                ));
+        review.update(requestDto.getContent(), requestDto.getRating());
+
+        return ReviewResponseDto.from(review);
+    }
+
+    @Transactional
+    public void deleteReview(Long workId, Long reviewId, Long userId) {
+        Work work = workRepository.findById(workId)
+                .orElseThrow(() -> new WorkException(
+                        ErrorStatus.WORK_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.WORK_NOT_FOUND
+                ));
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ReviewException(
+                        ErrorStatus.REVIEW_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.REVIEW_NOT_FOUND
+                ));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND
+                ));
+        review.delete();
     }
 }
