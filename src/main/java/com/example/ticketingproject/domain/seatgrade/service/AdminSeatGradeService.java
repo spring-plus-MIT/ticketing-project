@@ -17,7 +17,7 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional()
+@Transactional
 public class AdminSeatGradeService {
 
     private final SeatGradeRepository seatGradeRepository;

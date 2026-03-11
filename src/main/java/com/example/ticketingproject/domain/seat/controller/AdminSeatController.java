@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.example.ticketingproject.common.enums.SuccessStatus.*;
 
@@ -23,7 +20,7 @@ public class AdminSeatController {
     private final AdminSeatService adminSeatService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<SeatResponse>> create(@Valid @PathVariable(name = "venueId") Long venueId, CreateSeatRequest request) {
+    public ResponseEntity<CommonResponse<SeatResponse>> create(@PathVariable(name = "venueId") Long venueId, @Valid @RequestBody CreateSeatRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 CommonResponse.success(CREATE_SUCCESS, adminSeatService.save(venueId, request)));
     }
