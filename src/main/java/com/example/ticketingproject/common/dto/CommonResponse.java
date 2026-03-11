@@ -31,4 +31,14 @@ public class CommonResponse<T> {
                 data
         );
     }
+
+        public static <T> CommonResponse<T> success(T data) {
+        return new CommonResponse<>(
+                LocalDateTime.now(),
+                HttpStatus.OK,
+                "SUCCESS",
+                "요청에 성공하였습니다.",
+                data
+        );
+    }
 }
