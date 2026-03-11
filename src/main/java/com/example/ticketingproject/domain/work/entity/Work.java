@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.work.enums.Category;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -23,7 +24,7 @@ public class Work extends ModifiableEntity {
     @Length(max = 100)
     private String title;
 
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Category category;
 
