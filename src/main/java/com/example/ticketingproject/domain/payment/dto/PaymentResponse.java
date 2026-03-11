@@ -15,7 +15,7 @@ public class PaymentResponse {
     private final Long userId;
     private final BigDecimal amount;
     private final PaymentStatus paymentStatus;
-    private final BigDecimal balanceAfterCharge;
+    private final BigDecimal balanceAfterPayment;
 
     public static PaymentResponse from(Payment payment) {
         return PaymentResponse.builder()
@@ -24,7 +24,7 @@ public class PaymentResponse {
                 .userId(payment.getUser().getId())
                 .amount(payment.getAmount())
                 .paymentStatus(payment.getPaymentStatus())
-                .balanceAfterCharge(payment.getBalanceAfterCharge())
+                .balanceAfterPayment(payment.getBalanceAfterPayment())
                 .build();
     }
 

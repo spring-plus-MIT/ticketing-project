@@ -9,70 +9,51 @@ import com.example.ticketingproject.domain.payment.enums.PaymentStatus;
 import com.example.ticketingproject.domain.payment.exception.PaymentException;
 import com.example.ticketingproject.domain.payment.repository.PaymentRepository;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
-import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
-import com.example.ticketingproject.domain.reservation.exception.ReservationException;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.user.entity.User;
-import com.example.ticketingproject.domain.user.exception.UserException;
-import com.example.ticketingproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
 
     @Transactional
     public PaymentResponse createPayment(CreatePaymentRequest request, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserException(
-                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.USER_NOT_FOUND
+        Reservation reservation = reservationRepository.findByIdAndUserId(
+                request.getReservationId(), userId).orElseThrow(
+                () -> new AuthException(
+                        ErrorStatus.ACCESS_FORBIDDEN.getHttpStatus(),
+                        ErrorStatus.ACCESS_FORBIDDEN
                 )
         );
 
-        Reservation reservation = reservationRepository.findById(request.getReservationId())
-                .orElseThrow(() -> new ReservationException(ErrorStatus.RESERVATION_NOT_FOUND));
+        boolean alreadyPaid = paymentRepository.existsByReservationId(reservation.getId());
+        reservation.validateNotPaid(alreadyPaid);
 
-        if (!reservation.getUser().getId().equals(userId)) {
-            throw new AuthException(
-                    ErrorStatus.ACCESS_FORBIDDEN.getHttpStatus(),
-                    ErrorStatus.ACCESS_FORBIDDEN
-            );
-        }
+        User user = reservation.getUser();
 
-        if (reservation.getStatus() == ReservationStatus.CANCELED) {
-            throw new ReservationException(ErrorStatus.ALREADY_CANCELED_RESERVATION);
-        }
+        BigDecimal balanceAfterPayment = user.pay(request.getAmount());
 
-        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
-            throw new ReservationException(ErrorStatus.ALREADY_PAYED_RESERVATION);
-        }
-
-        if (paymentRepository.existsByReservationId(reservation.getId())) {
-            throw new PaymentException(
-                    ErrorStatus.ALREADY_PAYED_RESERVATION.getHttpStatus(),
-                    ErrorStatus.ALREADY_PAYED_RESERVATION
-            );
-        }
+        reservation.confirm();
 
         Payment payment = Payment.builder()
                 .reservation(reservation)
                 .user(user)
                 .amount(request.getAmount())
                 .paymentStatus(PaymentStatus.SUCCESS)
+                .balanceAfterPayment(balanceAfterPayment)
                 .build();
 
         Payment savedPayment = paymentRepository.save(payment);
-
-        reservation.updateStatus(ReservationStatus.CONFIRMED);
 
         return PaymentResponse.from(savedPayment);
     }
@@ -88,8 +69,8 @@ public class PaymentService {
         return PaymentResponse.from(payment);
     }
 
-    public Page<PaymentResponse> findAllPayments(Long userId, Pageable converted) {
-        Page<Payment> payments = paymentRepository.findAllByUserId(userId, converted);
+    public Page<PaymentResponse> findAllPayments(Long userId, Pageable pageable) {
+        Page<Payment> payments = paymentRepository.findAllByUserId(userId, pageable);
 
         return payments.map(PaymentResponse::from);
     }

@@ -32,14 +32,16 @@ public class Payment extends CreatableEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
-    private BigDecimal balanceAfterCharge;
+    private BigDecimal balanceAfterPayment;
 
     @Builder
-    public Payment(Reservation reservation, User user, BigDecimal amount, PaymentStatus paymentStatus,BigDecimal balanceAfterCharge) {
+    public Payment(Reservation reservation, User user, BigDecimal amount, PaymentStatus paymentStatus,BigDecimal balanceAfterPayment) {
         this.reservation = reservation;
         this.user = user;
         this.amount = amount;
         this.paymentStatus = paymentStatus;
-        this.balanceAfterCharge = balanceAfterCharge;
+        this.balanceAfterPayment = balanceAfterPayment;
     }
+
+
 }

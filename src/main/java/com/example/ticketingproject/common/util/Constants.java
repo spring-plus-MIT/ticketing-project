@@ -49,6 +49,7 @@ public class Constants {
 
     // Payment
     public static final String MSG_PAYMENT_NOT_FOUND = "존재하지 않는 결제입니다.";
+    public static final String MSG_INSUFFICIENT_BALANCE = "잔액이 부족합니다.";
 
     // Reservation
     public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
