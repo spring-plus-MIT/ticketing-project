@@ -116,7 +116,6 @@ public class AdminSeatServiceTest {
     @DisplayName("좌석 생성 실패 - 좌석 수 초과")
     void save_fail_seat_capacity_exceeded() {
         CreateSeatRequest request = mock(CreateSeatRequest.class);
-        given(request.getGradeName()).willReturn(GradeName.VIP);
 
         given(venueRepository.findById(999L)).willReturn(Optional.empty());
 
