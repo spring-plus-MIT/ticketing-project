@@ -22,7 +22,7 @@ public class SeatResponse {
         return SeatResponse.builder()
                 .seatId(seat.getId())
                 .venueId(seat.getVenue().getId())
-                .gradeName(seat.getGradeName())
+                .gradeName(seat.getSeatGrade().getGradeName())
                 .rowName(seat.getRowName())
                 .seatNumber(seat.getSeatNumber())
                 .createdAt(seat.getCreatedAt())
