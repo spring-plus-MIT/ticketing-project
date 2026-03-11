@@ -29,8 +29,6 @@ public class AdminReviewController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
                         adminReviewService.findAllReviews(converted)
                 )
         );
