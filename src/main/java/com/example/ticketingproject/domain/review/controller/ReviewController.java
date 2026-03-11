@@ -34,8 +34,6 @@ public class ReviewController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
                         reviewService.findAll(workId, converted)
                 )
         );
