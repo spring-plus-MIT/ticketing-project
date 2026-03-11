@@ -2,11 +2,13 @@ package com.example.ticketingproject.domain.seat.service;
 
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.common.exception.BaseException;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seat.service.SeatService;
+import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +46,8 @@ class SeatServiceTest {
 
     private Seat seat;
     private Venue venue;
+    private SeatGrade seatGrade;
+    private PerformanceSession performanceSession;
 
     @BeforeEach
     void setUp() {
@@ -53,9 +58,17 @@ class SeatServiceTest {
                 .build();
         ReflectionTestUtils.setField(venue, "id", 1L);
 
+        seatGrade = SeatGrade.builder()
+                .performanceSession(performanceSession)
+                .gradeName(GradeName.VIP)
+                .price(BigDecimal.valueOf(10000))
+                .totalSeats(100)
+                .remainingSeats(50)
+                .build();
+
         seat = Seat.builder()
                 .venue(venue)
-                .gradeName(GradeName.VIP)
+                .seatGrade(seatGrade)
                 .rowName("A")
                 .seatNumber(1)
                 .build();
