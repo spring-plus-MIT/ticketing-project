@@ -52,7 +52,7 @@ public class Constants {
 
     // Reservation
     public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
-    public static final String MSG_ALREADY_PAYED_RESERVATION = "이미 결제된 예약 입니다.";
+    public static final String MSG_ALREADY_PAID_RESERVATION = "이미 결제된 예약 입니다.";
 
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
