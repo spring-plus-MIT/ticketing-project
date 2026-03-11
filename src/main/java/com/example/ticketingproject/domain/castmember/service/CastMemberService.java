@@ -4,10 +4,10 @@ import com.example.ticketingproject.domain.castmember.dto.CastMemberResponse;
 import com.example.ticketingproject.domain.castmember.entity.CastMember;
 import com.example.ticketingproject.domain.castmember.repository.CastMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +16,9 @@ public class CastMemberService {
 
     private final CastMemberRepository castMemberRepository;
 
-    public List<CastMemberResponse> getCastMembers(Long sessionId) {
-        return castMemberRepository.findByPerformanceSessionId(sessionId).stream()
-                .map(this::convertToResponse)
-                .toList();
+    public Page<CastMemberResponse> getCastMembers(Long sessionId, Pageable pageable) {
+        return castMemberRepository.findByPerformanceSessionId(sessionId, pageable)
+                .map(this::convertToResponse);
     }
 
 

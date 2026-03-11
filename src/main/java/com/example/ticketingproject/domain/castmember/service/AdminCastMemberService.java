@@ -16,12 +16,11 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.SESSION_NOT_
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AdminCastMemberService {
     private final CastMemberRepository castMemberRepository;
     private final PerformanceSessionRepository performanceSessionRepository;
 
-    @Transactional
     public void createCastMember(Long sessionId, CastMemberRequest request) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
@@ -35,7 +34,6 @@ public class AdminCastMemberService {
         castMemberRepository.save(castMember);
     }
 
-    @Transactional
     public void updateCastMember(Long castId, CastMemberRequest request) {
         CastMember castMember = castMemberRepository.findById(castId)
                 .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
@@ -43,7 +41,6 @@ public class AdminCastMemberService {
         castMember.update(request.getName(), request.getRoleName());
     }
 
-    @Transactional
     public void deleteCastMember(Long castId) {
         CastMember castMember = castMemberRepository.findById(castId)
                 .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));

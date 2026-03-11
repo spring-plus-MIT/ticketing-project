@@ -22,14 +22,13 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.SESSION_NOT_
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AdminPerformanceSessionService {
 
     private final PerformanceSessionRepository performanceSessionRepository;
     private final PerformanceRepository performanceRepository;
     private final VenueRepository venueRepository;
 
-    @Transactional
     public void createSession(Long performanceId, SessionRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
@@ -37,7 +36,7 @@ public class AdminPerformanceSessionService {
         Venue venue = venueRepository.findById(request.getVenueId())
                 .orElseThrow(() -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND));
 
-        validateDuplicateSession(venue, request.getStartTime());
+        validateOverlappingSession(venue, request.getStartTime(), request.getEndTime());
 
         performanceSessionRepository.save(PerformanceSession.builder()
                 .performance(performance)
@@ -47,8 +46,6 @@ public class AdminPerformanceSessionService {
                 .build());
     }
 
-
-    @Transactional
     public void updateSession(Long sessionId, SessionRequest request) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
@@ -56,12 +53,11 @@ public class AdminPerformanceSessionService {
         Venue venue = venueRepository.findById(request.getVenueId())
                 .orElseThrow(() -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND));
 
-        validateDuplicateSession(venue, request.getStartTime());
+        validateOverlappingSessionForUpdate(venue, sessionId, request.getStartTime(), request.getEndTime());
 
         session.update(venue, request.getStartTime(), request.getEndTime());
     }
 
-    @Transactional
     public void deleteSession(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
@@ -69,10 +65,15 @@ public class AdminPerformanceSessionService {
         session.delete();
     }
 
-    private void validateDuplicateSession(Venue venue, LocalDateTime startTime) {
-        if (performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)) {
+    private void validateOverlappingSession(Venue venue, LocalDateTime startTime, LocalDateTime endTime) {
+        if (performanceSessionRepository.existsOverlappingSession(venue, startTime, endTime)) {
             throw new PerformanceSessionException(DUPLICATE_SESSION.getHttpStatus(), DUPLICATE_SESSION);
         }
     }
 
+    private void validateOverlappingSessionForUpdate(Venue venue, Long sessionId, LocalDateTime startTime, LocalDateTime endTime) {
+        if (performanceSessionRepository.existsOverlappingSessionForUpdate(venue, sessionId, startTime, endTime)) {
+            throw new PerformanceSessionException(DUPLICATE_SESSION.getHttpStatus(), DUPLICATE_SESSION);
+        }
+    }
 }

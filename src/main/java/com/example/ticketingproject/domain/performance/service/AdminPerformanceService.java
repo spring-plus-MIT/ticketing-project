@@ -22,14 +22,13 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.VENUE_NOT_FO
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AdminPerformanceService {
 
     private final PerformanceRepository performanceRepository;
     private final WorkRepository workRepository;
     private final VenueRepository venueRepository;
 
-    @Transactional
     public void createPerformance(PerformanceRequest request) {
         Work work = workRepository.findById(request.getWorkId())
                 .orElseThrow(() -> new WorkException(HttpStatus.NOT_FOUND, ErrorStatus.WORK_NOT_FOUND));
@@ -48,7 +47,6 @@ public class AdminPerformanceService {
         performanceRepository.save(performance);
     }
 
-    @Transactional
     public void updatePerformance(Long performanceId, PerformanceRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
@@ -68,7 +66,6 @@ public class AdminPerformanceService {
         );
     }
 
-    @Transactional
     public void closePerformance(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));

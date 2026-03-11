@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -73,62 +74,64 @@ class AdminPerformanceSessionServiceTest {
     }
 
     @Test
-    @DisplayName("회차 생성 성공")
+    @DisplayName("회차 생성 성공 - 겹치는 시간 없음")
     void createSession_success() {
-        // given
         given(performanceRepository.findById(1L)).willReturn(Optional.of(performance));
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
-        given(performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)).willReturn(false);
+        given(performanceSessionRepository.existsOverlappingSession(venue, startTime, endTime)).willReturn(false);
 
-        // when
         adminPerformanceSessionService.createSession(1L, request);
 
-        // then
         verify(performanceRepository).findById(1L);
         verify(venueRepository).findById(1L);
-        verify(performanceSessionRepository).existsByVenueAndStartTime(venue, startTime);
+        verify(performanceSessionRepository).existsOverlappingSession(venue, startTime, endTime);
         verify(performanceSessionRepository).save(any(PerformanceSession.class));
     }
 
     @Test
-    @DisplayName("회차 생성 실패 - 이미 등록된 중복 회차")
+    @DisplayName("회차 생성 실패 - 이미 등록된 시간대와 겹침")
     void createSession_fail_duplicateSession() {
-        // given
         given(performanceRepository.findById(1L)).willReturn(Optional.of(performance));
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
-        given(performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)).willReturn(true); // 중복 발생
+        given(performanceSessionRepository.existsOverlappingSession(venue, startTime, endTime)).willReturn(true);
 
-        // when & then
         assertThatThrownBy(() -> adminPerformanceSessionService.createSession(1L, request))
                 .isInstanceOf(PerformanceSessionException.class);
     }
 
     @Test
-    @DisplayName("회차 수정 성공")
+    @DisplayName("회차 수정 성공 - 자기 자신 제외 겹치는 시간 없음")
     void updateSession_success() {
-        // given
         given(performanceSessionRepository.findById(1L)).willReturn(Optional.of(session));
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
-        given(performanceSessionRepository.existsByVenueAndStartTime(venue, startTime)).willReturn(false);
+        given(performanceSessionRepository.existsOverlappingSessionForUpdate(venue, 1L, startTime, endTime)).willReturn(false);
 
-        // when
         adminPerformanceSessionService.updateSession(1L, request);
 
-        // then
         verify(performanceSessionRepository).findById(1L);
         verify(venueRepository).findById(1L);
+        verify(performanceSessionRepository).existsOverlappingSessionForUpdate(venue, 1L, startTime, endTime);
+        assertThat(session.getStartTime()).isEqualTo(startTime);
+    }
+
+    @Test
+    @DisplayName("회차 수정 실패 - 다른 회차와 시간대가 겹침")
+    void updateSession_fail_duplicateSession() {
+        given(performanceSessionRepository.findById(1L)).willReturn(Optional.of(session));
+        given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
+        given(performanceSessionRepository.existsOverlappingSessionForUpdate(venue, 1L, startTime, endTime)).willReturn(true);
+
+        assertThatThrownBy(() -> adminPerformanceSessionService.updateSession(1L, request))
+                .isInstanceOf(PerformanceSessionException.class);
     }
 
     @Test
     @DisplayName("회차 삭제 성공")
     void deleteSession_success() {
-        // given
         given(performanceSessionRepository.findById(1L)).willReturn(Optional.of(session));
 
-        // when
         adminPerformanceSessionService.deleteSession(1L);
 
-        // then
         verify(performanceSessionRepository).findById(1L);
     }
 }
