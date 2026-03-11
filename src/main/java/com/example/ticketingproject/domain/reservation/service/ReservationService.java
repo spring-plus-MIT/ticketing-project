@@ -1,6 +1,10 @@
 package com.example.ticketingproject.domain.reservation.service;
 
 import com.example.ticketingproject.common.enums.ErrorStatus;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
+import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
+import com.example.ticketingproject.domain.performancesession.service.PerformanceSessionService;
 import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
@@ -28,6 +32,8 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final SeatGradeRepository seatGradeRepository;
     private final SeatRepository seatRepository;
+    private final PerformanceSessionService performanceSessionService;
+    private final PerformanceSessionRepository performanceSessionRepository;
 
     @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest requestDto, Long userId) {
@@ -37,6 +43,11 @@ public class ReservationService {
                         ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.USER_NOT_FOUND
                 ));
+
+        PerformanceSession performanceSession = performanceSessionRepository.findById(requestDto.getPerformanceSessionId())
+                .orElseThrow(()->new PerformanceSessionException(
+                        ErrorStatus.SESSION_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.SESSION_NOT_FOUND ));
 
         Seat seat = seatRepository.findById(requestDto.getSeatId())
                 .orElseThrow(() -> new SeatException(
@@ -48,6 +59,7 @@ public class ReservationService {
 
         Reservation reservation = Reservation.builder()
                 .user(user)
+                .performanceSession(performanceSession)
                 .seat(seat)
                 .status(ReservationStatus.PENDING)
                 .totalPrice(seat.getSeatGrade().getPrice())
