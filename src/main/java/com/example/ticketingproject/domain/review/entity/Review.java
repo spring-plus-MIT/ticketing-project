@@ -42,4 +42,8 @@ public class Review extends DeletableEntity {
         this.content = content;
         this.rating = rating;
     }
+    public void update(String content, Integer rating) {
+        this.content = content;
+        this.rating = rating;
+    }
 }
