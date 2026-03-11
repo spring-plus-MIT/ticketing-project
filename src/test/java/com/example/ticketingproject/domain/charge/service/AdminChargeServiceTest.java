@@ -11,8 +11,10 @@ import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class AdminChargeServiceTest {
 
     @Mock
@@ -65,7 +68,7 @@ class AdminChargeServiceTest {
                 .userRole(UserRole.USER)
                 .userStatus(UserStatus.ACTIVE)
                 .build();
-        ReflectionTestUtils.setField(user, "id", 1L);
+        ReflectionTestUtils.setField(user, "id", 2L);
 
         charge = Charge.builder()
                 .admin(admin)
@@ -102,7 +105,6 @@ class AdminChargeServiceTest {
     void charge_실패_어드민없음() {
         // given
         ChargeRequest request = mock(ChargeRequest.class);
-        given(request.getAmount()).willReturn(BigDecimal.valueOf(500));
 
         given(userRepository.findById(99L)).willReturn(Optional.empty());
 
@@ -117,7 +119,6 @@ class AdminChargeServiceTest {
     @Test
     void charge_실패_유저없음() {
         ChargeRequest request = mock(ChargeRequest.class);
-        given(request.getAmount()).willReturn(BigDecimal.valueOf(500));
 
         given(userRepository.findById(1L)).willReturn(Optional.of(admin));
         given(userRepository.findById(99L)).willReturn(Optional.empty());
