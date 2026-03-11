@@ -29,8 +29,6 @@ public class AdminReservationController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
                         adminReservationService.getAllReservations(converted)
                 )
         );
@@ -47,8 +45,6 @@ public class AdminReservationController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
-                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
-                        SuccessStatus.READ_SUCCESS.getMessage(),
                         adminReservationService.getReservationsByUser(userId, converted)
                 )
         );
