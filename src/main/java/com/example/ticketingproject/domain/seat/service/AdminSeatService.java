@@ -36,7 +36,7 @@ public class AdminSeatService {
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
-        int currentSeatCount = seatRepository.countByVenue_Id(venue.getId());
+        int currentSeatCount = seatRepository.countByVenueId(venue.getId());
 
         if(currentSeatCount >= venue.getTotalSeats()) {
             throw new SeatException(SEAT_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_CAPACITY_EXCEEDED);

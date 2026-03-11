@@ -85,7 +85,7 @@ class LikeServiceTest {
     void save_success() {
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(workRepository.findById(1L)).willReturn(Optional.of(work));
-        given(likeRepository.existsByUserAndWork(1L, 1L)).willReturn(false);
+        given(likeRepository.existsByUserIdAndWorkId(1L, 1L)).willReturn(false);
         given(likeRepository.save(any(Like.class))).willReturn(like);
 
         LikeResponse response = likeService.save(1L, 1L);
@@ -126,7 +126,7 @@ class LikeServiceTest {
     void save_likeAlreadyExists() {
         given(workRepository.findById(1L)).willReturn(Optional.of(work));
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
-        given(likeRepository.existsByUserAndWork(1L, 1L)).willReturn(true);
+        given(likeRepository.existsByUserIdAndWorkId(1L, 1L)).willReturn(true);
 
         assertThatThrownBy(() -> likeService.save(1L, 1L))
                 .isInstanceOf(LikeException.class);

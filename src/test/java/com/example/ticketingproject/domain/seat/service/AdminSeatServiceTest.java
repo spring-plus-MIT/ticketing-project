@@ -87,7 +87,7 @@ public class AdminSeatServiceTest {
 
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
         given(seatGradeRepository.findByGradeName(GradeName.VIP)).willReturn(Optional.of(seatGrade));
-        given(seatRepository.countByVenue_Id(1L)).willReturn(10);
+        given(seatRepository.countByVenueId(1L)).willReturn(10);
         given(seatRepository.save(any(Seat.class))).willReturn(seat);
 
         SeatResponse response = adminSeatService.save(1L, request);
