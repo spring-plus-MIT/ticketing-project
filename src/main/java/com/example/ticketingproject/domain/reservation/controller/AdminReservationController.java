@@ -1,0 +1,56 @@
+package com.example.ticketingproject.domain.reservation.controller;
+
+import com.example.ticketingproject.common.dto.CommonResponse;
+import com.example.ticketingproject.common.enums.SuccessStatus;
+import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
+import com.example.ticketingproject.domain.reservation.service.AdminReservationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/admin/reservations")
+public class AdminReservationController {
+
+    private final AdminReservationService adminReservationService;
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getAllReservations(
+            @PageableDefault Pageable pageable,
+            @RequestParam(defaultValue = "1") int page) {
+
+        Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.READ_SUCCESS,
+                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
+                        SuccessStatus.READ_SUCCESS.getMessage(),
+                        adminReservationService.getAllReservations(converted)
+                )
+        );
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getReservationsByUser(
+            @PathVariable Long userId,
+            @PageableDefault Pageable pageable,
+            @RequestParam(defaultValue = "1") int page) {
+
+        Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+
+        return ResponseEntity.ok(
+                CommonResponse.success(
+                        SuccessStatus.READ_SUCCESS,
+                        SuccessStatus.READ_SUCCESS.getSuccessCode(),
+                        SuccessStatus.READ_SUCCESS.getMessage(),
+                        adminReservationService.getReservationsByUser(userId, converted)
+                )
+        );
+    }
+}

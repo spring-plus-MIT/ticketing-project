@@ -39,41 +39,21 @@ public class AdminSeatGradeService {
 
         SeatGrade savedSeatGrade = seatGradeRepository.save(seatGrade);
 
-        return SeatGradeResponse.builder()
-                .seatGradeId(savedSeatGrade.getId())
-                .sessionId(savedSeatGrade.getPerformanceSession().getId())
-                .gradeName(savedSeatGrade.getGradeName())
-                .price(savedSeatGrade.getPrice())
-                .totalSeats(savedSeatGrade.getTotalSeats())
-                .remainingSeats(savedSeatGrade.getRemainingSeats())
-                .createdAt(savedSeatGrade.getCreatedAt())
-                .modifiedAt(savedSeatGrade.getModifiedAt())
-                .deletedAt(savedSeatGrade.getDeletedAt())
-                .build();
+        return SeatGradeResponse.from(savedSeatGrade);
     }
 
     public SeatGradeResponse update(Long sessionId, Long seatGradeId, PutSeatGradeRequest request) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionId(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
         seatGrade.update(request.getGradeName());
 
-        return SeatGradeResponse.builder()
-                .seatGradeId(seatGrade.getId())
-                .sessionId(seatGrade.getPerformanceSession().getId())
-                .gradeName(seatGrade.getGradeName())
-                .price(seatGrade.getPrice())
-                .totalSeats(seatGrade.getTotalSeats())
-                .remainingSeats(seatGrade.getRemainingSeats())
-                .createdAt(seatGrade.getCreatedAt())
-                .modifiedAt(seatGrade.getModifiedAt())
-                .deletedAt(seatGrade.getDeletedAt())
-                .build();
+        return SeatGradeResponse.from(seatGrade);
     }
 
     public void delete(Long sessionId, Long seatGradeId) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionId(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 

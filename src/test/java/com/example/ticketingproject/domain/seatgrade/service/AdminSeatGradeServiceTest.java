@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.enums.GradeName;
 
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seatgrade.dto.CreateSeatGradeRequest;
 import com.example.ticketingproject.domain.seatgrade.dto.PutSeatGradeRequest;
@@ -98,7 +99,7 @@ public class AdminSeatGradeServiceTest {
         given(performanceSessionRepository.findById(999L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.save(999L, request))
-                .isInstanceOf(SeatGradeException.class);
+                .isInstanceOf(PerformanceSessionException.class);
     }
 
     @Test
@@ -108,7 +109,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
 
         SeatGradeResponse response = adminSeatGradeService.update(1L, 1L, request);
@@ -125,7 +126,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(999L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(999L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.update(1L, 999L, request))
@@ -139,7 +140,7 @@ public class AdminSeatGradeServiceTest {
                 .gradeName(GradeName.R)
                 .build();
 
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 999L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 999L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.update(999L, 1L, request))
@@ -149,7 +150,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 성공")
     void delete_success() {
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
 
         assertThatNoException()
@@ -161,7 +162,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 실패 - 존재하지 않는 좌석 등급")
     void delete_fail_seatGradeNotFound() {
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(999L, 1L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(999L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.delete(1L, 999L))
@@ -171,7 +172,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 삭제 실패 - 세션 ID 불일치")
     void delete_fail_sessionIdMismatch() {
-        given(seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(1L, 999L))
+        given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 999L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> adminSeatGradeService.delete(999L, 1L))
