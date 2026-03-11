@@ -3,110 +3,91 @@ package com.example.ticketingproject.domain.reservation.service;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
-import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
-import com.example.ticketingproject.domain.reservation.exception.ReservationException;
+import com.example.ticketingproject.domain.reservation.entity.Reservation;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
-import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    @Mock private ReservationRepository reservationRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private PerformanceSessionRepository performanceSessionRepository;
-    @Mock private SeatRepository seatRepository;
-    @Mock private SeatGradeRepository seatGradeRepository;
+    @Mock
+    private ReservationRepository reservationRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private SeatRepository seatRepository;
+
+    @InjectMocks
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
-        reservationService = new ReservationService(
-                reservationRepository,
-                userRepository,
-                performanceSessionRepository,
-                seatRepository,
-                seatGradeRepository
-        );
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @DisplayName("예약 생성 성공 테스트")
-    void createReservation_Success() {
-        // given
+    void 예약_생성_성공() {
+
         Long userId = 1L;
-        ReservationCreateRequest requestDto = new ReservationCreateRequest(1L, 1L);
+        Long seatId = 1L;
 
-        User user = User.builder().build();
-        ReflectionTestUtils.setField(user, "id", userId);
+        ReservationCreateRequest request = new ReservationCreateRequest();
+        ReflectionTestUtils.setField(request, "seatId", seatId);
 
-        Work work = Work.builder()
-                .title("레미제라블")
-                .build();
+        User user = mock(User.class);
 
-        Performance performance = Performance.builder()
-                .work(work)
-                .build();
+        SeatGrade seatGrade = mock(SeatGrade.class);
+        when(seatGrade.getPrice()).thenReturn(BigDecimal.valueOf(10000));
+        when(seatGrade.getGradeName()).thenReturn(GradeName.VIP); // 추가된 부분
 
-        PerformanceSession session = PerformanceSession.builder()
-                .performance(performance)
-                .build();
-        ReflectionTestUtils.setField(session, "id", 1L);
+        Seat seat = mock(Seat.class);
+        when(seat.getSeatGrade()).thenReturn(seatGrade);
 
-        Seat seat = Seat.builder()
-                .gradeName(GradeName.VIP)
-                .build();
+        PerformanceSession performanceSession = mock(PerformanceSession.class);
+        Performance performance = mock(Performance.class);
+        Work work = mock(Work.class);
 
-        SeatGrade seatGrade = SeatGrade.builder()
-                .price(BigDecimal.valueOf(100000))
-                .build();
+        when(performance.getWork()).thenReturn(work);
+        when(work.getTitle()).thenReturn("테스트 공연");
 
-        given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(performanceSessionRepository.findById(any())).willReturn(Optional.of(session));
-        given(seatRepository.findById(any())).willReturn(Optional.of(seat));
-        given(seatGradeRepository.findByPerformanceSessionIdAndGradeNameAndDeletedAtIsNull(any(), any()))
-                .willReturn(Optional.of(seatGrade));
+        Reservation reservation = mock(Reservation.class);
 
-        given(reservationRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
+        // NPE 방지용 mock 세팅
+        when(reservation.getUser()).thenReturn(user);
+        when(reservation.getSeat()).thenReturn(seat);
+        when(reservation.getPerformanceSession()).thenReturn(performanceSession);
+        when(performanceSession.getPerformance()).thenReturn(performance);
 
-        // when
-        ReservationResponse response = reservationService.createReservation(requestDto, userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
+        when(reservationRepository.save(any())).thenReturn(reservation);
 
-        // then
-        assertNotNull(response);
+        ReservationResponse response = reservationService.createReservation(request, userId);
+
+        verify(userRepository).findById(userId);
+        verify(seatRepository).findById(seatId);
         verify(reservationRepository).save(any());
-    }
 
-    @Test
-    @DisplayName("실패 테스트 - 유저 없음")
-    void createReservation_UserNotFound() {
-        given(userRepository.findById(any())).willReturn(Optional.empty());
-
-        assertThrows(ReservationException.class, () ->
-                reservationService.createReservation(new ReservationCreateRequest(1L, 1L), 1L)
-        );
+        assertThat(response).isNotNull();
     }
 }

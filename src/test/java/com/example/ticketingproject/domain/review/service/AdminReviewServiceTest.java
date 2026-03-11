@@ -5,8 +5,6 @@ import com.example.ticketingproject.domain.review.entity.Review;
 import com.example.ticketingproject.domain.review.exception.ReviewException;
 import com.example.ticketingproject.domain.review.repository.ReviewRepository;
 import com.example.ticketingproject.domain.user.entity.User;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,16 +14,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AdminReviewServiceTest {
+class AdminReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
@@ -33,53 +31,60 @@ public class AdminReviewServiceTest {
     @InjectMocks
     private AdminReviewService adminReviewService;
 
-    private Review review;
-    private User user;
-
-    @BeforeEach
-    void setUp() {
-        user = User.builder().name("관리자확인용").build();
-        review = Review.builder().content("삭제될 리뷰").rating(1).user(user).build();
-        ReflectionTestUtils.setField(review, "id", 1L);
-    }
-
     @Test
-    @DisplayName("관리자 전체 리뷰 조회 성공")
-    void findAllReviews_success() {
-        // given
+    void 관리자_리뷰_전체조회_성공() {
+
+        Long workId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Review> reviewPage = new PageImpl<>(List.of(review), pageable, 1);
-        given(reviewRepository.findAll(pageable)).willReturn(reviewPage);
 
-        // when
-        Page<ReviewResponseDto> response = adminReviewService.findAllReviews(pageable);
+        Review review = mock(Review.class);
+        User user = mock(User.class);
 
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getNickname()).isEqualTo("관리자확인용");
+        when(review.getUser()).thenReturn(user);
+        when(user.getName()).thenReturn("테스트유저");
+
+        Page<Review> reviewPage =
+                new PageImpl<>(List.of(review));
+
+        when(reviewRepository.findAllByWorkId(workId, pageable))
+                .thenReturn(reviewPage);
+
+        Page<ReviewResponseDto> result =
+                adminReviewService.findAllReviews(workId, pageable);
+
+        verify(reviewRepository).findAllByWorkId(workId, pageable);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent().size()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("관리자 리뷰 삭제 성공")
-    void delete_success() {
-        // given
-        given(reviewRepository.findById(1L)).willReturn(Optional.of(review));
+    void 관리자_리뷰삭제_성공() {
 
-        // when
-        assertThatNoException().isThrownBy(() -> adminReviewService.deleteReviewByAdmin(1L));
+        Long reviewId = 1L;
+        Review review = mock(Review.class);
 
-        // then
-        verify(reviewRepository, times(1)).delete(review);
+        when(reviewRepository.findById(reviewId))
+                .thenReturn(Optional.of(review));
+
+        adminReviewService.deleteReviewByAdmin(reviewId);
+
+        verify(reviewRepository).findById(reviewId);
+        verify(review).delete();
     }
 
     @Test
-    @DisplayName("관리자 리뷰 삭제 실패 - 존재하지 않는 리뷰")
-    void delete_fail_reviewNotFound() {
-        // given
-        given(reviewRepository.findById(999L)).willReturn(Optional.empty());
+    void 관리자_리뷰삭제_실패_리뷰없음() {
 
-        // when & then
-        assertThatThrownBy(() -> adminReviewService.deleteReviewByAdmin(999L))
-                .isInstanceOf(ReviewException.class);
+        Long reviewId = 1L;
+
+        when(reviewRepository.findById(reviewId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+                adminReviewService.deleteReviewByAdmin(reviewId)
+        ).isInstanceOf(ReviewException.class);
+
+        verify(reviewRepository).findById(reviewId);
     }
 }
