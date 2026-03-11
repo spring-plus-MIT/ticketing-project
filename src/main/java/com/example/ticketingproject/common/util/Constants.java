@@ -50,6 +50,10 @@ public class Constants {
     // Payment
     public static final String MSG_PAYMENT_NOT_FOUND = "존재하지 않는 결제입니다.";
 
+    // Reservation
+    public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
+    public static final String MSG_ALREADY_PAYED_RESERVATION = "이미 결제된 예약 입니다.";
+
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
     public static final String MSG_VALIDATION_NOT_BLANK_ERROR = "필수 입력 값이 누락 되었습니다.";

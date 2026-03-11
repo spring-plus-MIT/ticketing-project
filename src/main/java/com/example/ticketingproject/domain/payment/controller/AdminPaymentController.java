@@ -41,7 +41,7 @@ public class AdminPaymentController {
 
         return ResponseEntity.ok(CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
-                        adminPaymentService.findAllPayment(converted)
+                        adminPaymentService.findAllPayments(converted)
                 )
         );
     }

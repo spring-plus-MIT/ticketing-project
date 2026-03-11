@@ -1,5 +1,6 @@
 package com.example.ticketingproject.domain.payment.service;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.payment.dto.CreatePaymentRequest;
 import com.example.ticketingproject.domain.payment.dto.PaymentResponse;
@@ -40,6 +41,28 @@ public class PaymentService {
         Reservation reservation = reservationRepository.findById(request.getReservationId())
                 .orElseThrow(() -> new ReservationException(ErrorStatus.RESERVATION_NOT_FOUND));
 
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new AuthException(
+                    ErrorStatus.ACCESS_FORBIDDEN.getHttpStatus(),
+                    ErrorStatus.ACCESS_FORBIDDEN
+            );
+        }
+
+        if (reservation.getStatus() == ReservationStatus.CANCELED) {
+            throw new ReservationException(ErrorStatus.ALREADY_CANCELED_RESERVATION);
+        }
+
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            throw new ReservationException(ErrorStatus.ALREADY_PAYED_RESERVATION);
+        }
+
+        if (paymentRepository.existsByReservationId(reservation.getId())) {
+            throw new PaymentException(
+                    ErrorStatus.ALREADY_PAYED_RESERVATION.getHttpStatus(),
+                    ErrorStatus.ALREADY_PAYED_RESERVATION
+            );
+        }
+
         Payment payment = Payment.builder()
                 .reservation(reservation)
                 .user(user)
@@ -55,31 +78,18 @@ public class PaymentService {
     }
 
     public PaymentResponse findOnePayment(Long paymentId, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserException(
-                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.USER_NOT_FOUND
-                )
-        );
-
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(
-                () -> new PaymentException(
+        Payment payment = paymentRepository.findByIdAndUserId(paymentId, userId)
+                .orElseThrow(() -> new PaymentException(
                         ErrorStatus.PAYMENT_NOT_FOUND.getHttpStatus(),
                         ErrorStatus.PAYMENT_NOT_FOUND
                 )
         );
+
         return PaymentResponse.from(payment);
     }
 
-    public Page<PaymentResponse> findAllPayment(Long userId, Pageable converted) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new UserException(
-                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.USER_NOT_FOUND
-                )
-        );
-
-        Page<Payment> payments = paymentRepository.findAll(converted);
+    public Page<PaymentResponse> findAllPayments(Long userId, Pageable converted) {
+        Page<Payment> payments = paymentRepository.findAllByUserId(userId, converted);
 
         return payments.map(PaymentResponse::from);
     }

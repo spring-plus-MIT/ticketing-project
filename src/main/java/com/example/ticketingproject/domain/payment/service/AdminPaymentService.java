@@ -16,7 +16,7 @@ public class AdminPaymentService {
     private final PaymentRepository paymentRepository;
 
 
-    public Page<PaymentResponse> findAllPayment(Pageable converted) {
+    public Page<PaymentResponse> findAllPayments(Pageable converted) {
         Page<Payment> payments = paymentRepository.findAll(converted);
 
         return payments.map(PaymentResponse::from);

@@ -44,7 +44,7 @@ public class PaymentController {
     }
 
     @GetMapping
-    public ResponseEntity<CommonResponse<Page<PaymentResponse>>> getAllPayment(
+    public ResponseEntity<CommonResponse<Page<PaymentResponse>>> getAllPayments(
             @PageableDefault Pageable pageable,
             @RequestParam(defaultValue = "1") int page,
             CustomUserDetails customUserDetails
@@ -57,7 +57,7 @@ public class PaymentController {
 
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.READ_SUCCESS,
-                paymentService.findAllPayment(customUserDetails.getId(), converted)
+                paymentService.findAllPayments(customUserDetails.getId(), converted)
                 )
         );
     }
