@@ -27,6 +27,6 @@ public class LikeController {
 
     @DeleteMapping("/{likeId}")
     public ResponseEntity<CommonResponse<LikeResponse>> delete(@PathVariable(name = "workId") Long workId, @PathVariable(name = "likeId") Long likeId,  @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, DELETE_SUCCESS.getSuccessCode(), DELETE_SUCCESS.getMessage(), likeService.delete(workId, likeId, customUserDetails)));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, DELETE_SUCCESS.getSuccessCode(), DELETE_SUCCESS.getMessage(), likeService.delete(workId, likeId, customUserDetails.getId())));
     }
 }

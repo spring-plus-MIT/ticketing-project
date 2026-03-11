@@ -53,7 +53,7 @@ public class LikeService {
         return LikeResponse.from(savedLike);
     }
 
-    public LikeResponse delete(Long workId, Long likeId, CustomUserDetails customUserDetails) {
+    public LikeResponse delete(Long workId, Long likeId, Long userId) {
         Work work = workRepository.findById(workId).orElseThrow(
                 () -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND)
         );
@@ -66,7 +66,7 @@ public class LikeService {
             throw new LikeException(LIKE_NOT_FOUND.getHttpStatus(), LIKE_NOT_FOUND);
         }
 
-        if(!like.getUser().getId().equals(customUserDetails.getId())) {
+        if(!like.getUser().getId().equals(userId)) {
             throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(), ACCESS_FORBIDDEN);
         }
 
