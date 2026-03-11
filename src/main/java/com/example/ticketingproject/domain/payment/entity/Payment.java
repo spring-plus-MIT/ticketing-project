@@ -1,9 +1,9 @@
 package com.example.ticketingproject.domain.payment.entity;
 
 import com.example.ticketingproject.common.entity.CreatableEntity;
+import com.example.ticketingproject.domain.payment.enums.PaymentStatus;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
 import com.example.ticketingproject.domain.user.entity.User;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,13 +29,17 @@ public class Payment extends CreatableEntity {
     @JoinColumn(nullable = false)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
     private BigDecimal balanceAfterCharge;
 
     @Builder
-    public Payment(Reservation reservation, User user, BigDecimal amount, BigDecimal balanceAfterCharge) {
+    public Payment(Reservation reservation, User user, BigDecimal amount, PaymentStatus paymentStatus,BigDecimal balanceAfterCharge) {
         this.reservation = reservation;
         this.user = user;
         this.amount = amount;
+        this.paymentStatus = paymentStatus;
         this.balanceAfterCharge = balanceAfterCharge;
     }
 }
