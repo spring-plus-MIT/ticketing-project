@@ -30,7 +30,7 @@ public class ReservationResponse {
                 .performanceTitle(reservation.getPerformanceSession().getPerformance().getWork().getTitle())
                 .performanceDate(reservation.getPerformanceSession().getPerformance().getStartDate())
                 .startTime(reservation.getPerformanceSession().getStartTime())
-                .seatInfo(reservation.getSeat().getGradeName().name() + " - " + reservation.getSeat().getSeatNumber())
+                .seatInfo(reservation.getSeat().getSeatGrade().getGradeName().name() + " - " + reservation.getSeat().getSeatNumber())
                 .totalPrice(reservation.getTotalPrice())
                 .status(reservation.getStatus())
                 .build();

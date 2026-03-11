@@ -2,13 +2,9 @@ package com.example.ticketingproject.domain.review.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
-import com.example.ticketingproject.domain.review.dto.response.ReviewResponseDto;
 import com.example.ticketingproject.domain.review.service.AdminReviewService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,18 +15,13 @@ public class AdminReviewController {
 
     private final AdminReviewService adminReviewService;
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getAllReviewsByAdmin(
-            @PageableDefault Pageable pageable,
-            @RequestParam(defaultValue = "1") int page) {
-
-        Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-
+    @GetMapping("/admin/performances/{performanceId}/reviews")
+    public ResponseEntity<?> getAllReviews(
+            @PathVariable Long performanceId,
+            Pageable converted
+    ) {
         return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.READ_SUCCESS,
-                        adminReviewService.findAllReviews(converted)
-                )
+                adminReviewService.findAllReviews(performanceId, converted) 
         );
     }
 
