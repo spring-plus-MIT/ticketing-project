@@ -41,8 +41,6 @@ public class AdminReviewController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.DELETE_SUCCESS,
-                        SuccessStatus.DELETE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.DELETE_SUCCESS.getMessage(),
                         null
                 )
         );

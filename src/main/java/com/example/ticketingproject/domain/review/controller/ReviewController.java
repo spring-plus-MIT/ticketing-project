@@ -50,8 +50,6 @@ public class ReviewController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.CREATE_SUCCESS,
-                        SuccessStatus.CREATE_SUCCESS.getSuccessCode(),
-                        SuccessStatus.CREATE_SUCCESS.getMessage(),
                         response
                 )
         );
