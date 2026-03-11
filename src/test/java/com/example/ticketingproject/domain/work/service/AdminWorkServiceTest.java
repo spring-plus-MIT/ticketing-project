@@ -78,7 +78,6 @@ public class AdminWorkServiceTest {
                 }
                 """;
 
-
         UpdateWorkRequest request = objectMapper.readValue(json, UpdateWorkRequest.class);
 
         // when
