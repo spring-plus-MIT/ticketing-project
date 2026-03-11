@@ -27,4 +27,30 @@ public class ReservationController {
         ReservationResponse response = reservationService.createReservation(requestDto, customUserDetails.getId());
         return ResponseEntity.ok(CommonResponse.success(SuccessStatus.CREATE_SUCCESS, response));
     }
+
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<CommonResponse<ReservationResponse>> getOneReservation(
+            @PathVariable Long reservationId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+       return ResponseEntity.ok(CommonResponse.success(
+               SuccessStatus.READ_SUCCESS,
+               reservationService.findOneReservation(customUserDetails.getId(), reservationId)
+               )
+       );
+    }
+
+    @PatchMapping("/{reservationId}")
+    public ResponseEntity<CommonResponse<Void>> cancelReservation(
+            @PathVariable Long reservationId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        reservationService.cancelReservation(reservationId, customUserDetails.getId());
+
+        return ResponseEntity.ok(CommonResponse.success(
+                SuccessStatus.DELETE_SUCCESS,
+                null
+                )
+        );
+    }
 }

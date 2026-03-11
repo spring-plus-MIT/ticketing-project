@@ -31,6 +31,8 @@ public class Constants {
     // Seat
     public static final String MSG_SEAT_NOT_FOUND = "좌석이 존재하지 않습니다.";
     public static final String MSG_SEAT_CAPACITY_EXCEEDED = "Venue의 총 좌석 수를 초과할 수 없습니다.";
+    public static final String MSG_ALREADY_RESERVED_SEAT = "이미 예약된 좌석입니다.";
+    public static final String MSG_ALREADY_SOLD_SEAT = "이미 판매된 좌석입니다.";
 
     // Performance
     public static final String MSG_PERFORMANCE_NOT_FOUND = "공연이 존재하지 않습니다.";

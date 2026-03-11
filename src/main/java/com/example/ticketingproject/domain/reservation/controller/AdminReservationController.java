@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.service.AdminReservationService;
+import com.example.ticketingproject.domain.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminReservationController {
 
     private final AdminReservationService adminReservationService;
+    private final ReservationService reservationService;
 
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ReservationResponse>>> getAllReservations(
@@ -46,6 +48,32 @@ public class AdminReservationController {
                 CommonResponse.success(
                         SuccessStatus.READ_SUCCESS,
                         adminReservationService.getReservationsByUser(userId, converted)
+                )
+        );
+    }
+
+    @GetMapping("/{userId}/{reservationId}")
+    public ResponseEntity<CommonResponse<ReservationResponse>> getOndReservation (
+            @PathVariable Long userId,
+            @PathVariable Long reservationId
+    ) {
+       return ResponseEntity.ok(CommonResponse.success(
+               SuccessStatus.READ_SUCCESS,
+               reservationService.findOneReservation(userId, reservationId)
+               )
+       );
+    }
+
+    @PatchMapping("/{reservationId}/{userId}")
+    public ResponseEntity<CommonResponse<Void>> cancelReservation(
+            @PathVariable Long reservationId,
+            @PathVariable Long userId
+    ) {
+        reservationService.cancelReservation(reservationId, userId);
+
+        return ResponseEntity.ok(CommonResponse.success(
+                        SuccessStatus.DELETE_SUCCESS,
+                        null
                 )
         );
     }

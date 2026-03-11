@@ -29,6 +29,8 @@ public class AdminReservationService {
                 .map(ReservationResponse::from);
     }
 
+    // 이건 규범님이 테스트 코드에서 사용하고 있어서 남겨놨어요
+    // 내일 얘기 하고 지울 예정
     @Transactional
     public void updateReservationStatusByAdmin(Long reservationId, ReservationStatus newStatus) {
         Reservation reservation = reservationRepository.findById(reservationId)

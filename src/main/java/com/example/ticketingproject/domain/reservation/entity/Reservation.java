@@ -64,6 +64,10 @@ public class Reservation extends ModifiableEntity {
     }
 
     public void cancel() {
+        switch (this.status) {
+            case CANCELED -> throw new ReservationException(ErrorStatus.ALREADY_CANCELED_RESERVATION);
+            case CONFIRMED -> throw new ReservationException(ErrorStatus.ALREADY_PAID_RESERVATION);
+        }
         this.status = ReservationStatus.CANCELED;
     }
 
