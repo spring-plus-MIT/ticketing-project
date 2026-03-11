@@ -40,15 +40,16 @@ public class AuthService {
                     ErrorStatus.DUPLICATE_EMAIL);
         }
 
-        User user = new User(
-                request.getName(),
-                request.getEmail(),
-                passwordEncoder.encode(request.getPassword()),
-                request.getPhone(),
-                BigDecimal.ZERO,
-                UserRole.USER,
-                UserStatus.ACTIVE
-        );
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .balance(BigDecimal.ZERO)
+                .userRole(UserRole.USER)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
         User savedUser = userRepository.save(user);
 
         return RegisterResponse.from(savedUser);
