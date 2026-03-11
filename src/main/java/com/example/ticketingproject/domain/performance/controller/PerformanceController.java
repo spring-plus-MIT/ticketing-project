@@ -1,7 +1,6 @@
 package com.example.ticketingproject.domain.performance.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
-import com.example.ticketingproject.domain.performance.dto.PerformanceRequest;
 import com.example.ticketingproject.domain.performance.dto.PerformanceResponse;
 import com.example.ticketingproject.domain.performance.service.PerformanceService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
