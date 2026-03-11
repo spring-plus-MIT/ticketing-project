@@ -24,21 +24,6 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 public class CastMemberService {
 
     private final CastMemberRepository castMemberRepository;
-    private final PerformanceSessionRepository performanceSessionRepository;
-
-    @Transactional
-    public void createCastMember(Long sessionId, CastMemberRequest request) {
-        PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
-
-        CastMember castMember = CastMember.builder()
-                .performanceSession(session)
-                .name(request.getName())
-                .roleName(request.getRoleName())
-                .build();
-
-        castMemberRepository.save(castMember);
-    }
 
     public List<CastMemberResponse> getCastMembers(Long sessionId) {
         return castMemberRepository.findByPerformanceSessionId(sessionId).stream()
@@ -46,21 +31,6 @@ public class CastMemberService {
                 .toList();
     }
 
-    @Transactional
-    public void updateCastMember(Long castId, CastMemberRequest request) {
-        CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
-
-        castMember.update(request.getName(), request.getRoleName());
-    }
-
-    @Transactional
-    public void deleteCastMember(Long castId) {
-        CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
-
-        castMemberRepository.delete(castMember);
-    }
 
     private CastMemberResponse convertToResponse(CastMember c) {
         return CastMemberResponse.builder()

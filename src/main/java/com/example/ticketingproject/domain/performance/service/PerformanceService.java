@@ -27,27 +27,6 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
-    private final WorkRepository workRepository;
-    private final VenueRepository venueRepository;
-
-    @Transactional
-    public void createPerformance(PerformanceRequest request) {
-        Work work = workRepository.findById(request.getWorkId())
-                .orElseThrow(() -> new WorkException(HttpStatus.NOT_FOUND, ErrorStatus.WORK_NOT_FOUND));
-        Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new VenueException(HttpStatus.NOT_FOUND, ErrorStatus.VENUE_NOT_FOUND));
-
-        Performance performance = Performance.builder()
-                .work(work)
-                .venue(venue)
-                .season(request.getSeason())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .status(request.getStatus())
-                .build();
-
-        performanceRepository.save(performance);
-    }
 
     public Page<PerformanceResponse> getPerformances(Pageable pageable) {
         return performanceRepository.findAll(pageable)
@@ -58,34 +37,6 @@ public class PerformanceService {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
         return convertToResponse(performance);
-    }
-
-    @Transactional
-    public void updatePerformance(Long performanceId, PerformanceRequest request) {
-        Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
-
-        Work work = workRepository.findById(request.getWorkId())
-                .orElseThrow(() -> new WorkException(WORK_NOT_FOUND.getHttpStatus(), WORK_NOT_FOUND));
-        Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND));
-
-        performance.update(
-                work,
-                venue,
-                request.getSeason(),
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getStatus()
-        );
-    }
-
-    @Transactional
-    public void closePerformance(Long performanceId) {
-        Performance performance = performanceRepository.findById(performanceId)
-                .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
-
-        performance.close();
     }
 
     private PerformanceResponse convertToResponse(Performance p) {
