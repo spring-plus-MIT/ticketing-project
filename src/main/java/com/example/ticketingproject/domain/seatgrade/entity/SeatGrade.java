@@ -1,7 +1,7 @@
 package com.example.ticketingproject.domain.seatgrade.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
-import com.example.ticketingproject.common.enums.GradeName; // common에 있는 Enum을 가져옵니다.
+import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +30,7 @@ public class SeatGrade extends DeletableEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GradeName gradeName; // 이제 common의 GradeName을 사용합니다.
+    private GradeName gradeName;
 
     @Column(nullable = false)
     private BigDecimal price;

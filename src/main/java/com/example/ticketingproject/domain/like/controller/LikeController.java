@@ -22,11 +22,11 @@ public class LikeController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<LikeResponse>> create(@PathVariable(name = "workId") Long workId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), likeService.save(workId, customUserDetails.getId())));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, likeService.save(workId, customUserDetails.getId())));
     }
 
     @DeleteMapping("/{likeId}")
     public ResponseEntity<CommonResponse<LikeResponse>> delete(@PathVariable(name = "workId") Long workId, @PathVariable(name = "likeId") Long likeId,  @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, DELETE_SUCCESS.getSuccessCode(), DELETE_SUCCESS.getMessage(), likeService.delete(workId, likeId, customUserDetails.getId())));
+        return ResponseEntity.ok(CommonResponse.success(DELETE_SUCCESS, likeService.delete(workId, likeId, customUserDetails.getId())));
     }
 }
