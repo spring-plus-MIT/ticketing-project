@@ -6,7 +6,6 @@ import com.example.ticketingproject.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class AdminUserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public Page<GetUserResponse> findAllUser(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
