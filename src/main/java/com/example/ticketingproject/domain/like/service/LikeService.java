@@ -12,7 +12,6 @@ import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
 import com.example.ticketingproject.domain.work.exception.WorkException;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
-import com.example.ticketingproject.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,7 @@ public class LikeService {
                 () -> new UserException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND)
         );
 
-        if (likeRepository.existsByUserAndWork(user.getId(), work.getId())) {
+        if (likeRepository.existsByUserIdAndWorkId(user.getId(), work.getId())) {
             throw new LikeException(LIKE_ALREADY_EXISTS.getHttpStatus(), LIKE_ALREADY_EXISTS);
         }
 

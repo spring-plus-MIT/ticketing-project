@@ -1,7 +1,6 @@
 package com.example.ticketingproject.domain.seat.entity;
 
 import com.example.ticketingproject.common.entity.CreatableEntity;
-import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;

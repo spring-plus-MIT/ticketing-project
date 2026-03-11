@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.seatgrade.entity;
 import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Getter
 @Entity
@@ -54,5 +57,12 @@ public class SeatGrade extends DeletableEntity {
 
     public void update(GradeName gradeName) {
         this.gradeName = gradeName;
+    }
+
+    public void decreaseRemainingSeats() {
+        if (this.remainingSeats <= 0) {
+            throw new SeatGradeException(SEAT_GRADE_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_GRADE_CAPACITY_EXCEEDED);
+        }
+        this.remainingSeats--;
     }
 }

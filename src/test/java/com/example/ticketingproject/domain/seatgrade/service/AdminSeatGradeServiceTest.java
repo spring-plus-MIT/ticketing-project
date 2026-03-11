@@ -67,12 +67,11 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 생성 성공")
     void save_success() {
-        CreateSeatGradeRequest request = CreateSeatGradeRequest.builder()
-                .gradeName(GradeName.VIP)
-                .price(new BigDecimal(10000))
-                .totalSeats(100)
-                .remainingSeats(50)
-                .build();
+        CreateSeatGradeRequest request = mock(CreateSeatGradeRequest.class);
+        given(request.getGradeName()).willReturn(GradeName.VIP);
+        given(request.getPrice()).willReturn(new BigDecimal(10000));
+        given(request.getTotalSeats()).willReturn(100);
+        given(request.getRemainingSeats()).willReturn(50);
 
         given(performanceSessionRepository.findById(1L)).willReturn(Optional.of(performanceSession));
         given(seatGradeRepository.save(any(SeatGrade.class))).willReturn(seatGrade);
@@ -89,12 +88,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 생성 실패")
     void save_fail() {
-        CreateSeatGradeRequest request = CreateSeatGradeRequest.builder()
-                .gradeName(GradeName.VIP)
-                .price(new BigDecimal(10000))
-                .totalSeats(100)
-                .remainingSeats(50)
-                .build();
+        CreateSeatGradeRequest request = mock(CreateSeatGradeRequest.class);
 
         given(performanceSessionRepository.findById(999L)).willReturn(Optional.empty());
 
@@ -105,9 +99,8 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 수정 성공")
     void update_success() {
-        PutSeatGradeRequest request = PutSeatGradeRequest.builder()
-                .gradeName(GradeName.R)
-                .build();
+        PutSeatGradeRequest request = mock(PutSeatGradeRequest.class);
+        given(request.getGradeName()).willReturn(GradeName.R);
 
         given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 1L))
                 .willReturn(Optional.of(seatGrade));
@@ -122,9 +115,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 수정 실패 - 존재하지 않는 좌석 등급")
     void update_fail_seatGradeNotFound() {
-        PutSeatGradeRequest request = PutSeatGradeRequest.builder()
-                .gradeName(GradeName.R)
-                .build();
+        PutSeatGradeRequest request = mock(PutSeatGradeRequest.class);
 
         given(seatGradeRepository.findByIdAndPerformanceSessionId(999L, 1L))
                 .willReturn(Optional.empty());
@@ -136,9 +127,7 @@ public class AdminSeatGradeServiceTest {
     @Test
     @DisplayName("좌석 등급 수정 실패 - 세션 ID 불일치")
     void update_fail_sessionIdMismatch() {
-        PutSeatGradeRequest request = PutSeatGradeRequest.builder()
-                .gradeName(GradeName.R)
-                .build();
+        PutSeatGradeRequest request = mock(PutSeatGradeRequest.class);
 
         given(seatGradeRepository.findByIdAndPerformanceSessionId(1L, 999L))
                 .willReturn(Optional.empty());
