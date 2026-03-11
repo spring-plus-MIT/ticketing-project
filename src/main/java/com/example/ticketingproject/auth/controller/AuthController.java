@@ -7,6 +7,7 @@ import com.example.ticketingproject.auth.dto.RegisterResponse;
 import com.example.ticketingproject.auth.service.AuthService;
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,38 +25,22 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<CommonResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<CommonResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.REGISTER_SUCCESS,
-                        SuccessStatus.REGISTER_SUCCESS.getSuccessCode(),
-                        SuccessStatus.REGISTER_SUCCESS.getMessage(),
-                        authService.register(request))
-        );
+                CommonResponse.success(SuccessStatus.REGISTER_SUCCESS, authService.register(request)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<CommonResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         String token = response.getAccessToken();
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + token)
-                .body(CommonResponse.success(
-                        SuccessStatus.LOGIN_SUCCESS,
-                        SuccessStatus.LOGIN_SUCCESS.getSuccessCode(),
-                        SuccessStatus.LOGIN_SUCCESS.getMessage(),
-                        response));
+                .body(CommonResponse.success(SuccessStatus.LOGIN_SUCCESS, response));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<CommonResponse<Void>> logout() {
-        return ResponseEntity.ok(
-                CommonResponse.success(
-                        SuccessStatus.LOGOUT_SUCCESS,
-                        SuccessStatus.LOGOUT_SUCCESS.getSuccessCode(),
-                        SuccessStatus.LOGOUT_SUCCESS.getMessage(),
-                        null
-                )
-        );
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.LOGOUT_SUCCESS, null));
     }
 }

@@ -3,13 +3,13 @@ package com.example.ticketingproject.domain.work.entity;
 import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.work.enums.Category;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,5 +30,4 @@ public class Work extends ModifiableEntity {
     private BigDecimal minPrice;
 
     private Long likeCount;
-
 }

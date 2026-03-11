@@ -20,37 +20,15 @@ public class SeatGradeService {
     private final SeatGradeRepository seatGradeRepository;
 
     public Page<SeatGradeResponse> findAll(Long sessionId, Pageable pageable) {
-        return seatGradeRepository.findAllByPerformanceSessionIdAndDeletedAtIsNull(sessionId, pageable)
-                .map(
-                        seatGrade -> SeatGradeResponse.builder()
-                                .seatGradeId(seatGrade.getId())
-                                .sessionId(seatGrade.getPerformanceSession().getId())
-                                .gradeName(seatGrade.getGradeName())
-                                .price(seatGrade.getPrice())
-                                .totalSeats(seatGrade.getTotalSeats())
-                                .remainingSeats(seatGrade.getRemainingSeats())
-                                .createdAt(seatGrade.getCreatedAt())
-                                .modifiedAt(seatGrade.getModifiedAt())
-                                .deletedAt(seatGrade.getDeletedAt())
-                                .build()
-                );
+        return seatGradeRepository.findAllByPerformanceSessionId(sessionId, pageable)
+                .map(SeatGradeResponse::from);
     }
 
     public SeatGradeResponse findOne(Long sessionId, Long seatGradeId) {
-        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionIdAndDeletedAtIsNull(seatGradeId, sessionId).orElseThrow(
+        SeatGrade seatGrade = seatGradeRepository.findByIdAndPerformanceSessionId(seatGradeId, sessionId).orElseThrow(
                 () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
         );
 
-        return SeatGradeResponse.builder()
-                .seatGradeId(seatGrade.getId())
-                .sessionId(seatGrade.getPerformanceSession().getId())
-                .gradeName(seatGrade.getGradeName())
-                .price(seatGrade.getPrice())
-                .totalSeats(seatGrade.getTotalSeats())
-                .remainingSeats(seatGrade.getRemainingSeats())
-                .createdAt(seatGrade.getCreatedAt())
-                .modifiedAt(seatGrade.getModifiedAt())
-                .deletedAt(seatGrade.getDeletedAt())
-                .build();
+        return SeatGradeResponse.from(seatGrade);
     }
 }

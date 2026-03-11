@@ -24,6 +24,7 @@ public class AdminSeatController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<SeatResponse>> create(@Valid @PathVariable(name = "venueId") Long venueId, CreateSeatRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CREATE_SUCCESS, CREATE_SUCCESS.getSuccessCode(), CREATE_SUCCESS.getMessage(), adminSeatService.save(venueId, request)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonResponse.success(CREATE_SUCCESS, adminSeatService.save(venueId, request)));
     }
 }

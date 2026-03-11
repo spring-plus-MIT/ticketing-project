@@ -7,6 +7,7 @@ public class Constants {
     public static final String MSG_INVALID_TOKEN = "유효하지 않은 토큰입니다.";
     public static final String MSG_TOKEN_EXPIRED = "토큰이 만료되었습니다.";
     public static final String MSG_INVALID_SIGNATURE = "토큰 서명이 유효하지 않습니다.";
+    public static final String MSG_ACCESS_FORBIDDEN = "권한이 부족합니다.";
 
     // User
     public static final String MSG_DUPLICATE_EMAIL = "이미 사용 중인 이메일입니다.";
@@ -40,8 +41,16 @@ public class Constants {
     // SeatGrade
     public static final String MSG_SEAT_GRADE_NOT_FOUND = "좌석 등급이 존재하지 않습니다.";
 
+    // Like
+    public static final String MSG_LIKE_NOT_FOUND = "찜이 존재하지 않습니다.";
+    public static final String MSG_LIKE_ALREADY_EXISTS = "이미 찜한 작품입니다.";
+
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
+    public static final String MSG_VALIDATION_NOT_BLANK_ERROR = "필수 입력 값이 누락 되었습니다.";
+    public static final String MSG_VALIDATION_EMAIL_ERROR = "이메일 형식이 올바르지 않습니다.";
+    public static final String MSG_VALIDATION_LENGTH_ERROR = "입력 길이가 잘못되었습니다.";
+    public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
 
 
 }

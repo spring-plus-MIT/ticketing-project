@@ -1,7 +1,7 @@
 package com.example.ticketingproject.domain.venue.service;
 
 import com.example.ticketingproject.domain.venue.dto.CreateVenueRequest;
-import com.example.ticketingproject.domain.venue.dto.CreateVenueResponse;
+import com.example.ticketingproject.domain.venue.dto.VenueResponse;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class AdminVenueServiceTest {
         given(venueRepository.save(any(Venue.class))).willReturn(savedVenue);
 
         // when
-        CreateVenueResponse response = adminVenueService.create(request);
+        VenueResponse response = adminVenueService.create(request);
 
         // then
         assertThat(response.getName()).isEqualTo("올림픽 경기장");
