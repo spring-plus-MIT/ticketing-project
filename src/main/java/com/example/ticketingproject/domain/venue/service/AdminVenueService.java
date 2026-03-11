@@ -1,9 +1,13 @@
 package com.example.ticketingproject.domain.venue.service;
 
+import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.venue.dto.CreateVenueRequest;
+import com.example.ticketingproject.domain.venue.dto.UpdateVenueRequest;
 import com.example.ticketingproject.domain.venue.dto.VenueResponse;
 import com.example.ticketingproject.domain.venue.entity.Venue;
+import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,5 +34,29 @@ public class AdminVenueService {
                         .address(savedVenue.getAddress())
                         .totalSeats(savedVenue.getTotalSeats())
                         .build();
+    }
+
+    @Transactional
+    public VenueResponse updateVenue(Long venueId, UpdateVenueRequest request) {
+        Venue venue = venueRepository.findById(venueId).orElseThrow(
+                () -> new VenueException(
+                        ErrorStatus.VENUE_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.VENUE_NOT_FOUND
+                )
+        );
+        venue.update(request);
+
+        return VenueResponse.from(venue);
+    }
+
+    @Transactional
+    public void deleteVenue(Long venueId) {
+        Venue venue = venueRepository.findById(venueId).orElseThrow(
+                () -> new VenueException(
+                        ErrorStatus.VENUE_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.VENUE_NOT_FOUND
+                )
+        );
+        venue.delete();
     }
 }
