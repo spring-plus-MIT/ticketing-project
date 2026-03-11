@@ -5,6 +5,8 @@ import com.example.ticketingproject.domain.review.entity.Review;
 import com.example.ticketingproject.domain.review.exception.ReviewException;
 import com.example.ticketingproject.domain.review.repository.ReviewRepository;
 import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.work.entity.Work;
+import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +29,9 @@ class AdminReviewServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private WorkRepository workRepository;
 
     @InjectMocks
     private AdminReviewService adminReviewService;
@@ -62,12 +67,16 @@ class AdminReviewServiceTest {
     void 관리자_리뷰삭제_성공() {
 
         Long reviewId = 1L;
+        Long workId = 1L;
         Review review = mock(Review.class);
+        Work work = mock(Work.class);
 
+        when(workRepository.findById(workId))
+                .thenReturn(Optional.of(work));
         when(reviewRepository.findById(reviewId))
                 .thenReturn(Optional.of(review));
 
-        adminReviewService.deleteReviewByAdmin(reviewId);
+        adminReviewService.deleteReviewByAdmin(reviewId,workId);
 
         verify(reviewRepository).findById(reviewId);
         verify(review).delete();
@@ -77,12 +86,14 @@ class AdminReviewServiceTest {
     void 관리자_리뷰삭제_실패_리뷰없음() {
 
         Long reviewId = 1L;
-
+        Long workId = 1L;
+        Work work = mock(Work.class);
         when(reviewRepository.findById(reviewId))
                 .thenReturn(Optional.empty());
-
+        when(workRepository.findById(workId))
+                .thenReturn(Optional.of(work));
         assertThatThrownBy(() ->
-                adminReviewService.deleteReviewByAdmin(reviewId)
+                adminReviewService.deleteReviewByAdmin(reviewId,workId)
         ).isInstanceOf(ReviewException.class);
 
         verify(reviewRepository).findById(reviewId);

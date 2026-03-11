@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.reservation.service;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
@@ -37,6 +38,9 @@ class ReservationServiceTest {
     @Mock
     private SeatRepository seatRepository;
 
+    @Mock
+    private PerformanceSessionRepository performanceSessionRepository;
+
     @InjectMocks
     private ReservationService reservationService;
 
@@ -50,8 +54,10 @@ class ReservationServiceTest {
 
         Long userId = 1L;
         Long seatId = 1L;
+        Long performnaceSessionId = 1L;
 
         ReservationCreateRequest request = new ReservationCreateRequest();
+        ReflectionTestUtils.setField(request, "performanceSessionId", performnaceSessionId);
         ReflectionTestUtils.setField(request, "seatId", seatId);
 
         User user = mock(User.class);
@@ -79,6 +85,7 @@ class ReservationServiceTest {
         when(performanceSession.getPerformance()).thenReturn(performance);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(performanceSessionRepository.findById(performnaceSessionId)).thenReturn(Optional.of(performanceSession));
         when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
         when(reservationRepository.save(any())).thenReturn(reservation);
 

@@ -17,13 +17,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/works")
+@RequestMapping("/works/{worksId}/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @GetMapping("/{workId}/reviews")
+    @GetMapping
     public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getReviews(
             @PathVariable Long workId,
             @PageableDefault Pageable pageable,
@@ -50,6 +50,7 @@ public class ReviewController {
         return ResponseEntity.ok(
                 CommonResponse.success(
                         SuccessStatus.CREATE_SUCCESS,
+
                         response
                 )
         );
