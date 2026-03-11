@@ -6,7 +6,9 @@ import com.example.ticketingproject.domain.review.service.AdminReviewService;
 import com.example.ticketingproject.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +26,10 @@ public class AdminReviewController {
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ReviewResponseDto>>> getAllReviews(
             @PathVariable Long workId,
-            Pageable converted
+            @PageableDefault Pageable pageable,
+            @RequestParam (defaultValue = "1")  int page
     ) {
+        Pageable converted= PageRequest.of(page-1,pageable.getPageSize(),pageable.getSort());
         return ResponseEntity.ok(
                 CommonResponse.success(
                         READ_SUCCESS,
