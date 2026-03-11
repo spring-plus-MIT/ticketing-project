@@ -13,7 +13,8 @@ public enum SuccessStatus {
     CREATE_SUCCESS(HttpStatus.CREATED, "201_CREATE_SUCCESS", "데이터 생성에 성공하였습니다."),
     READ_SUCCESS(HttpStatus.OK, "200_READ_SUCCESS", "데이터 조회에 성공하였습니다."),
     UPDATE_SUCCESS(HttpStatus.OK, "200_UPDATE_SUCCESS", "데이터 수정에 성공하였습니다."),
-    DELETE_SUCCESS(HttpStatus.OK, "200_DELETE_SUCCESS", "데이터 삭제에 성공하였습니다.");
+    DELETE_SUCCESS(HttpStatus.OK, "200_DELETE_SUCCESS", "데이터 삭제에 성공하였습니다."),
+    CHARGE_SUCCESS(HttpStatus.OK, "200_CHARGE_SUCCESS", "충전에 성공하였습니다.");
 
     private final HttpStatus httpStatus;
     private final String successCode;

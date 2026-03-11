@@ -22,8 +22,8 @@ public class AdminSeatGradeController {
 
     @PostMapping
     public ResponseEntity<CommonResponse<SeatGradeResponse>> create(
-            @Valid @PathVariable(name = "sessionId") Long sessionId,
-            CreateSeatGradeRequest request
+            @PathVariable(name = "sessionId") Long sessionId,
+            @Valid @RequestBody CreateSeatGradeRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(CommonResponse.success(CREATE_SUCCESS, adminSeatGradeService.save(sessionId, request)));
@@ -31,9 +31,9 @@ public class AdminSeatGradeController {
 
     @PutMapping("/{seatGradeId}")
     public ResponseEntity<CommonResponse<SeatGradeResponse>> update(
-            @Valid @PathVariable(name = "sessionId") Long sessionId,
+            @PathVariable(name = "sessionId") Long sessionId,
             @PathVariable(name = "seatGradeId") Long seatGradeId,
-            PutSeatGradeRequest request
+            @Valid @RequestBody PutSeatGradeRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.success(UPDATE_SUCCESS, adminSeatGradeService.update(sessionId, seatGradeId, request)));
     }

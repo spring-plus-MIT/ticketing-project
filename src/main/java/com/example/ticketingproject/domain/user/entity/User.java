@@ -102,4 +102,8 @@ public class User extends DeletableEntity {
         this.password = password;
         this.phone = phone;
     }
+
+    public void changeBalance(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+    }
 }

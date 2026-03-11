@@ -26,8 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
@@ -51,7 +50,7 @@ class LikeServiceTest {
     private Like like;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         user = User.builder()
                 .name("홍길동")
                 .email("test@123.com")

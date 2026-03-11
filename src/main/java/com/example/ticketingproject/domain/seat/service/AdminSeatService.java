@@ -19,14 +19,13 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AdminSeatService {
 
     private final SeatRepository seatRepository;
     private final VenueRepository venueRepository;
     private final SeatGradeRepository seatGradeRepository;
 
-    @Transactional
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
         Venue venue = venueRepository.findById(venueId).orElseThrow(
                 () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
