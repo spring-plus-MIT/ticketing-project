@@ -15,9 +15,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Page<Reservation> findAllByUserId(Long userId, Pageable pageable);
 
     Optional<Reservation> findByIdAndUserId(Long reservationId, Long userId);
-
-    // 예약 대기 30분, 스케줄러에 적용 해야 하는데 내일 할 예정
-    @Query("SELECT r FROM Reservation r WHERE r.status = 'PENDING' AND r.expiresAt < :now ")
-    List<Reservation> findExpiredReservations(LocalDateTime now);
-
 }
