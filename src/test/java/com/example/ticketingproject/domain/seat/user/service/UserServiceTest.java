@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.user.service;
+package com.example.ticketingproject.domain.seat.user.service;
 
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
 import com.example.ticketingproject.domain.user.dto.UpdateUserRequest;
