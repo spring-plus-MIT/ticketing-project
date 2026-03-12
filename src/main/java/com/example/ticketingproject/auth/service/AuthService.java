@@ -26,7 +26,6 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -69,15 +68,11 @@ public class AuthService {
                     ErrorStatus.INVALID_PASSWORD);
         }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+        CustomUserDetails customUserDetails = new CustomUserDetails(
+                user.getId(),
+                user.getEmail(),
+                user.getUserRole()
         );
-
-        CustomUserDetails customUserDetails =
-                (CustomUserDetails) authentication.getPrincipal();
 
         String token = jwtTokenProvider.createToken(customUserDetails);
 
