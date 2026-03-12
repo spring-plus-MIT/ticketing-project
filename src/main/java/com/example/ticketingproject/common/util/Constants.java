@@ -54,7 +54,7 @@ public class Constants {
     public static final String MSG_INSUFFICIENT_BALANCE = "잔액이 부족합니다.";
 
     // Reservation
-    public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
+    public static final String MSG_ALREADY_CANCELLED_RESERVATION = "이미 취소된 예약 입니다.";
     public static final String MSG_ALREADY_PAID_RESERVATION = "이미 결제된 예약 입니다.";
 
     // Validation
