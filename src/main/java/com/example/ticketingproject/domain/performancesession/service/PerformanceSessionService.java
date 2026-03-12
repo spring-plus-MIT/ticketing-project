@@ -25,27 +25,17 @@ public class PerformanceSessionService {
 
     public Page<GetSessionResponse> getSessions(Long performanceId, Pageable pageable) {
         return performanceSessionRepository.findByPerformanceId(performanceId, pageable)
-                .map(this::convertToResponse);
+                .map(GetSessionResponse::from);
     }
 
     public GetSessionResponse getSessionDetail(Long sessionId) {
         PerformanceSession session = performanceSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
 
-        return convertToResponse(session);
+        return GetSessionResponse.from(session);
     }
 
     public Page<GetSessionResponse> search(String keyword, Category category, LocalDateTime startTime, LocalDateTime endTime, PerformanceStatus status, Pageable converted) {
         return performanceSessionRepository.searchSessions(keyword, category, startTime, endTime, status, converted);
-    }
-
-    private GetSessionResponse convertToResponse(PerformanceSession s) {
-        return GetSessionResponse.builder()
-                .id(s.getId())
-                .title(s.getPerformance().getWork().getTitle())
-                .venueName(s.getVenue().getName())
-                .startTime(s.getStartTime())
-                .endTime(s.getEndTime())
-                .build();
     }
 }
