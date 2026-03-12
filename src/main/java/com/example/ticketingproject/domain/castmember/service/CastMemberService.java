@@ -1,22 +1,13 @@
 package com.example.ticketingproject.domain.castmember.service;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
-import com.example.ticketingproject.domain.castmember.dto.CastMemberRequest;
 import com.example.ticketingproject.domain.castmember.dto.CastMemberResponse;
 import com.example.ticketingproject.domain.castmember.entity.CastMember;
-import com.example.ticketingproject.domain.castmember.exception.CastMemberException;
 import com.example.ticketingproject.domain.castmember.repository.CastMemberRepository;
-import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
-import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;
-import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,43 +15,12 @@ import static com.example.ticketingproject.common.enums.ErrorStatus.*;
 public class CastMemberService {
 
     private final CastMemberRepository castMemberRepository;
-    private final PerformanceSessionRepository performanceSessionRepository;
 
-    @Transactional
-    public void createCastMember(Long sessionId, CastMemberRequest request) {
-        PerformanceSession session = performanceSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new PerformanceSessionException(SESSION_NOT_FOUND.getHttpStatus(), SESSION_NOT_FOUND));
-
-        CastMember castMember = CastMember.builder()
-                .performanceSession(session)
-                .name(request.getName())
-                .roleName(request.getRoleName())
-                .build();
-
-        castMemberRepository.save(castMember);
+    public Page<CastMemberResponse> getCastMembers(Long sessionId, Pageable pageable) {
+        return castMemberRepository.findByPerformanceSessionId(sessionId, pageable)
+                .map(this::convertToResponse);
     }
 
-    public List<CastMemberResponse> getCastMembers(Long sessionId) {
-        return castMemberRepository.findByPerformanceSessionId(sessionId).stream()
-                .map(this::convertToResponse)
-                .toList();
-    }
-
-    @Transactional
-    public void updateCastMember(Long castId, CastMemberRequest request) {
-        CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
-
-        castMember.update(request.getName(), request.getRoleName());
-    }
-
-    @Transactional
-    public void deleteCastMember(Long castId) {
-        CastMember castMember = castMemberRepository.findById(castId)
-                .orElseThrow(() -> new CastMemberException(CAST_MEMBER_NOT_FOUND.getHttpStatus(), CAST_MEMBER_NOT_FOUND));
-
-        castMemberRepository.delete(castMember);
-    }
 
     private CastMemberResponse convertToResponse(CastMember c) {
         return CastMemberResponse.builder()

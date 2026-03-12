@@ -23,4 +23,26 @@ public interface PerformanceSessionRepository extends JpaRepository<PerformanceS
             @Param("venue") Venue venue,
             @Param("startTime") LocalDateTime startTime
     );
+
+    @Query("SELECT COUNT(ps) > 0 FROM PerformanceSession ps " +
+            "WHERE ps.venue = :venue " +
+            "AND ps.startTime < :endTime " +
+            "AND ps.endTime > :startTime")
+    boolean existsOverlappingSession(
+            @Param("venue") Venue venue,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
+    );
+
+    @Query("SELECT COUNT(ps) > 0 FROM PerformanceSession ps " +
+            "WHERE ps.venue = :venue " +
+            "AND ps.id != :sessionId " +
+            "AND ps.startTime < :endTime " +
+            "AND ps.endTime > :startTime")
+    boolean existsOverlappingSessionForUpdate(
+            @Param("venue") Venue venue,
+            @Param("sessionId") Long sessionId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
+    );
 }
