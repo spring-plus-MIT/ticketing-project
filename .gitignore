@@ -38,4 +38,6 @@ out/
 src/main/resources/.env
 
 ### .env ###
+.env.DS_Store
+**/.DS_Store
 .env
