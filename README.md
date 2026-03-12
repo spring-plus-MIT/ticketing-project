@@ -502,6 +502,31 @@ DB_PASSWORD=secret
 JWT_SECRET=your-jwt-secret
 ```
 
+### Spring Profile 설정
+
+`application.yml`에 기본 프로파일이 지정되어 있지 않으므로, 로컬 실행 시 반드시 `local` 프로파일을 명시해야 합니다.
+
+**IntelliJ 실행 설정**
+```
+Run/Debug Configurations → Active profiles → local
+```
+
+**VM options으로 지정**
+```
+-Dspring.profiles.active=local
+```
+
+**CLI로 실행 시**
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+| 환경 | 프로파일 | 설정 파일 |
+|------|---------|---------|
+| 로컬 | `local` | `application-local.yml` + `.env` |
+| 테스트 | (자동) | `src/test/resources/application.yml` (H2) |
+| 운영 | `prod` | `application-prod.yml` (GitHub Secrets로 주입) |
+
 ---
 
 ## 🔎 트러블슈팅
