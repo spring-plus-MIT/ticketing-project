@@ -281,6 +281,205 @@ PENDING → ACTIVE → DELETED
 
 ---
 
+# 동시성 시나리오 - 마지막 좌석 1개 동시 예매 100명
+
+### 1. 문제 상황
+
+**특정 좌석에 대해 동시에 여러 사용자가 예약을 시도하는 상황**
+
+예시)
+
+남은 좌석 : 1석 (A1)
+
+동시에 100명의 사용자가 해당 좌석을 예매 요청
+
+동시성 제어가 없는 경우 다음과 같은 문제가 발생
+
+```
+User1 → 좌석 조회 → AVAILABLE
+User2 → 좌석 조회 → AVAILABLE
+User3 → 좌석 조회 → AVAILABLE
+...
+User100 → 좌석 조회 → AVAILABLE
+```
+
+이후 모든 요청이 예약을 생성하게 되면
+
+A1 좌석에 대해 100개의 예약이 생성되는 Double Booking 문제가 발생
+
+
+### 2. 목표
+
+**동시 요청 발생 시, 단 하나의 요청건만 성공, 나머지 요청은 모두 실패 처리**
+
+예시)
+
+```
+User1 → 예약 성공
+User2 ~ User100 → 예약 실패
+```
+
+
+### 3. 해결 전략
+
+**Redis 기반 분산 락(Distributed Lock) 을 이용하여 동시성을 제어**
+
+- **Distributed Lock**을 선택한 이유
+
+1. **기존 DB Lock 방식의 한계**
+    - DB Pessimistic Lock - DB 트랜잭션 범위만 보호  
+    - Optimistic Lock - 충돌 발생 시 재시도 필요
+
+2. **티켓팅 로직 흐름**
+    - 좌석 조회 -> 예약 가능 여부 검증 -> 예약 생성 -> 좌석 상태 변경
+    - 이 전체 비즈니스 로직을 보호하려면 DB 트랜잭션 범위를 넘어서는 락이 필요
+    - **따라서 Redis 분산 락을 사용**
+
+| 구분 | 비관적 락 (Pessimistic) | 낙관적 락 (Optimistic) | 분산 락 (Distributed) |
+|-----|-----|-----|-----|
+| 특징 | 조회 시점에 즉시 락 획득 | 수정 시점에 버전으로 충돌 검증 | Redis 등 외부 시스템으로 락 관리 |
+| 장점 | 충돌 완전 차단, 무결성 보장 | 높은 동시성, 성능 우수 | 멀티 서버 환경에서도 일관성 보장 |
+| 단점 | 동시성 낮음, 데드락 가능 | 충돌 시 재시도 필요 | TTL, 네트워크 장애 등 고려 필요 |
+| 사용 예시 | 계좌 이체, 재고 차감 | 좋아요, 조회수 | 티켓 예매, 예약 시스템 |
+| 환경 | 단일 DB + 충돌 비용 큼 | 단일 DB + 충돌 비용 작음 | 멀티 서버 / 분산 환경 |
+
+
+
+### 4. Redis Lock 구현 방식
+
+**Redisson을 사용하지 않고 Lettuce 기반으로 직접 Redis Lock을 구현**
+
+구조
+
+```
+LockRedisRepository → LockService → ReservationService
+```
+
+비즈니스 로직에서는 Redis에 직접 접근하지 않도록 설계
+
+```
+ReservationService → LockService → LockRedisRepository → Redis
+```
+
+비즈니스 로직과 락 구현을 분리
+
+
+### 5. Redis Lock Key 설계
+
+**좌석 단위로 동시성을 제어하기 위한 Key 구조 사용**
+
+```
+lock:seat:{seatId}
+```
+
+현재 프로젝트는 좌석 단위로만 동시성 충돌이 발생
+
+```
+Seat A1 → 하나의 Lock
+Seat A2 → 별도의 Lock
+```
+
+
+### 6. Lock 획득 방식
+
+**Redis의 SETNX (Set If Not Exists)를 이용해 락 획득**
+
+```
+SET lock:seat:101 UUID NX PX 3000
+```
+
+- NX : key가 없을 때만 설정
+- PX : TTL 설정
+
+
+### 7. TTL 설정
+
+**락을 생성할 때 TTL(Time to Live)을 함께 설정**
+
+TTL = 3초
+
+서버 장애 또는 사용자 이탈 시 락이 영구적으로 남는 문제 방지
+
+예시)
+
+```
+Lock 획득 → 서버 장애 발생 → Lock 해제 코드 실행 안됨
+```
+
+TTL이 없으면 좌석이 영구적으로 잠김
+
+
+### 8. Lock 해제 방식
+
+**본인이 획득한 락만 해제하도록 UUID를 사용**
+
+현재 value == UUID 일 때만 삭제를 위한 Lua Script를 사용해 원자적으로 삭제
+
+예시)
+
+```lua
+if redis.call("get", KEYS[1]) == ARGV[1] then
+    return redis.call("del", KEYS[1])
+else
+    return 0
+end
+```
+
+다른 요청이 획득한 락을 실수로 삭제하는 문제를 방지
+
+
+### 9. Lock 실패 시 처리
+
+**락 획득에 실패했을 때 대표적 처리 방법**
+
+- Fail Fast - 즉시 실패
+- Retry - 일정 시간 후 재시도
+- Blocking - 락이 해제될 때까지 대기
+
+현재 프로젝트는 **Fail Fast 전략을 사용**
+
+- 티켓팅 시스템에서는 빠른 실패 응답이 사용자에게 더 좋음?
+- 락 획득 실패 → 즉시 예약 실패 응답
+
+
+### 10. 동시 예매 처리 흐름
+
+```
+사용자 요청 → Redis Lock 획득 시도 → Lock 성공
+→ 좌석 상태 검증 → 예약 생성 → 좌석 상태 변경(RESERVED) → Lock 해제
+→ 결제 완료 → 좌석 상태 변경(SOLD)
+```
+
+```
+사용자 요청 → Redis Lock 획득 시도 → Lock 실패 → 즉시 예약 실패
+```
+
+
+### 11. 기대 결과
+
+**문제 상황에 대한 Double Booking 문제를 방지**
+
+```
+1명 → 예약 성공
+99명 → 예약 실패
+```
+
+
+### 12. 추가 고려 사항
+
+**동시성 제어 시스템에 중요한 요소**
+
+- 락 TTL 설정
+- 락 해제 안정성
+- 락 충돌 시 처리 전략
+- Deadlock 방지
+
+현재 프로젝트에서 구조
+
+- SETNX + TTL
+- UUID 기반 락 식별
+- Lua Script 기반 원자적 해제
+---
 
 ## 🚀 로컬 실행 방법
 
