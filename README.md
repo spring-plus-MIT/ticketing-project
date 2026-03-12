@@ -266,7 +266,6 @@ PENDING → ACTIVE → DELETED
 ### 2️⃣ 해결 전략: 복합 인덱스 설계
 - **Composite Index 생성**: `INDEX idx_perf_optimized (work_id, start_date, venue_id)`
 - **선정 이유**: 조회 빈도가 높고 결합도가 높은 컬럼들을 묶어 **카디널리티(Cardinality)**를 높이고 탐색 범위를 최소화하여 서버 부하 경감
-- **카디널리티란 ? : **"데이터의 중복도가 낮고, 종류가 얼마나 다양한가"**를 나타내는 지표입니다.
 
 ### 3️⃣ 실제 개선 결과 (EXPLAIN 데이터 기반)
 
