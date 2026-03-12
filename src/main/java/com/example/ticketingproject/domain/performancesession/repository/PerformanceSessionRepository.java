@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 
 
-public interface PerformanceSessionRepository extends JpaRepository<PerformanceSession, Long> {
+public interface PerformanceSessionRepository extends JpaRepository<PerformanceSession, Long>, PerformanceSessionCustomRepository {
 
     Page<PerformanceSession> findByPerformanceId(Long performanceId, Pageable pageable);
 
