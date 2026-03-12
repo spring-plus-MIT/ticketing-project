@@ -45,7 +45,6 @@ public class SeatGrade extends DeletableEntity {
     private int remainingSeats;
 
 
-
     @Builder
     public SeatGrade(PerformanceSession performanceSession, GradeName gradeName, BigDecimal price, int totalSeats, int remainingSeats) {
         this.performanceSession = performanceSession;

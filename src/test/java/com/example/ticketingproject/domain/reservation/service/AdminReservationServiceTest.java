@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.reservation.service;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
+import com.example.ticketingproject.domain.seat.entity.Seat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,7 +20,7 @@ class AdminReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @InjectMocks
-    private AdminReservationService adminReservationService;
+    private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
@@ -27,21 +28,24 @@ class AdminReservationServiceTest {
     }
 
     @Test
-    void 관리자_예약상태_변경() {
+    void 관리자_예약_취소_성공_테스트() {
 
         Long reservationId = 1L;
+        Long userId = 1L;
 
         Reservation reservation = mock(Reservation.class);
+        Seat seat = mock(Seat.class);
 
-        when(reservationRepository.findById(reservationId))
+        when(reservationRepository.findByIdAndUserId(reservationId, userId))
                 .thenReturn(Optional.of(reservation));
+        when(reservation.getSeat()).thenReturn(seat);
 
-        adminReservationService.updateReservationStatusByAdmin(
-                reservationId,
-                ReservationStatus.CONFIRMED
+        reservationService.cancelReservation(
+                reservationId, userId
         );
 
-        verify(reservationRepository).findById(reservationId);
-        verify(reservation).updateStatus(ReservationStatus.CONFIRMED);
+        verify(reservationRepository).findByIdAndUserId(reservationId, userId);
+        verify(reservation).cancel();
+        verify(seat).release();
     }
 }

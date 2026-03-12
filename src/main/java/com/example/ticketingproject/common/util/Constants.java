@@ -31,6 +31,8 @@ public class Constants {
     // Seat
     public static final String MSG_SEAT_NOT_FOUND = "좌석이 존재하지 않습니다.";
     public static final String MSG_SEAT_CAPACITY_EXCEEDED = "Venue의 총 좌석 수를 초과할 수 없습니다.";
+    public static final String MSG_ALREADY_RESERVED_SEAT = "이미 예약된 좌석입니다.";
+    public static final String MSG_ALREADY_SOLD_SEAT = "이미 판매된 좌석입니다.";
 
     // Performance
     public static final String MSG_PERFORMANCE_NOT_FOUND = "공연이 존재하지 않습니다.";
@@ -52,7 +54,7 @@ public class Constants {
     public static final String MSG_INSUFFICIENT_BALANCE = "잔액이 부족합니다.";
 
     // Reservation
-    public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
+    public static final String MSG_ALREADY_CANCELLED_RESERVATION = "이미 취소된 예약 입니다.";
     public static final String MSG_ALREADY_PAID_RESERVATION = "이미 결제된 예약 입니다.";
 
     // Validation

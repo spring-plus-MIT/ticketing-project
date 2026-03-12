@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.seat.service;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
+import com.example.ticketingproject.domain.seat.enums.SeatStatus;
 import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
@@ -48,6 +49,7 @@ public class AdminSeatService {
                 .seatGrade(seatGrade)
                 .rowName(request.getRowName())
                 .seatNumber(request.getSeatNumber())
+                .seatStatus(SeatStatus.AVAILABLE)
                 .build();
 
         Seat savedSeat = seatRepository.save(seat);
