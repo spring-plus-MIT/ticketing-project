@@ -109,7 +109,7 @@ class UserServiceTest {
         User user = User.builder()
                 .name("이름")
                 .email("test3@test.com")
-                .password("1234")
+                .password("12345678")
                 .phone("010-1234-1234")
                 .balance(BigDecimal.valueOf(1000))
                 .userRole(UserRole.USER)

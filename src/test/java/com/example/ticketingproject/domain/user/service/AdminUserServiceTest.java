@@ -33,7 +33,7 @@ public class AdminUserServiceTest {
             User user = User.builder()
                     .name("user" + i)
                     .email("user" + i + "@test.com")
-                    .password("1234")
+                    .password("12345678")
                     .phone("01012341234")
                     .balance(BigDecimal.valueOf(1000))
                     .userRole(UserRole.USER)

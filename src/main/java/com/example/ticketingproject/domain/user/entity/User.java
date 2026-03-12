@@ -1,6 +1,8 @@
 package com.example.ticketingproject.domain.user.entity;
 
 import com.example.ticketingproject.common.entity.DeletableEntity;
+import com.example.ticketingproject.common.enums.ErrorStatus;
+import com.example.ticketingproject.domain.payment.exception.PaymentException;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
@@ -105,5 +107,18 @@ public class User extends DeletableEntity {
 
     public void changeBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
+    }
+
+    public BigDecimal pay(BigDecimal amount) {
+        if (this.balance.compareTo(amount) < 0) {
+            throw new PaymentException(
+                    ErrorStatus.INSUFFICIENT_BALANCE.getHttpStatus(),
+                    ErrorStatus.INSUFFICIENT_BALANCE
+            );
+        }
+
+        this.balance = this.balance.subtract(amount);
+
+        return this.balance;
     }
 }

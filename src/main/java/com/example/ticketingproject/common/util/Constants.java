@@ -47,6 +47,14 @@ public class Constants {
     public static final String MSG_LIKE_NOT_FOUND = "찜이 존재하지 않습니다.";
     public static final String MSG_LIKE_ALREADY_EXISTS = "이미 찜한 작품입니다.";
 
+    // Payment
+    public static final String MSG_PAYMENT_NOT_FOUND = "존재하지 않는 결제입니다.";
+    public static final String MSG_INSUFFICIENT_BALANCE = "잔액이 부족합니다.";
+
+    // Reservation
+    public static final String MSG_ALREADY_CANCELED_RESERVATION = "이미 취소된 예약 입니다.";
+    public static final String MSG_ALREADY_PAID_RESERVATION = "이미 결제된 예약 입니다.";
+
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
     public static final String MSG_VALIDATION_NOT_BLANK_ERROR = "필수 입력 값이 누락 되었습니다.";

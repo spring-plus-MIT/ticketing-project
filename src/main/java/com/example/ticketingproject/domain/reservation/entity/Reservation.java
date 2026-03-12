@@ -1,9 +1,10 @@
 package com.example.ticketingproject.domain.reservation.entity;
 
 import com.example.ticketingproject.common.entity.ModifiableEntity;
-import com.example.ticketingproject.domain.performance.entity.Performance;
+import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
+import com.example.ticketingproject.domain.reservation.exception.ReservationException;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -67,6 +68,17 @@ public class Reservation extends ModifiableEntity {
     }
 
     public void confirm() {
+        switch (this.status) {
+            case CANCELED -> throw new ReservationException(ErrorStatus.ALREADY_CANCELED_RESERVATION);
+            case CONFIRMED -> throw new ReservationException(ErrorStatus.ALREADY_PAID_RESERVATION);
+        }
+
         this.status = ReservationStatus.CONFIRMED;
+    }
+
+    public void validateNotPaid(boolean alreadyPaid) {
+        if (alreadyPaid) {
+            throw new ReservationException(ErrorStatus.ALREADY_PAID_RESERVATION);
+        }
     }
 }
