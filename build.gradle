@@ -30,7 +30,13 @@ repositories {
 }
 
 dependencies {
+    // aws parameter store
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store:4.0.0-RC1'
+
+    // websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // H2
