@@ -66,8 +66,8 @@ public class Constants {
     public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
 
     // Lock
-    public static final String MSG_LOCK_ACQUISITION_FAILED = "다른 요청이 이미 사용 중입니다.";
-    public static final String MSG_LOCK_TIMEOUT = "제한 시간이 초과 되었습니다.";
-    public static final String MSG_LOCK_RELEASE_FAILED = "Lock 해제에 실패했습니다.";
-    public static final String MSG_LOCK_INTERRUPTED = "요청이 정상적으로 처리되지 않았습니다.";
+    public static final String MSG_LOCK_ACQUISITION_FAILED = "다른 사용자가 이미 요청 중입니다.";
+    public static final String MSG_LOCK_TIMEOUT = "요청이 많아 처리가 지연되었습니다. 잠시 후 다시 시도해주세요.";
+    public static final String MSG_LOCK_RELEASE_FAILED = "요청 처리 중 문제가 발생했습니다. 다시 시도해주세요.";
+    public static final String MSG_LOCK_INTERRUPTED = "요청이 정상적으로 처리되지 않았습니다. 잠시 후 다시 시도해주세요.";
 }
