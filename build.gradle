@@ -40,6 +40,9 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 
+   // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
