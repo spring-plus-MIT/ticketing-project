@@ -4,7 +4,7 @@ import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,10 +34,10 @@ public class Performance extends ModifiableEntity {
     @Length(max = 20)
     private String season;
 
-    @NotBlank
+    @NotNull
     private LocalDate startDate;
 
-    @NotBlank
+    @NotNull
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)

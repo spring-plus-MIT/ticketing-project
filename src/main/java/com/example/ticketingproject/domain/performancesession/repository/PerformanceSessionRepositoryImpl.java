@@ -1,8 +1,8 @@
 package com.example.ticketingproject.domain.performancesession.repository;
 
+import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
 import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
 import com.example.ticketingproject.domain.performance.entity.QPerformance;
-import com.example.ticketingproject.domain.performancesession.dto.GetSessionResponse;
 import com.example.ticketingproject.domain.performancesession.entity.QPerformanceSession;
 import com.example.ticketingproject.domain.work.entity.QWork;
 import com.example.ticketingproject.domain.work.enums.Category;
@@ -16,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -24,18 +24,19 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
 
     private final JPAQueryFactory queryFactory;
 
-    private final QPerformanceSession performanceSession = QPerformanceSession.performanceSession;
+    private final QPerformanceSession performanceSession =  QPerformanceSession.performanceSession;
     private final QPerformance performance = QPerformance.performance;
     private final QWork work = QWork.work;
 
 
     @Override
-    public Page<GetSessionResponse> searchSessions(String keyword, Category category, LocalDateTime startTime, LocalDateTime endTime, PerformanceStatus status, Pageable converted) {
-        List<GetSessionResponse> result = queryFactory
-                .select(Projections.constructor(GetSessionResponse.class,
-                        performanceSession.id,
-                        work.title,
-                        performanceSession.venue.name,
+    public Page<PerformanceSearchResponse> searchPerformance(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status, Pageable converted) {
+        List<PerformanceSearchResponse> result = queryFactory
+                .select(Projections.constructor(PerformanceSearchResponse.class,
+                        performance.id,
+                        performance.season,
+                        work.category,
+                        performance.status,
                         performanceSession.startTime,
                         performanceSession.endTime
                         ))
@@ -45,23 +46,23 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .where(
                         titleLike(keyword),
                         categoryEq(category),
-                        dateBetween(startTime, endTime),
+                        dateBetween(startDate, endDate),
                         statusEq(status)
                 )
                 .offset(converted.getOffset())
                 .limit(converted.getPageSize())
-                .orderBy(performanceSession.startTime.asc())
+                .orderBy(performance.startDate.asc())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
-                .select(performanceSession.count())
+                .select(performance.count())
                 .from(performanceSession)
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)
                 .where(
                         titleLike(keyword),
                         categoryEq(category),
-                        dateBetween(startTime, endTime),
+                        dateBetween(startDate, endDate),
                         statusEq(status)
                 );
 
@@ -80,13 +81,13 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 : null;
     }
 
-    private BooleanExpression dateBetween(LocalDateTime startTime, LocalDateTime endTime) {
-        if (startTime == null && endTime == null) return null;
-        if (startTime == null) return performanceSession.startTime.loe(endTime);
-        if (endTime == null) return performanceSession.endTime.goe(startTime);
+    private BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null && endDate == null) return null;
+        if (startDate == null) return performanceSession.startTime.loe(endDate.atTime(23, 59, 59));
+        if (endDate == null) return performanceSession.startTime.goe(startDate.atStartOfDay());
 
-        return performanceSession.startTime.loe(endTime)
-                .and(performanceSession.endTime.goe(startTime));
+        return performanceSession.startTime.goe(startDate.atStartOfDay())
+                .and(performanceSession.startTime.loe(endDate.atTime(23, 59, 59)));
     }
 
     private BooleanExpression statusEq(PerformanceStatus status) {

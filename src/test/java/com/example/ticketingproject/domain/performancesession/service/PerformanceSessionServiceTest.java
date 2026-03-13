@@ -1,5 +1,7 @@
 package com.example.ticketingproject.domain.performancesession.service;
 
+import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
+import com.example.ticketingproject.common.search.service.SearchRankingService;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
 import com.example.ticketingproject.domain.performancesession.dto.GetSessionResponse;
@@ -29,12 +31,16 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class PerformanceSessionServiceTest {
 
     @Mock
     private PerformanceSessionRepository performanceSessionRepository;
+
+    @Mock
+    private SearchRankingService searchRankingService;
 
     @InjectMocks
     private PerformanceSessionService performanceSessionService;
@@ -105,150 +111,17 @@ class PerformanceSessionServiceTest {
     }
 
     @Test
-    @DisplayName("공연 세션 검색 성공 - 키워드 포함 결과 반환")
-    void search_success() {
-        // given
+    @DisplayName("공연 검색 시 인기 검색어 기록 호출 확인")
+    void search_recordsKeyword() {
         Pageable pageable = PageRequest.of(0, 10);
+        Page<PerformanceSearchResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        GetSessionResponse dto = GetSessionResponse.builder()
-                .id(1L)
-                .title("테스트 작품")
-                .venueName("테스트 공연장")
-                .startTime(LocalDateTime.of(2025, 5, 1, 14, 0))
-                .endTime(LocalDateTime.of(2025, 5, 1, 17, 0))
-                .build();
-
-        Page<GetSessionResponse> sessionPage = new PageImpl<>(List.of(dto), pageable, 1);
-
-        given(performanceSessionRepository.searchSessions(
-                "테스트 작품", null, null, null, null, pageable
-        )).willReturn(sessionPage);
-
-        // when
-        Page<GetSessionResponse> response = performanceSessionService.search(
-                "테스트 작품", null, null, null, null, pageable
-        );
-
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getId()).isEqualTo(1L);
-        assertThat(response.getContent().get(0).getTitle()).isEqualTo("테스트 작품");
-        assertThat(response.getContent().get(0).getVenueName()).isEqualTo("테스트 공연장");
-    }
-
-    @Test
-    @DisplayName("공연 세션 검색 성공 - 카테고리 필터 적용")
-    void search_success_withCategory() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        GetSessionResponse dto = GetSessionResponse.builder()
-                .id(1L)
-                .title("테스트 작품")
-                .venueName("테스트 공연장")
-                .startTime(LocalDateTime.of(2025, 5, 1, 14, 0))
-                .endTime(LocalDateTime.of(2025, 5, 1, 17, 0))
-                .build();
-
-        Page<GetSessionResponse> sessionPage = new PageImpl<>(List.of(dto), pageable, 1);
-
-        given(performanceSessionRepository.searchSessions(
-                null, Category.MUSICAL, null, null, null, pageable
-        )).willReturn(sessionPage);
-
-        // when
-        Page<GetSessionResponse> response = performanceSessionService.search(
-                null, Category.MUSICAL, null, null, null, pageable
-        );
-
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getTitle()).isEqualTo("테스트 작품");
-    }
-
-    @Test
-    @DisplayName("공연 세션 검색 성공 - 날짜 범위 필터 적용")
-    void search_success_withDateRange() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-        LocalDateTime startTime = LocalDateTime.of(2025, 5, 1, 0, 0);
-        LocalDateTime endTime = LocalDateTime.of(2025, 5, 31, 23, 59);
-
-        GetSessionResponse dto = GetSessionResponse.builder()
-                .id(1L)
-                .title("테스트 작품")
-                .venueName("테스트 공연장")
-                .startTime(LocalDateTime.of(2025, 5, 1, 14, 0))
-                .endTime(LocalDateTime.of(2025, 5, 1, 17, 0))
-                .build();
-
-        Page<GetSessionResponse> sessionPage = new PageImpl<>(List.of(dto), pageable, 1);
-
-        given(performanceSessionRepository.searchSessions(
-                null, null, startTime, endTime, null, pageable
-        )).willReturn(sessionPage);
-
-        // when
-        Page<GetSessionResponse> response = performanceSessionService.search(
-                null, null, startTime, endTime, null, pageable
-        );
-
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getStartTime())
-                .isAfterOrEqualTo(startTime);
-        assertThat(response.getContent().get(0).getEndTime())
-                .isBeforeOrEqualTo(endTime);
-    }
-
-    @Test
-    @DisplayName("공연 세션 검색 성공 - 상태 필터 적용")
-    void search_success_withStatus() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-
-        GetSessionResponse dto = GetSessionResponse.builder()
-                .id(1L)
-                .title("테스트 작품")
-                .venueName("테스트 공연장")
-                .startTime(LocalDateTime.of(2025, 5, 1, 14, 0))
-                .endTime(LocalDateTime.of(2025, 5, 1, 17, 0))
-                .build();
-
-        Page<GetSessionResponse> sessionPage = new PageImpl<>(List.of(dto), pageable, 1);
-
-        given(performanceSessionRepository.searchSessions(
-                null, null, null, null, PerformanceStatus.ON_SALE, pageable
-        )).willReturn(sessionPage);
-
-        // when
-        Page<GetSessionResponse> response = performanceSessionService.search(
-                null, null, null, null, PerformanceStatus.ON_SALE, pageable
-        );
-
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent()).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("공연 세션 검색 성공 - 검색 결과 없음")
-    void search_success_emptyResult() {
-        // given
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<GetSessionResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-
-        given(performanceSessionRepository.searchSessions(
-                "존재하지않는작품", null, null, null, null, pageable
+        given(performanceSessionRepository.searchPerformance(
+                "레미제라블", null, null, null, null, pageable
         )).willReturn(emptyPage);
 
-        // when
-        Page<GetSessionResponse> response = performanceSessionService.search(
-                "존재하지않는작품", null, null, null, null, pageable
-        );
+        performanceSessionService.search("레미제라블", null, null, null, null, pageable, 1L);
 
-        // then
-        assertThat(response.getTotalElements()).isEqualTo(0);
-        assertThat(response.getContent()).isEmpty();
+        then(searchRankingService).should().recordKeyword("레미제라블", 1L, "performance");
     }
 }

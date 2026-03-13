@@ -11,7 +11,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.example.ticketingproject.common.enums.SuccessStatus.*;
+import static com.example.ticketingproject.common.enums.SuccessStatus.READ_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,5 +38,4 @@ public class PerformanceController {
         PerformanceResponse response = performanceService.getPerformanceDetail(performanceId);
         return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, response));
     }
-
 }
