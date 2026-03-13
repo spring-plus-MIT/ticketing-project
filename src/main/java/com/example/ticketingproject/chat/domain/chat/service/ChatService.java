@@ -1,7 +1,8 @@
 package com.example.ticketingproject.chat.domain.chat.service;
 
+import com.example.ticketingproject.chat.domain.chat.entity.ChatRoomStatus;
+import com.example.ticketingproject.chat.domain.chat.exception.ChatException; // 추가!
 import com.example.ticketingproject.common.enums.ErrorStatus;
-import com.example.ticketingproject.common.exception.BaseException;
 import com.example.ticketingproject.chat.domain.chat.dto.ChatMessageRequest;
 import com.example.ticketingproject.chat.domain.chat.dto.ChatMessageResponse;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatMessage;
@@ -32,13 +33,17 @@ public class ChatService {
     @Transactional
     public ChatMessageResponse saveMessage(ChatMessageRequest request, Long senderId) {
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new BaseException(HttpStatus.NOT_FOUND, ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new ChatException(HttpStatus.NOT_FOUND, ErrorStatus.USER_NOT_FOUND));
 
         ChatRoom chatRoom = chatRoomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new BaseException(HttpStatus.NOT_FOUND, ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new ChatException(HttpStatus.NOT_FOUND, ErrorStatus.CHAT_ROOM_NOT_FOUND));
 
         if (sender.getUserRole() != UserRole.ADMIN && !chatRoom.getCreator().getId().equals(senderId)) {
-            throw new BaseException(HttpStatus.FORBIDDEN, ErrorStatus.USER_NOT_FOUND); // 권한 없음 에러 이후에 오류 추가해서 다시
+            throw new ChatException(HttpStatus.FORBIDDEN, ErrorStatus.FORBIDDEN_CHAT_ROOM);
+        }
+
+        if (chatRoom.getStatus() == ChatRoomStatus.COMPLETED) {
+            throw new ChatException(HttpStatus.BAD_REQUEST, ErrorStatus.CHAT_ROOM_ALREADY_COMPLETED);
         }
 
         ChatMessage message = ChatMessage.builder()
@@ -48,6 +53,11 @@ public class ChatService {
                 .build();
 
         chatMessageRepository.save(message);
+
+        if (chatRoom.getStatus() == ChatRoomStatus.WAITING && sender.getUserRole() == UserRole.ADMIN) {
+            chatRoom.changeStatus(ChatRoomStatus.IN_PROGRESS);
+        }
+
         return ChatMessageResponse.from(message);
     }
 

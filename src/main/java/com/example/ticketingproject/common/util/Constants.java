@@ -64,5 +64,10 @@ public class Constants {
     public static final String MSG_VALIDATION_LENGTH_ERROR = "입력 길이가 잘못되었습니다.";
     public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
 
+    // Chatroom
+    public static final String MSG_CHAT_ROOM_NOT_FOUND = "존재하지 않는 채팅방입니다.";
+    public static final String MSG_FORBIDDEN_CHAT_ROOM = "해당 채팅방에 접근할 권한이 없습니다.";
+    public static final String MSG_CHAT_ROOM_ALREADY_COMPLETED = "이미 종료된 상담입니다.";
+
 
 }

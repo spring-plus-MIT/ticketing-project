@@ -1,6 +1,8 @@
 package com.example.ticketingproject.chat.listener;
 
 import com.example.ticketingproject.chat.domain.chat.dto.ChatMessageResponse;
+import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 public class WebSocketEventListener {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
 
     /**
      * 1. 유저 입장 감지 (채팅방 구독 시점)
@@ -35,18 +38,21 @@ public class WebSocketEventListener {
             UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) event.getUser();
             if (auth != null) {
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+                Long userId = userDetails.getId();
 
-                String username = userDetails.getUsername().split("@")[0];
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                String realName = user.getName();
 
                 if (accessor.getSessionAttributes() != null) {
                     accessor.getSessionAttributes().put("roomId", roomId);
-                    accessor.getSessionAttributes().put("username", username);
+                    accessor.getSessionAttributes().put("username", realName);
                 }
 
-                ChatMessageResponse systemMessage = ChatMessageResponse.createSystemMessage(roomId, username + "님이 입장하셨습니다.");
+                ChatMessageResponse systemMessage = ChatMessageResponse.createSystemMessage(roomId, realName + "님이 입장하셨습니다.");
 
                 messagingTemplate.convertAndSend(destination, systemMessage);
-                log.info("[채팅방 입장] 방 번호: {}, 유저명: {}", roomId, username);
+                log.info("[채팅방 입장] 방 번호: {}, 유저명: {}", roomId, realName);
             }
         }
     }
@@ -60,7 +66,7 @@ public class WebSocketEventListener {
 
         if (accessor.getSessionAttributes() != null) {
             Long roomId = (Long) accessor.getSessionAttributes().get("roomId");
-            String username = (String) accessor.getSessionAttributes().get("username");
+            String username = (String) accessor.getSessionAttributes().get("username"); // 위에서 저장한 진짜 이름
 
             if (roomId != null && username != null) {
 

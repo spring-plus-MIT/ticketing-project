@@ -1,6 +1,7 @@
 package com.example.ticketingproject.chat.domain.chat.repository;
 
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoom;
+import com.example.ticketingproject.chat.domain.chat.entity.ChatRoomStatus;
 import com.example.ticketingproject.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +16,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query("SELECT c FROM ChatRoom c JOIN FETCH c.creator WHERE c.creator = :creator")
     List<ChatRoom> findAllByCreator(@Param("creator") User creator);
+
+    @Query("SELECT c FROM ChatRoom c JOIN FETCH c.creator WHERE c.status = :status")
+    List<ChatRoom> findAllByStatus(@Param("status") ChatRoomStatus status);
 
 }
