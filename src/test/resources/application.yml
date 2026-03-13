@@ -14,3 +14,14 @@ jwt:
   secret:
     key: test-secret-key-for-junit-test-only
   expiration: 1800000
+
+# AWS 설정 추가
+cloud:
+  aws:
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
