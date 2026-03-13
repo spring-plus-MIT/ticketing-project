@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.user.service;
+package com.example.ticketingproject.domain.seat.user.service;
 
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
 import com.example.ticketingproject.domain.user.dto.UpdateUserRequest;
@@ -8,6 +8,7 @@ import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
+import com.example.ticketingproject.domain.user.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;

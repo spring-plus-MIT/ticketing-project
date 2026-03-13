@@ -1,17 +1,31 @@
 package com.example.ticketingproject.domain.reservation.service;
 
+import com.example.ticketingproject.common.enums.GradeName;
+import com.example.ticketingproject.domain.performance.entity.Performance;
+import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
+import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
-import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.seat.entity.Seat;
+import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
+import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.work.entity.Work;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class AdminReservationServiceTest {
@@ -21,6 +35,9 @@ class AdminReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
+    @InjectMocks
+    private AdminReservationService adminReservationService;
 
     @BeforeEach
     void setUp() {
@@ -47,5 +64,76 @@ class AdminReservationServiceTest {
         verify(reservationRepository).findByIdAndUserId(reservationId, userId);
         verify(reservation).cancel();
         verify(seat).release();
+    }
+    @Test
+    @DisplayName("관리자 - 전체 예약 목록 조회 테스트")
+    void getAllReservationsTest() {
+        Work mockWork = Work.builder().build();
+        Performance mockPerformance = Performance.builder().work(mockWork).build();
+        PerformanceSession mockSession = PerformanceSession.builder().performance(mockPerformance).build();
+
+        SeatGrade mockGrade = SeatGrade.builder().build();
+        ReflectionTestUtils.setField(mockGrade, "gradeName", GradeName.values()[0]);
+        ReflectionTestUtils.setField(mockGrade, "id", 1L);
+
+        Seat mockSeat = Seat.builder().seatNumber(1).build();
+        ReflectionTestUtils.setField(mockSeat, "seatGrade", mockGrade);
+        ReflectionTestUtils.setField(mockSeat, "id", 1L);
+
+        User mockUser = User.builder().build();
+        ReflectionTestUtils.setField(mockUser, "id", 1L);
+
+        Reservation reservation = Reservation.builder()
+                .user(mockUser)
+                .performanceSession(mockSession)
+                .seat(mockSeat)
+                .build();
+        ReflectionTestUtils.setField(reservation, "id", 1L);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Reservation> reservationPage = new PageImpl<>(List.of(reservation));
+        when(reservationRepository.findAll(pageable)).thenReturn(reservationPage);
+
+        Page<ReservationResponse> result = adminReservationService.getAllReservations(pageable);
+
+        assertThat(result).isNotNull();
+        verify(reservationRepository, times(1)).findAll(pageable);
+    }
+
+    @Test
+    @DisplayName("관리자 - 특정 유저의 예약 목록 조회 테스트")
+    void getReservationsByUserTest() {
+        Work mockWork = Work.builder().build();
+        Performance mockPerformance = Performance.builder().work(mockWork).build();
+        PerformanceSession mockSession = PerformanceSession.builder().performance(mockPerformance).build();
+
+        SeatGrade mockGrade = SeatGrade.builder().build();
+        ReflectionTestUtils.setField(mockGrade, "gradeName", GradeName.values()[0]);
+        ReflectionTestUtils.setField(mockGrade, "id", 1L);
+
+        Seat mockSeat = Seat.builder().seatNumber(1).build();
+        ReflectionTestUtils.setField(mockSeat, "seatGrade", mockGrade);
+        ReflectionTestUtils.setField(mockSeat, "id", 1L);
+
+        Long userId = 1L;
+        User mockUser = User.builder().build();
+        ReflectionTestUtils.setField(mockUser, "id", userId);
+
+        Reservation reservation = Reservation.builder()
+                .user(mockUser)
+                .performanceSession(mockSession)
+                .seat(mockSeat)
+                .build();
+        ReflectionTestUtils.setField(reservation, "id", 1L);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Reservation> reservationPage = new PageImpl<>(List.of(reservation));
+
+        when(reservationRepository.findAllByUserId(userId, pageable)).thenReturn(reservationPage);
+
+        Page<ReservationResponse> result = adminReservationService.getReservationsByUser(userId, pageable);
+
+        assertThat(result).isNotNull();
+        verify(reservationRepository, times(1)).findAllByUserId(userId, pageable);
     }
 }

@@ -1,10 +1,11 @@
-package com.example.ticketingproject.domain.user.service;
+package com.example.ticketingproject.domain.seat.user.service;
 
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
+import com.example.ticketingproject.domain.user.service.AdminUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
