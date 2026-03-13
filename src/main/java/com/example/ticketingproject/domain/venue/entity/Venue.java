@@ -3,12 +3,15 @@ package com.example.ticketingproject.domain.venue.entity;
 import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.domain.venue.dto.UpdateVenueRequest;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
+
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_LENGTH_ERROR;
 
 @Getter
 @Entity
@@ -26,7 +29,7 @@ public class Venue extends DeletableEntity {
     @Length(max = 255)
     private String address;
 
-    @Length(min = 1)
+    @Min(value = 1)
     private int totalSeats;
 
     @Builder

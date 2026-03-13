@@ -16,6 +16,7 @@ import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
+import com.example.ticketingproject.lock.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
     private final PerformanceSessionRepository performanceSessionRepository;
+    private final LockService lockService;
 
     @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest requestDto, Long userId) {
@@ -48,30 +50,38 @@ public class ReservationService {
                         ErrorStatus.SESSION_NOT_FOUND
                         )
                 );
+        String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
 
-        Seat seat = seatRepository.findById(requestDto.getSeatId())
-                .orElseThrow(() -> new SeatException(
-                        ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
-                        ErrorStatus.SEAT_NOT_FOUND
-                        )
-                );
+        String uuid = lockService.lock(key);
 
-        // 좌석 점유를 위한 seat 메서드 추가 (SeatStatus = RESERVED)
-        seat.reserve();
+        try {
+            Seat seat = seatRepository.findById(requestDto.getSeatId())
+                    .orElseThrow(() -> new SeatException(
+                                    ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
+                                    ErrorStatus.SEAT_NOT_FOUND
+                            )
+                    );
 
-        Reservation reservation = Reservation.builder()
-                .user(user)
-                .performanceSession(performanceSession)
-                .seat(seat)
-                .status(ReservationStatus.PENDING)
-                .totalPrice(seat.getSeatGrade().getPrice())
-                .reservedAt(LocalDateTime.now())
-                .expiresAt(LocalDateTime.now().plusMinutes(30))
-                .build();
+            // 좌석 점유를 위한 seat 메서드 추가 (SeatStatus = RESERVED)
+            seat.reserve();
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+            Reservation reservation = Reservation.builder()
+                    .user(user)
+                    .performanceSession(performanceSession)
+                    .seat(seat)
+                    .status(ReservationStatus.PENDING)
+                    .totalPrice(seat.getSeatGrade().getPrice())
+                    .reservedAt(LocalDateTime.now())
+                    .expiresAt(LocalDateTime.now().plusMinutes(10))
+                    .build();
 
-        return ReservationResponse.from(savedReservation);
+            Reservation savedReservation = reservationRepository.save(reservation);
+
+            return ReservationResponse.from(savedReservation);
+
+        } finally {
+            lockService.unlock(key, uuid);
+        }
     }
 
     public ReservationResponse findOneReservation(Long userId, Long reservationId) {

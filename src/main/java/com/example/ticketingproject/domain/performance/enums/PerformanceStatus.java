@@ -1,4 +1,4 @@
-package com.example.ticketingproject.domain.performance.entity;
+package com.example.ticketingproject.domain.performance.enums;
 
 import lombok.Getter;
 
