@@ -50,9 +50,9 @@ public class ReservationService {
                         ErrorStatus.SESSION_NOT_FOUND
                         )
                 );
-//        String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
-//
-//        String uuid = lockService.lock(key);
+        String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
+
+        String uuid = lockService.lock(key);
 
         try {
             Seat seat = seatRepository.findById(requestDto.getSeatId())
@@ -80,7 +80,7 @@ public class ReservationService {
             return ReservationResponse.from(savedReservation);
 
         } finally {
-//            lockService.unlock(key, uuid);
+            lockService.unlock(key, uuid);
         }
     }
 

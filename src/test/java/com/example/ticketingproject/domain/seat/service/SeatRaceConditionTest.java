@@ -107,7 +107,7 @@ public class SeatRaceConditionTest {
     }
 
     @Test
-    void 좌석_20개_제한_동시_200개_생성_테스트() throws InterruptedException {
+    void 제한_좌석_20개_동시_200개_생성_시_제한_초과_생성_테스트() throws InterruptedException {
         // given
         int threadCount = 200;
 
