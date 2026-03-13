@@ -23,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -51,59 +52,131 @@ class ReservationServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void 예약_생성_성공() {
-
-        // given
-        Long userId = 1L;
-        Long seatId = 1L;
-        Long performnaceSessionId = 1L;
-
-        ReservationCreateRequest request = new ReservationCreateRequest();
-        ReflectionTestUtils.setField(request, "performanceSessionId", performnaceSessionId);
-        ReflectionTestUtils.setField(request, "seatId", seatId);
-
-        User user = mock(User.class);
-
-        SeatGrade seatGrade = mock(SeatGrade.class);
-        when(seatGrade.getPrice()).thenReturn(BigDecimal.valueOf(10000));
-        when(seatGrade.getGradeName()).thenReturn(GradeName.VIP); // 추가된 부분
-
-        Seat seat = mock(Seat.class);
-        when(seat.getSeatGrade()).thenReturn(seatGrade);
-
-        PerformanceSession performanceSession = mock(PerformanceSession.class);
-        Performance performance = mock(Performance.class);
-        Work work = mock(Work.class);
-
-        // when & then
-        when(performance.getWork()).thenReturn(work);
-        when(work.getTitle()).thenReturn("테스트 공연");
-
+    // ReservationResponse.from()이 접근하는 모든 메서드를 stubbing한 mock Reservation 반환
+    private Reservation createMockReservation(User user, Seat seat, PerformanceSession performanceSession) {
         Reservation reservation = mock(Reservation.class);
-
+        when(reservation.getId()).thenReturn(1L);
         when(reservation.getUser()).thenReturn(user);
         when(reservation.getSeat()).thenReturn(seat);
         when(reservation.getPerformanceSession()).thenReturn(performanceSession);
-        when(performanceSession.getPerformance()).thenReturn(performance);
-
-        when(reservation.getId()).thenReturn(1L);
         when(reservation.getStatus()).thenReturn(ReservationStatus.PENDING);
         when(reservation.getTotalPrice()).thenReturn(BigDecimal.valueOf(10000));
-        when(reservation.getReservedAt()).thenReturn(LocalDateTime.now());
-        when(reservation.getExpiresAt()).thenReturn(LocalDateTime.now().plusMinutes(30));
+        return reservation;
+    }
+
+    private User createMockUser(Long userId) {
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(userId);
+        return user;
+    }
+
+    private Seat createMockSeat() {
+        SeatGrade seatGrade = mock(SeatGrade.class);
+        when(seatGrade.getGradeName()).thenReturn(GradeName.VIP);
+        when(seatGrade.getPrice()).thenReturn(BigDecimal.valueOf(10000));
+
+        Seat seat = mock(Seat.class);
+        when(seat.getSeatGrade()).thenReturn(seatGrade);
+        when(seat.getRowName()).thenReturn("A");
+        when(seat.getSeatNumber()).thenReturn(1);
+        return seat;
+    }
+
+    private PerformanceSession createMockPerformanceSession() {
+        Work work = mock(Work.class);
+        when(work.getTitle()).thenReturn("테스트 공연");
+
+        Performance performance = mock(Performance.class);
+        when(performance.getWork()).thenReturn(work);
+        when(performance.getStartDate()).thenReturn(LocalDate.of(2026, 5, 1));
+
+        PerformanceSession performanceSession = mock(PerformanceSession.class);
+        when(performanceSession.getPerformance()).thenReturn(performance);
+        when(performanceSession.getStartTime()).thenReturn(LocalDateTime.of(2026, 5, 1, 19, 0));
+        return performanceSession;
+    }
+
+    @Test
+    void 예약_생성_성공() {
+        // given
+        Long userId = 1L;
+        Long seatId = 1L;
+        Long performanceSessionId = 1L;
+
+        ReservationCreateRequest request = new ReservationCreateRequest();
+        ReflectionTestUtils.setField(request, "performanceSessionId", performanceSessionId);
+        ReflectionTestUtils.setField(request, "seatId", seatId);
+
+        User user = createMockUser(userId);
+        Seat seat = createMockSeat();
+        PerformanceSession performanceSession = createMockPerformanceSession();
+        Reservation savedReservation = createMockReservation(user, seat, performanceSession);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(performanceSessionRepository.findById(performnaceSessionId)).thenReturn(Optional.of(performanceSession));
+        when(performanceSessionRepository.findById(performanceSessionId)).thenReturn(Optional.of(performanceSession));
         when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
-        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(reservationRepository.save(any())).thenReturn(savedReservation);
 
+        // when
         ReservationResponse response = reservationService.createReservation(request, userId);
 
+        // then
         verify(userRepository).findById(userId);
+        verify(performanceSessionRepository).findById(performanceSessionId);
         verify(seatRepository).findById(seatId);
+        verify(seat).reserve();
         verify(reservationRepository).save(any());
 
         assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(1L);
+        assertThat(response.getUserId()).isEqualTo(userId);
+        assertThat(response.getPerformanceTitle()).isEqualTo("테스트 공연");
+        assertThat(response.getTotalPrice()).isEqualByComparingTo(BigDecimal.valueOf(10000));
+        assertThat(response.getStatus()).isEqualTo(ReservationStatus.PENDING);
+    }
+
+    @Test
+    void 예약_단건_조회_성공() {
+        // given
+        Long userId = 1L;
+        Long reservationId = 1L;
+
+        User user = createMockUser(userId);
+        Seat seat = createMockSeat();
+        PerformanceSession performanceSession = createMockPerformanceSession();
+        Reservation reservation = createMockReservation(user, seat, performanceSession);
+
+        when(reservationRepository.findByIdAndUserId(reservationId, userId)).thenReturn(Optional.of(reservation));
+
+        // when
+        ReservationResponse response = reservationService.findOneReservation(userId, reservationId);
+
+        // then
+        verify(reservationRepository).findByIdAndUserId(reservationId, userId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(reservationId);
+        assertThat(response.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(response.getPerformanceTitle()).isEqualTo("테스트 공연");
+    }
+
+    @Test
+    void 예약_취소_성공() {
+        // given
+        Long userId = 1L;
+        Long reservationId = 1L;
+
+        Seat seat = mock(Seat.class);
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getSeat()).thenReturn(seat);
+        when(reservationRepository.findByIdAndUserId(reservationId, userId)).thenReturn(Optional.of(reservation));
+
+        // when
+        reservationService.cancelReservation(reservationId, userId);
+
+        // then
+        verify(reservationRepository).findByIdAndUserId(reservationId, userId);
+        verify(reservation).cancel();
+        verify(seat).release();
     }
 }
