@@ -516,10 +516,29 @@ Run/Debug Configurations → Active profiles → local
 -Dspring.profiles.active=local
 ```
 
-**CLI로 실행 시**
+## 로컬 실행 방법
+
+### 방법 1. CLI로 직접 실행
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=local'
 ```
+
+### 방법 2. Docker Compose로 실행
+
+**[실행]**
+1. 파일 수정 (필요 시)
+2. `./gradlew bootJar`
+3. `docker-compose up --build`
+4. Postman으로 `localhost:8080` 테스트
+
+**[종료]**
+1. `docker-compose down` → 컨테이너 + 네트워크 삭제, DB 유지
+2. `docker-compose down -v` → 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+
+**[이미지 삭제]**
+1. `docker images` → 이미지 ID 확인
+2. `docker rmi {이미지ID}` → 이미지 삭제 (컨테이너 중지 상태여야 함)
+3. `docker rmi -f {이미지ID}` → 실행 중인 컨테이너가 있어도 강제 삭제
 
 | 환경 | 프로파일 | 설정 파일 |
 |------|---------|---------|
