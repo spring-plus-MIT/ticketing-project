@@ -7,6 +7,7 @@ import com.example.ticketingproject.domain.performancesession.repository.Perform
 import com.example.ticketingproject.domain.reservation.dto.request.ReservationCreateRequest;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
+import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
@@ -22,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +54,7 @@ class ReservationServiceTest {
     @Test
     void 예약_생성_성공() {
 
+        // given
         Long userId = 1L;
         Long seatId = 1L;
         Long performnaceSessionId = 1L;
@@ -73,6 +76,7 @@ class ReservationServiceTest {
         Performance performance = mock(Performance.class);
         Work work = mock(Work.class);
 
+        // when & then
         when(performance.getWork()).thenReturn(work);
         when(work.getTitle()).thenReturn("테스트 공연");
 
@@ -82,6 +86,12 @@ class ReservationServiceTest {
         when(reservation.getSeat()).thenReturn(seat);
         when(reservation.getPerformanceSession()).thenReturn(performanceSession);
         when(performanceSession.getPerformance()).thenReturn(performance);
+
+        when(reservation.getId()).thenReturn(1L);
+        when(reservation.getStatus()).thenReturn(ReservationStatus.PENDING);
+        when(reservation.getTotalPrice()).thenReturn(BigDecimal.valueOf(10000));
+        when(reservation.getReservedAt()).thenReturn(LocalDateTime.now());
+        when(reservation.getExpiresAt()).thenReturn(LocalDateTime.now().plusMinutes(30));
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(performanceSessionRepository.findById(performnaceSessionId)).thenReturn(Optional.of(performanceSession));
