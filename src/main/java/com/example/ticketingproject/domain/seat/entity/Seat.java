@@ -8,6 +8,7 @@ import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,7 @@ public class Seat extends CreatableEntity {
     @Length(max = 10)
     private String rowName;
 
-    @NotBlank
+    @NotNull
     private int seatNumber;
 
     @Enumerated(EnumType.STRING)

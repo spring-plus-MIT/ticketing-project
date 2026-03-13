@@ -1,10 +1,11 @@
 package com.example.ticketingproject.domain.performance.entity;
 
 import com.example.ticketingproject.common.entity.ModifiableEntity;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
+
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 @Table(name = "performances")
@@ -34,10 +37,10 @@ public class Performance extends ModifiableEntity {
     @Length(max = 20)
     private String season;
 
-    @NotBlank
+    @NotNull
     private LocalDate startDate;
 
-    @NotBlank
+    @NotNull
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)

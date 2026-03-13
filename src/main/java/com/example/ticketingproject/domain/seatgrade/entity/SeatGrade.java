@@ -5,7 +5,7 @@ import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 import java.math.BigDecimal;
 
 import static com.example.ticketingproject.common.enums.ErrorStatus.*;
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 @Entity
@@ -38,10 +39,10 @@ public class SeatGrade extends DeletableEntity {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @NotBlank
+    @NotNull
     private int totalSeats;
 
-    @NotBlank
+    @NotNull
     private int remainingSeats;
 
 

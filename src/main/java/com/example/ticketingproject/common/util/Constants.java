@@ -60,9 +60,14 @@ public class Constants {
     // Validation
     public static final String MSG_VALIDATION_ERROR = "입력 형식이 올바르지 않거나, 필수 입력 값이 누락 되었습니다.";
     public static final String MSG_VALIDATION_NOT_BLANK_ERROR = "필수 입력 값이 누락 되었습니다.";
+    public static final String MSG_VALIDATION_NOT_NULL_ERROR = "필수 입력 값이 누락 되었습니다.";
     public static final String MSG_VALIDATION_EMAIL_ERROR = "이메일 형식이 올바르지 않습니다.";
     public static final String MSG_VALIDATION_LENGTH_ERROR = "입력 길이가 잘못되었습니다.";
     public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
 
-
+    // Lock
+    public static final String MSG_LOCK_ACQUISITION_FAILED = "다른 요청이 이미 사용 중입니다.";
+    public static final String MSG_LOCK_TIMEOUT = "제한 시간이 초과 되었습니다.";
+    public static final String MSG_LOCK_RELEASE_FAILED = "Lock 해제에 실패했습니다.";
+    public static final String MSG_LOCK_INTERRUPTED = "요청이 정상적으로 처리되지 않았습니다.";
 }
