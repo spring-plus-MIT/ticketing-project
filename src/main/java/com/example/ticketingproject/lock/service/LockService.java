@@ -21,30 +21,15 @@ public class LockService {
     public String lock(String key) {
         String uuid = UUID.randomUUID().toString();
 
-        try{
-            for (int i = 0; i < RETRY_COUNT; i++) {
-                Boolean success = lockRedisRepository.tryLock(key, uuid, LOCK_TTL);
+        Boolean success = lockRedisRepository.tryLock(key, uuid, LOCK_TTL);
 
-                if (success) {
-                    return uuid;
-                }
-
-                Thread.sleep(RETRY_DELAY * (i + 1));
-            }
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-
+        if (!success) {
             throw new LockException(
-                    ErrorStatus.LOCK_INTERRUPTED.getHttpStatus(),
-                    ErrorStatus.LOCK_INTERRUPTED
+                    ErrorStatus.LOCK_ACQUISITION_FAILED.getHttpStatus(),
+                    ErrorStatus.LOCK_ACQUISITION_FAILED
             );
         }
-
-        throw new LockException(
-                ErrorStatus.LOCK_ACQUISITION_FAILED.getHttpStatus(),
-                ErrorStatus.LOCK_ACQUISITION_FAILED
-        );
+        return uuid;
     }
 
     public void unlock(String key, String uuid) {
