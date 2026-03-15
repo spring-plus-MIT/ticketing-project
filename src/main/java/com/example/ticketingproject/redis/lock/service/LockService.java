@@ -1,8 +1,8 @@
-package com.example.ticketingproject.lock.service;
+package com.example.ticketingproject.redis.lock.service;
 
 import com.example.ticketingproject.common.enums.ErrorStatus;
-import com.example.ticketingproject.lock.exception.LockException;
-import com.example.ticketingproject.lock.repository.LockRedisRepository;
+import com.example.ticketingproject.redis.lock.exception.LockException;
+import com.example.ticketingproject.redis.lock.repository.LockRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +35,10 @@ public class LockService {
     }
 
     public String createSessionAndSeatLockKey(Long sessionId, Long seatId) {
-        return "lock:session:" + sessionId + "seat:" + seatId;
+        return "lock:session:" + sessionId + ":seat:" + seatId;
     }
 
     public String createVenueAndSeatLockKey(Long venueId){
-        return "lock:venue:" + venueId + "seat:create";
+        return "lock:venue:" + venueId + ":seat:create";
     }
 }

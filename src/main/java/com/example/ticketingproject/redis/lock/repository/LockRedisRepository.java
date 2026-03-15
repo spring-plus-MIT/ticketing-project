@@ -1,4 +1,4 @@
-package com.example.ticketingproject.lock.repository;
+package com.example.ticketingproject.redis.lock.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

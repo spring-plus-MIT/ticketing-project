@@ -16,7 +16,7 @@ import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
-import com.example.ticketingproject.lock.service.LockService;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
