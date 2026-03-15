@@ -1,6 +1,6 @@
 package com.example.ticketingproject.domain.performance.dto;
 
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import lombok.Getter;
 
 import java.time.LocalDate;

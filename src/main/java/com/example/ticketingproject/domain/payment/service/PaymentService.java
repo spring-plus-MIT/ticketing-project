@@ -45,6 +45,8 @@ public class PaymentService {
 
         reservation.confirm();
 
+        reservation.getSeat().sold();
+
         Payment payment = Payment.builder()
                 .reservation(reservation)
                 .user(user)
