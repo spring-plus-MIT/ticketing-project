@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +26,7 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<CommonResponse<PaymentResponse>> createPayment (
             @Valid @RequestBody CreatePaymentRequest request,
-            CustomUserDetails customUserDetails
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(
                 SuccessStatus.CREATE_SUCCESS,
@@ -34,8 +35,11 @@ public class PaymentController {
         );
     }
 
-    @GetMapping("/{paymentId}/{userId}")
-    public ResponseEntity<CommonResponse<PaymentResponse>> getOnePayment (@PathVariable Long paymentId, CustomUserDetails customUserDetails) {
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<CommonResponse<PaymentResponse>> getOnePayment (
+            @PathVariable Long paymentId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.READ_SUCCESS,
                 paymentService.findOnePayment(paymentId, customUserDetails.getId())
@@ -47,7 +51,7 @@ public class PaymentController {
     public ResponseEntity<CommonResponse<Page<PaymentResponse>>> getAllPayments(
             @PageableDefault Pageable pageable,
             @RequestParam(defaultValue = "1") int page,
-            CustomUserDetails customUserDetails
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         Pageable converted = PageRequest.of(
                 page - 1,

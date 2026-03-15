@@ -76,7 +76,7 @@ class AdminReviewServiceTest {
         when(reviewRepository.findById(reviewId))
                 .thenReturn(Optional.of(review));
 
-        adminReviewService.deleteReviewByAdmin(reviewId,workId);
+        adminReviewService.deleteReviewByAdmin(reviewId, workId);
 
         verify(reviewRepository).findById(reviewId);
         verify(review).delete();
@@ -93,7 +93,7 @@ class AdminReviewServiceTest {
         when(workRepository.findById(workId))
                 .thenReturn(Optional.of(work));
         assertThatThrownBy(() ->
-                adminReviewService.deleteReviewByAdmin(reviewId,workId)
+                adminReviewService.deleteReviewByAdmin(reviewId, workId)
         ).isInstanceOf(ReviewException.class);
 
         verify(reviewRepository).findById(reviewId);

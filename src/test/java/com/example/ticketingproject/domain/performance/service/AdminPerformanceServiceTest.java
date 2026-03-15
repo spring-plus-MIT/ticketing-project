@@ -2,7 +2,7 @@ package com.example.ticketingproject.domain.performance.service;
 
 import com.example.ticketingproject.domain.performance.dto.PerformanceRequest;
 import com.example.ticketingproject.domain.performance.entity.Performance;
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performance.exception.PerformanceException;
 import com.example.ticketingproject.domain.performance.repository.PerformanceRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;

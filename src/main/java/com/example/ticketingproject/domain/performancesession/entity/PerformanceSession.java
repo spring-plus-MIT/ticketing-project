@@ -34,8 +34,7 @@ public class PerformanceSession extends DeletableEntity {
     private LocalDateTime endTime;
 
     @Builder
-    public PerformanceSession(Long id, Performance performance, Venue venue, LocalDateTime startTime, LocalDateTime endTime ) {
-        this.id = id;
+    public PerformanceSession(Performance performance, Venue venue, LocalDateTime startTime, LocalDateTime endTime ) {
         this.performance = performance;
         this.venue = venue;
         this.startTime  = startTime;
