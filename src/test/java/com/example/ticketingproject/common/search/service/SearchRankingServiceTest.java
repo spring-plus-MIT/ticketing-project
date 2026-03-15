@@ -90,7 +90,7 @@ import static org.mockito.BDDMockito.*;
                     .willReturn(mockKeywords);
 
             // when
-            List<String> result = searchRankingService.getRealTimeKeywords();
+            List<String> result = searchRankingService.getRealTimeKeywords("performance");
 
             // then
             assertThat(result).hasSize(3);
@@ -107,7 +107,7 @@ import static org.mockito.BDDMockito.*;
                     .willReturn(null);
 
             // when
-            List<String> result = searchRankingService.getRealTimeKeywords();
+            List<String> result = searchRankingService.getRealTimeKeywords("performance");
 
             // then
             assertThat(result).isEmpty();
