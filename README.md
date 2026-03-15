@@ -254,81 +254,96 @@ PENDING → ACTIVE → DELETED
 
 ---
 
-## ⚡ 데이터베이스 성능 최적화 (Database Indexing)
+# ⚡ Database Performance Optimization (Indexing)
+## 🚀 대규모 공연 데이터셋 인덱스 최적화 및 확장성 검증 보고서
 
-# 🚀 대규모 공연 데이터셋 인덱스 최적화 및 확장성 검증 보고서
+### 1. 프로젝트 개요 (Background)
+본 작업은 대규모 공연 데이터 조회 성능 문제를 해결하기 위한 데이터베이스 인덱스 최적화 실험입니다. 초기 환경에서 발생하던 Full Table Scan 문제를 진단하고, 600만 건 이상의 데이터 환경에서도 안정적인 성능을 유지하는 구조를 설계/검증했습니다.
 
-## 1. 개요 (Background)
-본 프로젝트는 공연 정보 데이터가 **약 600만 건 이상** 존재하는 대규모 환경을 가정하여, 조회 성능 병목(Bottleneck)을 분석하고 **복합 인덱스 및 커버링 인덱스 설계**를 통해 쿼리 성능을 최적화한 과정을 기록한 기술 보고서입니다.
+---
 
-## 📊 2. 성능 개선 핵심 지표 (Summary)
-| 구분 | 최적화 전 (Before) | 최적화 후 (After) | 500만건 추가 후 (Post-Insert) |
+### 📊 2. 실험 환경
+| 항목 | 내용 |
+| :--- | :--- |
+| **Database** | MySQL 8.x |
+| **데이터 종류** | 공연 정보 데이터 |
+| **초기 데이터** | 약 100만 건 |
+| **확장 테스트** | +500만 건 (총 약 600만 건) |
+
+---
+
+### 📊 3. 성능 개선 결과 (Summary)
+| 구분 | 최적화 전 (Before) | 인덱스 적용 후 (After) | 500만건 추가 후 |
 | :--- | :--- | :--- | :--- |
 | **실행 시간** | **396 ms** | **381 ms** | **379 ms** |
-| **조회 방식** | Full Table Scan (ALL) | **Range Scan (범위 스캔)** | **Range Scan 유지** |
-| **정렬 방식** | Using filesort (부하 높음) | **인덱스 정렬 활용 (부하 0)** | **인덱스 정렬 유지** |
-| **인덱스 전략** | 없음 | **Covering Index (Using index)** | **성능 방어 성공** |
+| **조회 방식** | Full Table Scan (ALL) | **Range Scan** | **Range Scan 유지** |
+| **정렬 방식** | Using filesort | **인덱스 정렬 활용** | **인덱스 정렬 유지** |
+| **인덱스 전략** | 없음 | **Covering Index** | **성능 방어 성공** |
 
-> **성과 분석:** 데이터 규모가 약 100만 건에서 600만 건으로 **5배 이상 급증**했음에도 불구하고, 최적화된 인덱스 구조 덕분에 실행 시간이 **380ms 대의 안정적인 수치**를 유지함을 확인하였습니다.
-
----
-
-## 🔍 3. Phase 1. 인덱스 부재로 인한 성능 저하 (Before)
-- **현상:** `venue_id`와 `start_date` 조건으로 조회 시 인덱스가 없어 124만 건 전수 조사 발생.
-- **분석 결과:**
-    - `type: ALL`: 전체 데이터를 다 읽어야 하므로 데이터 증가 시 성능이 급격히 저하됨.
-    - `Using filesort`: 인덱스 정렬이 없어 메모리/CPU를 사용하여 별도의 정렬 작업 수행.
-
-> <img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
-*그림 1: 최적화 전 Full Table Scan 및 Filesort 발생*
+> **핵심 결과:** 데이터 규모가 6배 증가했음에도 실행 시간을 380ms 수준으로 유지하며 강력한 **확장성(Scalability)**을 확보함.
 
 ---
 
-## 🏗️ 4. Phase 2. 복합 인덱스 설계 및 적용 (After)
-- **적용 인덱스:** `idx_perf_main (venue_id, start_date, season)`
-- **설계 핵심:**
-    - **커버링 인덱스 (Using index):** `SELECT`에 필요한 컬럼이 인덱스에 모두 포함되어 있어 디스크 I/O를 최소화함.
-    - **정렬 최적화:** 인덱스 자체 정렬 순서를 활용하여 `filesort` 부하를 제거함.
+### 🔍 4. 문제 분석 (Before Optimization)
+인덱스가 없는 상태에서 `WHERE` 필터링과 `ORDER BY`를 동시에 수행할 경우, 전체 테이블을 스캔하고 메모리 내에서 강제 정렬이 발생함을 확인했습니다.
 
-> <img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
-*그림 2: 인덱스 최적화 후 커버링 인덱스 적용 결과*
+- **EXPLAIN 분석 결과:** `type: ALL`, `Using filesort` 발생
+- **위험 요소:** 데이터 증가 시 성능이 선형적으로 저하될 가능성 높음
 
----
-
-## 📈 5. Phase 3. 대규모 데이터 확장 테스트 (Post-Insert)
-성능 확장성을 검증하기 위해 **500만 건의 더미 데이터**를 추가 적재한 후 재측정하였습니다. (총 데이터 약 600만 건)
-
-- **검증 결과:**
-    - 데이터가 5배 증가했음에도 `range scan`과 `Using index` 상태가 흔들림 없이 유지됨.
-    - 실행 시간 또한 **379ms**로 데이터 증가 전과 동일한 수준의 고성능 유지.
-- **결론:** 시스템 확장성(**Scalability**) 확보 완료.
-
-> <img width="1280" height="638" alt="Image" src="https://github.com/user-attachments/assets/f547ad11-e883-4b13-912c-5105d79ff36d" />
-*그림 3: 500만 건 추가 후에도 안정적인 실행 계획 유지*
+<img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
+*그림 1: 최적화 전 실행 계획 (Full Table Scan)*
 
 ---
 
-## 📌 6. 작업 진행 과정
+### 🏗️ 5. 해결 방법 (Index Optimization)
+조회 조건과 정렬 조건을 동시에 최적화하기 위해 다음과 같은 **복합 인덱스**를 설계했습니다.
 
-본 인덱스 최적화 작업은 다음 단계로 진행되었습니다.
+**[설계된 인덱스]**
+`idx_perf_main (venue_id, start_date, season)`
 
-- 검색 쿼리 수집 및 **EXPLAIN 분석**
-- 병목 쿼리 선정 및 성능 측정
-- 복합 인덱스 초안 설계  
-  `(venue_id + start_date + season)`
-- 인덱스 적용 전/후 **실행 계획 비교**
-- 더미 데이터 소규모 적재 후 인덱스 효과 검증
-- **500만 건 데이터 확장 테스트 수행**
-- EXPLAIN 결과 기반 **최종 성능 분석 문서화**
+- **WHERE 필터링:** `venue_id`, `start_date`를 인덱스에서 즉시 필터링
+- **ORDER BY 최적화:** 인덱스의 정렬 순서를 활용하여 `filesort` 제거
+- **Covering Index:** `SELECT` 절의 컬럼을 인덱스에 포함시켜 테이블 접근 최소화(`Using index`)
 
-----
-## 🎯 7. 최종 성과 및 결론
-본 최적화의 핵심 성과는 다음과 같습니다.
-
-- **복합 인덱스 설계:** WHERE 필터링과 ORDER BY 정렬 조건을 동시에 충족하여 부하 제거.
-- **커버링 인덱스 활용:** 테이블 데이터 블록 접근을 차단하고 인덱스 메모리만으로 쿼리 완결.
-- **안정적 확장성:** 600만 건 이상의 대규모 환경에서도 일관된 응답 속도를 보장하는 데이터 구조 구축.
 ---
+
+### 📈 6. 인덱스 적용 결과 (After Optimization)
+- **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인
+- **개선 효과:** Full Table Scan 제거, 디스크 I/O 감소, 조회 성능 안정화
+
+<img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
+*그림 2: 인덱스 최적화 후 실행 계획 (Covering Index)*
+
+---
+
+### 📈 7. 대규모 데이터 확장 테스트
+실제 서비스 운영 환경을 가정하여 **500만 건의 더미 데이터**를 추가 적재하고 재측정했습니다.
+
+- **테스트 결과:** 데이터가 600만 건으로 증가했음에도 실행 계획과 속도(379ms)가 안정적으로 유지됨.
+
+<img width="100%" alt="Post-Insert 검증" src="https://github.com/user-attachments/assets/f547ad11-e883-4b13-912c-5105d79ff36d" />
+*그림 3: 500만 건 데이터 추가 후 확장성 검증 결과*
+
+---
+
+### 🎯 8. 최종 성과
+1. **쿼리 성능 개선:** Full Scan 및 Filesort 제거를 통한 연산 효율화
+2. **디스크 I/O 감소:** 커버링 인덱스 적용으로 테이블 접근 최소화
+3. **확장성 확보:** 대규모 데이터 환경에서도 고정된 응답 속도 보장
+
+---
+
+### 🗂 9. 작업 진행 과정 (Work Log)
+1. **분석:** 검색 쿼리 수집 및 EXPLAIN 기반 병목 분석
+2. **설계:** 복합 인덱스 초안 설계 및 실행 계획 비교 시뮬레이션
+3. **검증:** 인덱스 적용 전/후 성능 측정 및 5만 건 샘플 테스트
+4. **확장:** 500만 건 데이터 적재를 통한 대규모 환경 최종 테스트
+5. **문서화:** 성능 비교 보고서 작성 및 팀 기술 공유
+
+---
+
+### 📌 핵심 기술 키워드
+`MySQL` `Indexing` `Covering Index` `Composite Index` `Query Optimization` `EXPLAIN Analysis` `Scalability`
 
 # 동시성 시나리오 - 마지막 좌석 1개 동시 예매 100명
 
