@@ -3,7 +3,7 @@ package com.example.ticketingproject.domain.performancesession.service;
 import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
 import com.example.ticketingproject.common.search.service.SearchRankingService;
 import com.example.ticketingproject.domain.performance.entity.Performance;
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performancesession.dto.GetSessionResponse;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.performancesession.exception.PerformanceSessionException;

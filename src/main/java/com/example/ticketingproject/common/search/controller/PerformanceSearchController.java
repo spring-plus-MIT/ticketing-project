@@ -2,7 +2,7 @@ package com.example.ticketingproject.common.search.controller;
 
 import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performancesession.service.PerformanceSessionService;
 import com.example.ticketingproject.domain.work.enums.Category;
 import com.example.ticketingproject.security.CustomUserDetails;

@@ -1,7 +1,7 @@
 package com.example.ticketingproject.domain.performancesession.repository;
 
 import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performance.entity.QPerformance;
 import com.example.ticketingproject.domain.performancesession.entity.QPerformanceSession;
 import com.example.ticketingproject.domain.work.entity.QWork;
@@ -12,6 +12,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.util.StringUtils;
@@ -54,19 +55,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .orderBy(performance.startDate.asc())
                 .fetch();
 
-        JPAQuery<Long> countQuery = queryFactory
-                .select(performance.count())
-                .from(performanceSession)
-                .join(performanceSession.performance, performance)
-                .join(performance.work, work)
-                .where(
-                        titleLike(keyword),
-                        categoryEq(category),
-                        dateBetween(startDate, endDate),
-                        statusEq(status)
-                );
-
-        return PageableExecutionUtils.getPage(result, converted, countQuery::fetchOne);
+        return new PageImpl<>(result, converted, result.size());
     }
 
     private BooleanExpression titleLike(String keyword) {
@@ -94,5 +83,22 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
         return status != null
                 ? performance.status.eq(status)
                 : null;
+    }
+
+    @Override
+    public long countPerformance(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status) {
+        Long count = queryFactory
+                .select(performanceSession.count())
+                .from(performanceSession)
+                .join(performanceSession.performance, performance)
+                .join(performance.work, work)
+                .where(
+                        titleLike(keyword),
+                        categoryEq(category),
+                        dateBetween(startDate, endDate),
+                        statusEq(status)
+                )
+                .fetchOne();
+        return count != null ? count : 0L;
     }
 }

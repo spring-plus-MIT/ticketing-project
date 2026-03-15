@@ -1,6 +1,6 @@
 package com.example.ticketingproject.common.search.dto;
 
-import com.example.ticketingproject.domain.performance.entity.PerformanceStatus;
+import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.work.enums.Category;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
