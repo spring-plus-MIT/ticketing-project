@@ -1,6 +1,7 @@
 package com.example.ticketingproject.common.search.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,7 +27,7 @@ public class SearchRankingService {
         if(!StringUtils.hasText(keyword)) return ;
 
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
-        String realTimeKey = POPULAR_SEARCH_KEY + domain + now;
+        String realTimeKey = POPULAR_SEARCH_KEY + domain + ":" + now;
 
         String realTimeDedupKey = "search:dedup:" + domain + ":" + now + ":" + userId +  ":" + keyword;
         Boolean isNewRealtime = stringRedisTemplate.opsForValue()
@@ -38,9 +39,10 @@ public class SearchRankingService {
         }
     }
 
-    public List<String> getRealTimeKeywords() {
+    @Cacheable(value = "popularKeywords", key = "'realtime:' + #domain")
+    public List<String> getRealTimeKeywords(String domain) {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
-        return getKeywords(POPULAR_SEARCH_KEY + now);
+        return getKeywords(POPULAR_SEARCH_KEY + domain + ":" + now);
     }
 
     private List<String> getKeywords(String key) {

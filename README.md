@@ -254,6 +254,177 @@ PENDING → ACTIVE → DELETED
 
 ---
 
+# 검색 기능 및 캐시 최적화
+
+---
+
+## 1️⃣ 검색 API 설계
+
+### 문제 상황
+매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
+
+### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+
+| 항목 | 내용 |
+|------|------|
+| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
+| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
+| 페이징 | `PageableExecutionUtils.getPage()`로 count 쿼리 분리 |
+
+### 검색 조건 (동적 쿼리)
+
+| 파라미터 | 조건 | 설명 |
+|----------|------|------|
+| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
+| `category` | `work.category = category` | 장르 필터 |
+| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
+| `status` | `performance.status = status` | 공연 상태 필터 |
+
+### count 쿼리 분리 패턴
+
+```java
+// 마지막 페이지에서는 count 쿼리 실행 생략
+return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+```
+
+> 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리를 실행하지 않아
+> 불필요한 DB 호출을 방지합니다.
+
+---
+
+## 2️⃣ 인기 검색어
+
+### 구현 방식
+Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
+
+```
+# 검색 시 score 증가
+ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
+
+# 상위 10개 조회
+ZREVRANGE popular:search:performance:2025031315 0 9
+```
+
+### 집계 기간 - 실시간 (1시간 단위)
+
+| 항목 | 내용 |
+|------|------|
+| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
+| TTL | 1시간 (자동 만료) |
+| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
+
+> **일별/주간을 선택하지 않은 이유**
+> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
+> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
+
+### 중복 검색 카운팅 방지
+
+```
+키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
+TTL: 1시간
+```
+
+| 흐름 | 동작 |
+|------|------|
+| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
+| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
+| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
+
+> **userId 기반을 선택한 이유**
+> 티켓팅 서비스 특성상 로그인이 필수입니다.
+> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
+
+---
+
+## 3️⃣ 검색 API 캐시 적용
+
+### 캐시를 적용한 이유
+
+**검색 API (`performanceSearch`)**
+검색 API는 동일한 조건으로 반복 호출될 가능성이 높고, LIKE 쿼리는 인덱스를 제대로 활용하지 못해 DB 부하가 큽니다.
+검색 결과는 수 분 내에 급격히 변하지 않으므로 캐시 적용으로 DB 부하를 줄이고 응답 속도를 개선했습니다.
+
+**인기 검색어 API (`popularKeywords`)**
+매 요청마다 Redis를 조회하는 비용을 줄이기 위해 캐시를 적용했습니다.
+인기 검색어는 실시간성이 중요하므로 TTL을 1분으로 짧게 설정했습니다.
+
+### v1 vs v2 비교
+
+| 항목 | v1 | v2 |
+|------|----|----|
+| 엔드포인트 | `GET /performance/search/v1` | `GET /performance/search/v2` |
+| 캐시 적용 | ❌ | ✅ Caffeine (인메모리) |
+| 동작 방식 | 매 요청마다 DB 조회 | 캐시 HIT 시 메모리에서 즉시 반환 |
+
+### 캐시 전략 - Cache-aside (Lazy Loading)
+
+```
+요청 → 캐시 확인
+  ├─ HIT  → 캐시에서 즉시 반환
+  └─ MISS → DB 조회 → 캐시 저장 → 반환
+```
+
+> **Cache-aside를 선택한 이유**
+> - 검색 API는 읽기 위주이고 데이터 변경 빈도가 낮습니다.
+> - Write-through는 데이터 변경 시 캐시도 함께 갱신해야 해서 복잡도가 높아집니다.
+> - Write-back은 캐시와 DB 사이의 데이터 정합성 문제가 발생할 수 있습니다.
+
+### TTL 및 maximumSize 설정
+
+| 캐시 | TTL | maximumSize | 설정 이유 |
+|------|-----|-------------|----------|
+| `performanceSearch` | 5분 | 100 | DB 부하 감소, 데이터 변경 빈도 낮음 |
+| `popularKeywords` | 1분 | 10 | 실시간성 중요, Redis 조회 비용 절감 |
+
+### 캐시 Key 설계
+
+```
+# 검색 캐시
+performanceSearch::search:{keyword}:{category}:{startDate}:{endDate}:{status}:{pageNumber}
+
+# 실제 예시
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+performanceSearch::search:ALL:ALL:2025-03-01:2025-03-31:ALL:0
+
+# 인기 검색어 캐시
+popularKeywords::realtime:{domain}
+
+# 실제 예시
+popularKeywords::realtime:performance
+```
+
+| 항목 | 설명 |
+|------|------|
+| `value` | 캐시 저장소 이름으로 캐시 종류 구분 |
+| `key` prefix | `search:`, `realtime:` prefix로 충돌 방지 |
+| null 처리 | null 값은 `'ALL'`로 대체해 명확한 키 생성 |
+| 구분자 | `:` 사용으로 Spring 캐시 컨벤션(`cacheName::key`)과 일관성 유지 |
+
+### 로컬 캐시의 한계
+
+```
+서버 A: "레미제라블" 검색 → 캐시 저장
+서버 B: "레미제라블" 검색 → 캐시 MISS → DB 조회
+
+→ Scale-out 환경에서 서버 간 캐시 공유 불가
+→ 서버마다 다른 캐시 데이터로 정합성 문제 발생
+→ Redis 리모트 캐시로 전환하여 해결
+```
+
+---
+
+## 4️⃣ Redis 리모트 캐시 전환 (작성 예정)
+
+---
+
+## 5️⃣ 성능 테스트 결과 (작성 예정)
+
+---
+
+## 6️⃣ Cache Eviction (작성 예정)
+
+---
+
 ## 🚀 로컬 실행 방법
 
 ```bash

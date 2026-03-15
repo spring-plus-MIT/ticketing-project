@@ -29,7 +29,7 @@ public class PerformanceSearchController {
 
     private final PerformanceSessionService performanceSessionService;
 
-    @GetMapping
+    @GetMapping("/v1")
     public ResponseEntity<CommonResponse<Page<PerformanceSearchResponse>>> search(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Category category,
@@ -43,5 +43,20 @@ public class PerformanceSearchController {
         Pageable converted =  PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
         return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.search(keyword, category, startDate, endDate, status, converted, customUserDetails.getId())));
+    }
+
+    @GetMapping("/v2")
+    public ResponseEntity<CommonResponse<Page<PerformanceSearchResponse>>> searchV2(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) PerformanceStatus status,
+            @PageableDefault(size = 10) Pageable pageable,
+            @RequestParam(defaultValue = "1") int page,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
+        Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.searchV2(keyword, category, startDate, endDate, status, converted, customUserDetails.getId())));
     }
 }
