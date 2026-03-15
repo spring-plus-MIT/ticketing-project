@@ -43,7 +43,7 @@ public class LockRedisRepository {
             log.warn("Lock 해제 실패 key={}, value={}", key, value);
             return false;
         } else {
-            log.info("Lock 해제 성공 key={}, thread={}", key, Thread.currentThread().getName());
+            log.info("Lock 해제 성공 key={}, value={}", key, value);
             return true;
         }
     }
