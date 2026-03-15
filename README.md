@@ -280,7 +280,7 @@ PENDING → ACTIVE → DELETED
     - `Using filesort`: 인덱스에 정렬된 데이터가 없어 메모리/CPU를 사용하여 강제 정렬 수행.
     - **위험성:** 데이터 증가 시 서버 응답 불능(Timeout) 가능성 매우 높음.
 
-> ![Before 실행 계획](image_1d6c06.png)
+> <img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
 > *그림 1: 최적화 전 Full Table Scan 및 Filesort 발생 지표*
 
 ---
@@ -292,7 +292,7 @@ PENDING → ACTIVE → DELETED
     - `Using index`: **커버링 인덱스(Covering Index)** 달성. 실제 데이터 블록 접근 없이 인덱스 메모리만으로 쿼리 완결.
     - **개선 효과:** 불필요한 탐색 행 수를 절반 이하로 줄이고 정렬 부하를 완전히 제거함.
 
-> ![After 실행 계획](image_1d64a0.png)
+> <img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
 > *그림 2: 인덱스 최적화 후 커버링 인덱스가 적용된 실행 계획*
 
 ---
@@ -303,7 +303,7 @@ PENDING → ACTIVE → DELETED
     - 데이터가 약 600만 건 이상으로 급증했음에도 불구하고 `type: range` 및 `Using index` 상태 유지.
     - **결론:** 데이터 규모 확장에 따라 성능이 무너지지 않는 **확장성(Scalability)**을 확보함.
 
-> ![Post-Insert 검증](image_1d0747.png)
+> <img width="1280" height="638" alt="Image" src="https://github.com/user-attachments/assets/f547ad11-e883-4b13-912c-5105d79ff36d" />
 > *그림 3: 500만 건 추가 적재 후에도 변함없이 안정적인 인덱스 효율성*
 
 ---
