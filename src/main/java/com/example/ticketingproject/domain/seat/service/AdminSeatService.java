@@ -12,6 +12,7 @@ import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeReposit
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
+import com.example.ticketingproject.lock.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,34 +27,43 @@ public class AdminSeatService {
     private final SeatRepository seatRepository;
     private final VenueRepository venueRepository;
     private final SeatGradeRepository seatGradeRepository;
+    private final LockService lockService;
 
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
-        Venue venue = venueRepository.findById(venueId).orElseThrow(
-                () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
-        );
 
-        SeatGrade seatGrade = seatGradeRepository.findByGradeName(request.getGradeName()).orElseThrow(
-                () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
-        );
+        String key = lockService.createVenueAndSeatLockKey(venueId);
+        String uuid = lockService.lock(key);
 
-        int currentSeatCount = seatRepository.countByVenueId(venue.getId());
+        try {
+            Venue venue = venueRepository.findById(venueId).orElseThrow(
+                    () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
+            );
 
-        if(currentSeatCount >= venue.getTotalSeats()) {
-            throw new SeatException(SEAT_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_CAPACITY_EXCEEDED);
+            SeatGrade seatGrade = seatGradeRepository.findByGradeName(request.getGradeName()).orElseThrow(
+                    () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
+            );
+
+            int currentSeatCount = seatRepository.countByVenueId(venue.getId());
+
+            if(currentSeatCount >= venue.getTotalSeats()) {
+                throw new SeatException(SEAT_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_CAPACITY_EXCEEDED);
+            }
+
+            seatGrade.decreaseRemainingSeats();
+
+            Seat seat = Seat.builder()
+                    .venue(venue)
+                    .seatGrade(seatGrade)
+                    .rowName(request.getRowName())
+                    .seatNumber(request.getSeatNumber())
+                    .seatStatus(SeatStatus.AVAILABLE)
+                    .build();
+
+            Seat savedSeat = seatRepository.save(seat);
+
+            return SeatResponse.from(savedSeat);
+        } finally {
+            lockService.unlock(key, uuid);
         }
-
-        seatGrade.decreaseRemainingSeats();
-
-        Seat seat = Seat.builder()
-                .venue(venue)
-                .seatGrade(seatGrade)
-                .rowName(request.getRowName())
-                .seatNumber(request.getSeatNumber())
-                .seatStatus(SeatStatus.AVAILABLE)
-                .build();
-
-        Seat savedSeat = seatRepository.save(seat);
-
-        return SeatResponse.from(savedSeat);
     }
 }

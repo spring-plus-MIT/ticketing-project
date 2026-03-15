@@ -14,8 +14,6 @@ import java.util.UUID;
 public class LockService {
     private final LockRedisRepository lockRedisRepository;
 
-    private static final int RETRY_COUNT = 5;
-    private static final long RETRY_DELAY = 100;
     private static final Duration LOCK_TTL = Duration.ofSeconds(10);
 
     public String lock(String key) {
@@ -38,5 +36,9 @@ public class LockService {
 
     public String createSessionAndSeatLockKey(Long sessionId, Long seatId) {
         return "lock:session:" + sessionId + "seat:" + seatId;
+    }
+
+    public String createVenueAndSeatLockKey(Long venueId){
+        return "lock:venue:" + venueId + "seat:create";
     }
 }
