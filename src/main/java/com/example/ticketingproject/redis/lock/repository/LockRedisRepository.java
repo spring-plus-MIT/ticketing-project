@@ -32,7 +32,7 @@ public class LockRedisRepository {
         return Boolean.TRUE.equals(result);
     }
 
-    public void unlock(String key, String value) {
+    public Boolean unlock(String key, String value) {
         Long result = stringRedisTemplate.execute(
                 SCRIPT,
                 Collections.singletonList(key),
@@ -41,8 +41,10 @@ public class LockRedisRepository {
 
         if (result == null || result == 0) {
             log.warn("Lock 해제 실패 key={}, value={}", key, value);
+            return false;
         } else {
             log.info("Lock 해제 성공 key={}, thread={}", key, Thread.currentThread().getName());
+            return true;
         }
     }
 }
