@@ -132,8 +132,8 @@ public class SeatRaceConditionTest {
 
                     adminSeatService.save(venue.getId(), request);
 
-                } catch (Exception e) {
-                    Assertions.fail(e.getMessage());
+                } catch (Exception ignored) {
+
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -150,6 +150,6 @@ public class SeatRaceConditionTest {
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
 
-        Assertions.assertTrue(seatCount > 20);
+        Assertions.assertEquals(20, seatCount);
     }
 }

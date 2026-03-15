@@ -32,7 +32,7 @@ public class AdminSeatService {
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
 
         String key = lockService.createVenueAndSeatLockKey(venueId);
-        String uuid = lockService.lock(key);
+        String uuid = lockService.lockRetry(key);
 
         try {
             Venue venue = venueRepository.findById(venueId).orElseThrow(

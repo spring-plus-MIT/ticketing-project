@@ -16,7 +16,7 @@ public class LockService {
 
     private static final Duration LOCK_TTL = Duration.ofSeconds(10);
 
-    public String lock(String key) {
+    public String lockFailFast(String key) {
         String uuid = UUID.randomUUID().toString();
 
         Boolean success = lockRedisRepository.tryLock(key, uuid, LOCK_TTL);
@@ -28,6 +28,33 @@ public class LockService {
             );
         }
         return uuid;
+    }
+
+    public String lockRetry(String key) {
+        String uuid = UUID.randomUUID().toString();
+
+        int retry = 10;
+
+        while (retry > 0) {
+            Boolean success = lockRedisRepository.tryLock(key, uuid, LOCK_TTL);
+
+            if (Boolean.TRUE.equals(success)) {
+                return uuid;
+            }
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            retry--;
+        }
+
+        throw new LockException(
+                ErrorStatus.LOCK_ACQUISITION_FAILED.getHttpStatus(),
+                ErrorStatus.LOCK_ACQUISITION_FAILED
+        );
     }
 
     public void unlock(String key, String uuid) {

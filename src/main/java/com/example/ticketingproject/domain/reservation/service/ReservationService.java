@@ -52,7 +52,7 @@ public class ReservationService {
                 );
         String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
 
-        String uuid = lockService.lock(key);
+        String uuid = lockService.lockFailFast(key);
 
         try {
             Seat seat = seatRepository.findById(requestDto.getSeatId())
