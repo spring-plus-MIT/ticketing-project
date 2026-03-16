@@ -1,4 +1,10 @@
 spring:
+  cloud:
+    aws:
+      parameterstore:
+        enabled: false
+      secretsmanager:
+        enabled: false
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
