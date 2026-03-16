@@ -31,7 +31,7 @@ jobs:
     name: Build & Push to ECR
     runs-on: ubuntu-latest
     needs: ci
-    if: github.event_name == 'push'
+    if: false # TODO: CD 준비되면 제거
     permissions:
       id-token: write
       contents: read
