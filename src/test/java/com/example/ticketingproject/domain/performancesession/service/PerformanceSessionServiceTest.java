@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.performancesession.service;
 
 import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
+import com.example.ticketingproject.common.search.service.PerformanceSearchCacheService;
 import com.example.ticketingproject.common.search.service.SearchRankingService;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,9 @@ class PerformanceSessionServiceTest {
 
     @Mock
     private SearchRankingService searchRankingService;
+
+    @Mock
+    private PerformanceSearchCacheService performanceSearchCacheService;
 
     @InjectMocks
     private PerformanceSessionService performanceSessionService;
@@ -123,5 +128,210 @@ class PerformanceSessionServiceTest {
         performanceSessionService.search("레미제라블", null, null, null, null, pageable, 1L);
 
         then(searchRankingService).should().recordKeyword("레미제라블", 1L, "performance");
+    }
+
+    @Test
+    @DisplayName("공연 검색 v1 성공 - 키워드 검색")
+    void search_success_withKeyword() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        PerformanceSearchResponse dto = new PerformanceSearchResponse(
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
+                LocalDateTime.of(2025, 5, 1, 14, 0),
+                LocalDateTime.of(2025, 5, 1, 17, 0)
+        );
+        Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
+
+        given(performanceSessionRepository.searchPerformance(
+                "레미제라블", null, null, null, null, pageable
+        )).willReturn(searchPage);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.search(
+                "레미제라블", null, null, null, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).getPerformanceId()).isEqualTo(1L);
+        assertThat(response.getContent().get(0).getCategory()).isEqualTo(Category.MUSICAL);
+    }
+
+    @Test
+    @DisplayName("공연 검색 v1 성공 - 카테고리 필터")
+    void search_success_withCategory() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        PerformanceSearchResponse dto = new PerformanceSearchResponse(
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
+                LocalDateTime.of(2025, 5, 1, 14, 0),
+                LocalDateTime.of(2025, 5, 1, 17, 0)
+        );
+        Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
+
+        given(performanceSessionRepository.searchPerformance(
+                null, Category.MUSICAL, null, null, null, pageable
+        )).willReturn(searchPage);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.search(
+                null, Category.MUSICAL, null, null, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).getCategory()).isEqualTo(Category.MUSICAL);
+    }
+
+    @Test
+    @DisplayName("공연 검색 v1 성공 - 날짜 범위 필터")
+    void search_success_withDateRange() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        LocalDate startDate = LocalDate.of(2025, 5, 1);
+        LocalDate endDate = LocalDate.of(2025, 5, 31);
+        PerformanceSearchResponse dto = new PerformanceSearchResponse(
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
+                LocalDateTime.of(2025, 5, 1, 14, 0),
+                LocalDateTime.of(2025, 5, 1, 17, 0)
+        );
+        Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
+
+        given(performanceSessionRepository.searchPerformance(
+                null, null, startDate, endDate, null, pageable
+        )).willReturn(searchPage);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.search(
+                null, null, startDate, endDate, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).getStartDate())
+                .isAfterOrEqualTo(startDate.atStartOfDay());
+        assertThat(response.getContent().get(0).getEndDate())
+                .isBeforeOrEqualTo(endDate.atTime(23, 59, 59));
+    }
+
+    @Test
+    @DisplayName("공연 검색 v1 성공 - 상태 필터")
+    void search_success_withStatus() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        PerformanceSearchResponse dto = new PerformanceSearchResponse(
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
+                LocalDateTime.of(2025, 5, 1, 14, 0),
+                LocalDateTime.of(2025, 5, 1, 17, 0)
+        );
+        Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
+
+        given(performanceSessionRepository.searchPerformance(
+                null, null, null, null, PerformanceStatus.ON_SALE, pageable
+        )).willReturn(searchPage);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.search(
+                null, null, null, null, PerformanceStatus.ON_SALE, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).getStatus()).isEqualTo(PerformanceStatus.ON_SALE);
+    }
+
+    @Test
+    @DisplayName("공연 검색 v1 성공 - 검색 결과 없음")
+    void search_success_emptyResult() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<PerformanceSearchResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        given(performanceSessionRepository.searchPerformance(
+                "존재하지않는작품", null, null, null, null, pageable
+        )).willReturn(emptyPage);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.search(
+                "존재하지않는작품", null, null, null, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(0);
+        assertThat(response.getContent()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("공연 검색 v2 성공 - 캐시 서비스 호출 확인")
+    void searchV2_success() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        PerformanceSearchResponse dto = new PerformanceSearchResponse(
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
+                LocalDateTime.of(2025, 5, 1, 14, 0),
+                LocalDateTime.of(2025, 5, 1, 17, 0)
+        );
+
+        given(performanceSearchCacheService.getContent(
+                "레미제라블", null, null, null, null, pageable, 0
+        )).willReturn(List.of(dto));
+
+        given(performanceSearchCacheService.getCount(
+                "레미제라블", null, null, null, null
+        )).willReturn(1L);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.searchV2(
+                "레미제라블", null, null, null, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).getPerformanceId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("공연 검색 v2 시 인기 검색어 기록 호출 확인")
+    void searchV2_recordsKeyword() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        given(performanceSearchCacheService.getContent(
+                "레미제라블", null, null, null, null, pageable, 0
+        )).willReturn(List.of());
+
+        given(performanceSearchCacheService.getCount(
+                "레미제라블", null, null, null, null
+        )).willReturn(0L);
+
+        // when
+        performanceSessionService.searchV2("레미제라블", null, null, null, null, pageable, 1L);
+
+        // then
+        then(searchRankingService).should().recordKeyword("레미제라블", 1L, "performance");
+    }
+
+    @Test
+    @DisplayName("공연 검색 v2 성공 - 검색 결과 없음")
+    void searchV2_emptyResult() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        given(performanceSearchCacheService.getContent(
+                "존재하지않는작품", null, null, null, null, pageable, 0
+        )).willReturn(List.of());
+
+        given(performanceSearchCacheService.getCount(
+                "존재하지않는작품", null, null, null, null
+        )).willReturn(0L);
+
+        // when
+        Page<PerformanceSearchResponse> response = performanceSessionService.searchV2(
+                "존재하지않는작품", null, null, null, null, pageable, 1L
+        );
+
+        // then
+        assertThat(response.getTotalElements()).isEqualTo(0);
+        assertThat(response.getContent()).isEmpty();
     }
 }

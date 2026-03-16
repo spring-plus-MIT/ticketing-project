@@ -5,7 +5,7 @@ import com.example.ticketingproject.domain.work.enums.Category;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @RequiredArgsConstructor
@@ -15,6 +15,6 @@ public class PerformanceSearchResponse {
     private final String season;
     private final Category category;
     private final PerformanceStatus status;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
 }
