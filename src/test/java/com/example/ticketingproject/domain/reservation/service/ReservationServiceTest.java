@@ -15,6 +15,7 @@ import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -46,6 +47,9 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
+    @Mock
+    private LockService lockService;
 
     @BeforeEach
     void setUp() {
