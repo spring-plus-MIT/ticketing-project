@@ -6,13 +6,13 @@
 
 ## 📌 프로젝트 개요
 
-| 항목 | 내용                     |
-|------|------------------------|
-| 프로젝트명 | Ticketing Project      |
+| 항목 | 내용                      |
+|------|-------------------------|
+| 프로젝트명 | Ticketing Project       |
 | 개발 기간 | 2026.03.05 ~ 2025.03.25 |
-| 개발 인원 | 5명                     |
-| 데이터베이스 | MySQL 8.4              |
-| 아키텍처 | Monolithic REST API    |
+| 개발 인원 | 5명                      |
+| 데이터베이스 | MySQL 8.0               |
+| 아키텍처 | Monolithic REST API     |
 
 ---
 
@@ -254,30 +254,99 @@ PENDING → ACTIVE → DELETED
 
 ---
 
-## ⚡ 성능 최적화 (Database Indexing)
+# ⚡ Database Performance Optimization (Indexing)
+## 🚀 대규모 공연 데이터셋 인덱스 최적화 및 확장성 검증 보고서
 
-> 대용량 데이터 환경에서의 검색 효율성을 극대화하기 위해 실행 계획(EXPLAIN) 분석 및 복합 인덱스(Composite Index)를 설계했습니다.
+### 1. 프로젝트 개요 (Background)
+본 작업은 대규모 공연 데이터 조회 성능 문제를 해결하기 위한 데이터베이스 인덱스 최적화 실험입니다. 초기 환경에서 발생하던 Full Table Scan 문제를 진단하고, 600만 건 이상의 데이터 환경에서도 안정적인 성능을 유지하는 구조를 설계/검증했습니다.
 
-### 1️⃣ 문제 상황 및 최적화 대상
-- **데이터 규모**: 약 14만 건의 기본 데이터 적재 후, 대량의 더미 데이터 적재를 통해 총 **3,800만 건** 규모의 극한 환경 조성
-- **대상 쿼리**: `work_id`, `start_date`, `venue_id` 조건을 포함한 공연 검색 쿼리
-- **현상**: 인덱스 부재 시 `work_id + 0` 등의 연산으로 인해 인덱스가 무력화되며 **전수 조사(Full Table Scan)** 발생
+---
 
-### 2️⃣ 해결 전략: 복합 인덱스 설계
-- **Composite Index 생성**: `INDEX idx_perf_optimized (work_id, start_date, venue_id)`
-- **선정 이유**: 조회 빈도가 높고 결합도가 높은 컬럼들을 묶어 **카디널리티(Cardinality)** 를 높이고 탐색 범위를 최소화하여 서버 부하 경감
+### 📊 2. 실험 환경
+| 항목 | 내용 |
+| :--- | :--- |
+| **Database** | MySQL 8.x |
+| **데이터 종류** | 공연 정보 데이터 |
+| **초기 데이터** | 약 100만 건 |
+| **확장 테스트** | +500만 건 (총 약 600만 건) |
 
-### 3️⃣ 실제 개선 결과 (EXPLAIN 데이터 기반)
+---
 
-| 지표 | 인덱스 미적용 (Before) | 복합 인덱스 적용 (After) | 개선 성과 |
-|:---:|:---:|:---:|:---:|
-| **스캔 범위 (Rows)** | **38,285,970 건** | **231,772 건** | **약 165배 탐색 범위 압축** |
-| **실행 방식 (type)** | `ALL` (Full Scan) | **`ref` (Index Scan)** | **DB 연산 효율 최적화** |
-| **응답 시간 (ms)** | 343 ms | 348 ~ 365 ms | 데이터 전송 부하로 인해 유사 |
+### 📊 3. 성능 개선 결과 (Summary)
+| 구분 | 최적화 전 (Before) | 인덱스 적용 후 (After) | 500만건 추가 후 |
+| :--- | :--- | :--- | :--- |
+| **실행 시간** | **396 ms** | **381 ms** | **379 ms** |
+| **조회 방식** | Full Table Scan (ALL) | **Range Scan** | **Range Scan 유지** |
+| **정렬 방식** | Using filesort | **인덱스 정렬 활용** | **인덱스 정렬 유지** |
+| **인덱스 전략** | 없음 | **Covering Index** | **성능 방어 성공** |
 
-### 4️⃣ 결과 분석 및 검증
-- **탐색 범위 99.4% 감소**: 탐색해야 할 데이터 행을 3,800만 개에서 23만 개로 줄여 CPU 연산 비용을 획기적으로 절감했습니다.
-- **응답 시간(ms)의 병목 지점 파악**: 스캔 범위의 차이에도 응답 시간이 유사한 원인은 `SELECT *`로 인한 **23만 건의 대량 데이터 전송(Network I/O)** 시간임을 확인했습니다.
+> **핵심 결과:** 데이터 규모가 6배 증가했음에도 실행 시간을 380ms 수준으로 유지하며 강력한 **확장성(Scalability)**을 확보함.
+
+---
+
+### 🔍 4. 문제 분석 (Before Optimization)
+인덱스가 없는 상태에서 `WHERE` 필터링과 `ORDER BY`를 동시에 수행할 경우, 전체 테이블을 스캔하고 메모리 내에서 강제 정렬이 발생함을 확인했습니다.
+
+- **EXPLAIN 분석 결과:** `type: ALL`, `Using filesort` 발생
+- **위험 요소:** 데이터 증가 시 성능이 선형적으로 저하될 가능성 높음
+
+<img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
+*그림 1: 최적화 전 실행 계획 (Full Table Scan)*
+
+---
+
+### 🏗️ 5. 해결 방법 (Index Optimization)
+조회 조건과 정렬 조건을 동시에 최적화하기 위해 다음과 같은 **복합 인덱스**를 설계했습니다.
+
+**[설계된 인덱스]**
+`idx_perf_main (venue_id, start_date, season)`
+
+- **WHERE 필터링:** `venue_id`, `start_date`를 인덱스에서 즉시 필터링
+- **ORDER BY 최적화:** 인덱스의 정렬 순서를 활용하여 `filesort` 제거
+- **Covering Index:** `SELECT` 절의 컬럼을 인덱스에 포함시켜 테이블 접근 최소화(`Using index`)
+
+
+---
+
+### 📈 6. 인덱스 적용 결과 (After Optimization)
+- **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인
+- **개선 효과:** Full Table Scan 제거, 디스크 I/O 감소, 조회 성능 안정화
+
+<img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
+*그림 2: 인덱스 최적화 후 실행 계획 (Covering Index)*
+
+---
+
+### 📈 7. 대규모 데이터 확장 테스트
+실제 서비스 운영 환경을 가정하여 **500만 건의 더미 데이터**를 추가 적재하고 재측정했습니다.
+
+- **테스트 결과:** 데이터가 600만 건으로 증가했음에도 실행 계획과 속도(379ms)가 안정적으로 유지됨.
+
+<img width="100%" alt="Post-Insert 검증" src="https://github.com/user-attachments/assets/f547ad11-e883-4b13-912c-5105d79ff36d" />
+*그림 3: 500만 건 데이터 추가 후 확장성 검증 결과*
+
+---
+
+### 🎯 8. 최종 성과
+1. **쿼리 성능 개선:** Full Scan 및 Filesort 제거를 통한 연산 효율화
+2. **디스크 I/O 감소:** 커버링 인덱스 적용으로 테이블 접근 최소화
+3. **확장성 확보:** 대규모 데이터 환경에서도 고정된 응답 속도 보장
+
+---
+
+### 🗂 9. 작업 진행 과정 (Work Log)
+1. **분석:** 검색 쿼리 수집 및 EXPLAIN 기반 병목 분석
+2. **설계:** 복합 인덱스 초안 설계 및 실행 계획 비교 시뮬레이션
+3. **검증:** 인덱스 적용 전/후 성능 측정 및 5만 건 샘플 테스트
+4. **확장:** 500만 건 데이터 적재를 통한 대규모 환경 최종 테스트
+5. **문서화:** 성능 비교 보고서 작성 및 팀 기술 공유
+
+---
+
+### 📌 핵심 기술 키워드
+`MySQL` `Indexing` `Covering Index` `Composite Index` `Query Optimization` `EXPLAIN Analysis` `Scalability`
+
+
 
 ---
 # Concurrency Scenarios
@@ -754,6 +823,50 @@ DB_USERNAME=root
 DB_PASSWORD=secret
 JWT_SECRET=your-jwt-secret
 ```
+
+### Spring Profile 설정
+
+`application.yml`에 기본 프로파일이 지정되어 있지 않으므로, 로컬 실행 시 반드시 `local` 프로파일을 명시해야 합니다.
+
+**IntelliJ 실행 설정**
+```
+Run/Debug Configurations → Active profiles → local
+```
+
+**VM options으로 지정**
+```
+-Dspring.profiles.active=local
+```
+
+## 로컬 실행 방법
+
+### 방법 1. CLI로 직접 실행
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+### 방법 2. Docker Compose로 실행
+
+**[실행]**
+1. 파일 수정 (필요 시)
+2. `./gradlew bootJar`
+3. `docker-compose up --build`
+4. Postman으로 `localhost:8080` 테스트
+
+**[종료]**
+1. `docker-compose down` → 컨테이너 + 네트워크 삭제, DB 유지
+2. `docker-compose down -v` → 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+
+**[이미지 삭제]**
+1. `docker images` → 이미지 ID 확인
+2. `docker rmi {이미지ID}` → 이미지 삭제 (컨테이너 중지 상태여야 함)
+3. `docker rmi -f {이미지ID}` → 실행 중인 컨테이너가 있어도 강제 삭제
+
+| 환경 | 프로파일 | 설정 파일 |
+|------|---------|---------|
+| 로컬 | `local` | `application-local.yml` + `.env` |
+| 테스트 | (자동) | `src/test/resources/application.yml` (H2) |
+| 운영 | `prod` | `application-prod.yml` (GitHub Secrets로 주입) |
 
 ---
 
