@@ -17,7 +17,6 @@ public class UpdateUserRequest {
     private String password;
 
     @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
-    @Length(min = 1, max = 10, message = MSG_VALIDATION_LENGTH_ERROR)
     @Pattern(
             regexp = "^010-\\d{4}-\\d{4}$",
             message = MSG_VALIDATION_PATTERN_ERROR
