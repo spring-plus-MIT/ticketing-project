@@ -1,6 +1,8 @@
 package com.example.ticketingproject.redis.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -21,10 +23,19 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
+    private ObjectMapper redisObjectMapper() {  // @Bean 제거
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        om.activateDefaultTyping(
+                om.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL
+        );
+        return om;
+    }
+
     @Bean
-    public CacheManager cacheManager(
-            RedisConnectionFactory connectionFactory,
-            @Qualifier("redisObjectMapper") ObjectMapper redisObjectMapper) {
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(
@@ -32,7 +43,7 @@ public class CacheConfig {
                                 .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair
-                                .fromSerializer(new GenericJackson2JsonRedisSerializer(redisObjectMapper)));
+                                .fromSerializer(new GenericJackson2JsonRedisSerializer(redisObjectMapper())));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
         cacheConfigurations.put("performanceSearch",
