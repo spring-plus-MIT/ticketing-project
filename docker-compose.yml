@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7.0
+    container_name: my-redis # 컨테이너 이름 직접 지정
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy   # ← mysql 완전히 뜬 후 앱 시작
+      redis:
+        condition: service_started
+
+volumes:
+  mysql-data:

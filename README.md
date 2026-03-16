@@ -6,13 +6,13 @@
 
 ## 📌 프로젝트 개요
 
-| 항목 | 내용                     |
-|------|------------------------|
-| 프로젝트명 | Ticketing Project      |
+| 항목 | 내용                      |
+|------|-------------------------|
+| 프로젝트명 | Ticketing Project       |
 | 개발 기간 | 2026.03.05 ~ 2025.03.25 |
-| 개발 인원 | 5명                     |
-| 데이터베이스 | MySQL 8.4              |
-| 아키텍처 | Monolithic REST API    |
+| 개발 인원 | 5명                      |
+| 데이터베이스 | MySQL 8.0               |
+| 아키텍처 | Monolithic REST API     |
 
 ---
 
@@ -565,6 +565,50 @@ DB_USERNAME=root
 DB_PASSWORD=secret
 JWT_SECRET=your-jwt-secret
 ```
+
+### Spring Profile 설정
+
+`application.yml`에 기본 프로파일이 지정되어 있지 않으므로, 로컬 실행 시 반드시 `local` 프로파일을 명시해야 합니다.
+
+**IntelliJ 실행 설정**
+```
+Run/Debug Configurations → Active profiles → local
+```
+
+**VM options으로 지정**
+```
+-Dspring.profiles.active=local
+```
+
+## 로컬 실행 방법
+
+### 방법 1. CLI로 직접 실행
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+### 방법 2. Docker Compose로 실행
+
+**[실행]**
+1. 파일 수정 (필요 시)
+2. `./gradlew bootJar`
+3. `docker-compose up --build`
+4. Postman으로 `localhost:8080` 테스트
+
+**[종료]**
+1. `docker-compose down` → 컨테이너 + 네트워크 삭제, DB 유지
+2. `docker-compose down -v` → 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+
+**[이미지 삭제]**
+1. `docker images` → 이미지 ID 확인
+2. `docker rmi {이미지ID}` → 이미지 삭제 (컨테이너 중지 상태여야 함)
+3. `docker rmi -f {이미지ID}` → 실행 중인 컨테이너가 있어도 강제 삭제
+
+| 환경 | 프로파일 | 설정 파일 |
+|------|---------|---------|
+| 로컬 | `local` | `application-local.yml` + `.env` |
+| 테스트 | (자동) | `src/test/resources/application.yml` (H2) |
+| 운영 | `prod` | `application-prod.yml` (GitHub Secrets로 주입) |
 
 ---
 

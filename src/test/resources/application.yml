@@ -1,0 +1,29 @@
+spring:
+  config:
+    import: "optional:aws-parameterstore:"
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+# 테스트용 더미값 추가
+jwt:
+  secret:
+    key: test-secret-key-for-junit-test-only
+  expiration: 1800000
+
+# AWS 설정 추가
+cloud:
+  aws:
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
