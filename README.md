@@ -6,13 +6,13 @@
 
 ## 📌 프로젝트 개요
 
-| 항목 | 내용                     |
-|------|------------------------|
-| 프로젝트명 | Ticketing Project      |
+| 항목 | 내용                      |
+|------|-------------------------|
+| 프로젝트명 | Ticketing Project       |
 | 개발 기간 | 2026.03.05 ~ 2025.03.25 |
-| 개발 인원 | 5명                     |
-| 데이터베이스 | MySQL 8.4              |
-| 아키텍처 | Monolithic REST API    |
+| 개발 인원 | 5명                      |
+| 데이터베이스 | MySQL 8.0               |
+| 아키텍처 | Monolithic REST API     |
 
 ---
 
@@ -254,34 +254,468 @@ PENDING → ACTIVE → DELETED
 
 ---
 
-## ⚡ 성능 최적화 (Database Indexing)
-
-> 대용량 데이터 환경에서의 검색 효율성을 극대화하기 위해 실행 계획(EXPLAIN) 분석 및 복합 인덱스(Composite Index)를 설계했습니다.
-
-### 1️⃣ 문제 상황 및 최적화 대상
-- **데이터 규모**: 약 14만 건의 기본 데이터 적재 후, 대량의 더미 데이터 적재를 통해 총 **3,800만 건** 규모의 극한 환경 조성
-- **대상 쿼리**: `work_id`, `start_date`, `venue_id` 조건을 포함한 공연 검색 쿼리
-- **현상**: 인덱스 부재 시 `work_id + 0` 등의 연산으로 인해 인덱스가 무력화되며 **전수 조사(Full Table Scan)** 발생
-
-### 2️⃣ 해결 전략: 복합 인덱스 설계
-- **Composite Index 생성**: `INDEX idx_perf_optimized (work_id, start_date, venue_id)`
-- **선정 이유**: 조회 빈도가 높고 결합도가 높은 컬럼들을 묶어 **카디널리티(Cardinality)** 를 높이고 탐색 범위를 최소화하여 서버 부하 경감
-
-### 3️⃣ 실제 개선 결과 (EXPLAIN 데이터 기반)
-
-| 지표 | 인덱스 미적용 (Before) | 복합 인덱스 적용 (After) | 개선 성과 |
-|:---:|:---:|:---:|:---:|
-| **스캔 범위 (Rows)** | **38,285,970 건** | **231,772 건** | **약 165배 탐색 범위 압축** |
-| **실행 방식 (type)** | `ALL` (Full Scan) | **`ref` (Index Scan)** | **DB 연산 효율 최적화** |
-| **응답 시간 (ms)** | 343 ms | 348 ~ 365 ms | 데이터 전송 부하로 인해 유사 |
-
-### 4️⃣ 결과 분석 및 검증
-- **탐색 범위 99.4% 감소**: 탐색해야 할 데이터 행을 3,800만 개에서 23만 개로 줄여 CPU 연산 비용을 획기적으로 절감했습니다.
-- **응답 시간(ms)의 병목 지점 파악**: 스캔 범위의 차이에도 응답 시간이 유사한 원인은 `SELECT *`로 인한 **23만 건의 대량 데이터 전송(Network I/O)** 시간임을 확인했습니다.
+# 검색 기능 및 캐시 최적화
 
 ---
 
-# 동시성 시나리오 - 마지막 좌석 1개 동시 예매 100명
+## 1️⃣ 검색 API 설계
+
+### 문제 상황
+매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
+
+### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+
+| 항목 | 내용 |
+|------|------|
+| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
+| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
+| 페이징 | `PageableExecutionUtils.getPage()`로 count 쿼리 분리 |
+
+### 검색 조건 (동적 쿼리)
+
+| 파라미터 | 조건 | 설명 |
+|----------|------|------|
+| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
+| `category` | `work.category = category` | 장르 필터 |
+| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
+| `status` | `performance.status = status` | 공연 상태 필터 |
+
+### count 쿼리 분리 패턴
+
+```java
+// 마지막 페이지에서는 count 쿼리 실행 생략
+return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+```
+
+> 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리를 실행하지 않아
+> 불필요한 DB 호출을 방지합니다.
+
+---
+
+## 2️⃣ 인기 검색어
+
+### 구현 방식
+Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
+
+```
+# 검색 시 score 증가
+ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
+
+# 상위 10개 조회
+ZREVRANGE popular:search:performance:2025031315 0 9
+```
+
+### 집계 기간 - 실시간 (1시간 단위)
+
+| 항목 | 내용 |
+|------|------|
+| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
+| TTL | 1시간 (자동 만료) |
+| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
+
+> **일별/주간을 선택하지 않은 이유**
+> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
+> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
+
+### 중복 검색 카운팅 방지
+
+```
+키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
+TTL: 1시간
+```
+
+| 흐름 | 동작 |
+|------|------|
+| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
+| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
+| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
+
+> **userId 기반을 선택한 이유**
+> 티켓팅 서비스 특성상 로그인이 필수입니다.
+> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
+
+---
+
+# 검색 기능 및 캐시 최적화
+
+---
+
+## 1️⃣ 검색 API 설계
+
+### 문제 상황
+매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
+
+### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+
+| 항목 | 내용 |
+|------|------|
+| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
+| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
+| 페이징 | content 조회와 count 조회를 별도 메서드로 분리 |
+
+### 검색 조건 (동적 쿼리)
+
+| 파라미터 | 조건 | 설명 |
+|----------|------|------|
+| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
+| `category` | `work.category = category` | 장르 필터 |
+| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
+| `status` | `performance.status = status` | 공연 상태 필터 |
+
+### count 쿼리 분리
+
+**인메모리 캐시(Caffeine) 적용 시**
+```java
+// Page 객체를 메모리에 그대로 저장 가능
+// PageableExecutionUtils로 마지막 페이지 최적화
+return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+// → 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리 실행 생략
+```
+
+**Redis 캐시 전환 후**
+```java
+// Page 객체는 Redis에 직렬화할 수 없어 content와 count를 분리
+List<PerformanceSearchResponse> content = performanceSearchCacheService.getContent(...);
+long total = performanceSearchCacheService.getCount(...);
+return new PageImpl<>(content, pageable, total);
+```
+
+| 항목 | 인메모리 (Caffeine) | Redis |
+|------|-------------------|-------|
+| Page 저장 | 객체 그대로 저장 가능 | 직렬화 불가 → 분리 필요 |
+| count 최적화 | 마지막 페이지 count 생략 | 별도 캐시로 저장/재사용 |
+| count 키 | 불필요 | pageNumber 제외한 별도 키 |
+
+**count 키에서 pageNumber를 제외한 이유**
+
+> 전체 결과 수는 페이지 번호와 무관하게 동일한 값이므로 동일한 검색 조건이라면
+> count는 한 번만 캐시에 저장되어 재사용됩니다.
+
+---
+
+## 2️⃣ 인기 검색어
+
+### 구현 방식
+Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
+
+```
+# 검색 시 score 증가
+ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
+
+# 상위 10개 조회
+ZREVRANGE popular:search:performance:2025031315 0 9
+```
+
+### 집계 기간 - 실시간 (1시간 단위)
+
+| 항목 | 내용 |
+|------|------|
+| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
+| TTL | 1시간 (자동 만료) |
+| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
+
+> **일별/주간을 선택하지 않은 이유**
+> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
+> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
+
+### 중복 검색 카운팅 방지
+
+```
+키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
+TTL: 1시간
+```
+
+| 흐름 | 동작 |
+|------|------|
+| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
+| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
+| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
+
+**userId 기반을 선택한 이유**
+> 티켓팅 서비스 특성상 로그인이 필수입니다.
+> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
+
+---
+
+## 3️⃣ 검색 API 캐시 적용 (인메모리 → Redis 전환)
+
+### 캐시를 적용한 이유
+
+**검색 API (`performanceSearch`)**
+검색 API는 동일한 조건으로 반복 호출될 가능성이 높고, LIKE 쿼리는 인덱스를 제대로 활용하지 못해 DB 부하가 큽니다.
+검색 결과는 수 분 내에 급격히 변하지 않으므로 캐시 적용으로 DB 부하를 줄이고 응답 속도를 개선했습니다.
+
+**인기 검색어 API (`popularKeywords`)**
+매 요청마다 Redis를 조회하는 비용을 줄이기 위해 캐시를 적용했습니다.
+인기 검색어는 실시간성이 중요하므로 TTL을 1분으로 짧게 설정했습니다.
+
+### v1 vs v2 비교
+
+| 항목 | v1 | v2 (인메모리) | v2 (Redis 전환 후) |
+|------|----|--------------|--------------------|
+| 엔드포인트 | `GET /performance/search/v1` | `GET /performance/search/v2` | `GET /performance/search/v2` |
+| 캐시 적용 | ❌ | ✅ Caffeine (인메모리) | ✅ Redis (리모트 캐시) |
+| 동작 방식 | 매 요청마다 DB 조회 | 캐시 HIT 시 메모리에서 즉시 반환 | 캐시 HIT 시 Redis에서 즉시 반환 |
+| Scale-out | - | 서버 간 공유 불가 | 모든 서버 공유 가능 |
+
+### 캐시 전략 - Cache-aside (Lazy Loading)
+
+```
+요청 → 캐시 확인
+  ├─ HIT  → Redis 캐시에서 즉시 반환
+  └─ MISS → DB 조회 → Redis에 저장 → 반환
+```
+
+> **Cache-aside를 선택한 이유**
+> - 검색 API는 읽기 위주이고 데이터 변경 빈도가 낮습니다.
+> - Write-through는 데이터 변경 시 캐시도 함께 갱신해야 해서 복잡도가 높아집니다.
+> - Write-back은 캐시와 DB 사이의 데이터 정합성 문제가 발생할 수 있습니다.
+
+### TTL 설정
+
+| 캐시 | TTL | 설정 이유 |
+|------|-----|----------|
+| `performanceSearch` | 5분 | DB 부하 감소, 데이터 변경 빈도 낮음 |
+| `popularKeywords` | 1분 | 실시간성 중요, Redis 조회 비용 절감 |
+
+**인메모리(Caffeine) vs Redis TTL/maximumSize 비교**
+
+| 항목 | 인메모리 (Caffeine) | Redis |
+|------|-------------------|-------|
+| TTL | `expireAfterWrite()` | `entryTtl()` |
+| maximumSize | 설정 필요 (서버 메모리 직접 사용) | 설정 불필요 (Redis 서버가 관리) |
+| 메모리 관리 | 애플리케이션 레벨에서 제한 | Redis `maxmemory-policy`로 관리 |
+
+**maximumSize를 설정하지 않은 이유**
+> 인메모리 캐시(Caffeine)는 서버 메모리를 직접 사용하므로 `maximumSize`로 항목 수를 제한해야 했습니다.
+> Redis 리모트 캐시로 전환 후에는 메모리 관리를 Redis 서버가 전담하므로 `maximumSize` 설정이 불필요합니다.
+> Redis 서버의 `maxmemory-policy` 설정으로 메모리 관리 정책을 지정할 수 있습니다.
+
+### 캐시 Key 설계
+
+```
+# content 캐시
+performanceSearch::search:{keyword}:{category}:{startDate}:{endDate}:{status}:{pageNumber}
+
+# count 캐시
+performanceSearch::count:{keyword}:{category}:{startDate}:{endDate}:{status}
+
+# 실제 예시
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+performanceSearch::count:레미제라블:MUSICAL:ALL:ALL:ON_SALE
+
+# 인기 검색어 캐시
+popularKeywords::realtime:{domain}
+popularKeywords::realtime:performance
+```
+
+| 항목 | 설명 |
+|------|------|
+| `value` | 캐시 저장소 이름으로 캐시 종류 구분 |
+| `key` prefix | `search:`, `count:`, `realtime:` prefix로 충돌 방지 |
+| null 처리 | null 값은 `'ALL'`로 대체해 명확한 키 생성 |
+| 구분자 | `:` 사용으로 Spring 캐시 컨벤션(`cacheName::key`)과 일관성 유지 |
+| count 키 | 페이지 번호 제외 (전체 결과 수는 페이지와 무관) |
+
+---
+
+## 4️⃣ Redis 리모트 캐시 전환
+
+### 인메모리 캐시의 한계
+
+```
+서버 A: "레미제라블" 검색 → 로컬 캐시 저장
+서버 B: "레미제라블" 검색 → 캐시 MISS → DB 조회
+
+→ Scale-out 환경에서 서버 간 캐시 공유 불가
+→ 서버마다 다른 캐시 데이터로 정합성 문제 발생
+```
+
+### Redis를 선택한 이유 (vs Memcached)
+
+| 항목 | Redis | Memcached |
+|------|-------|-----------|
+| 자료구조 | String, List, Set, ZSet, Hash 등 다양 | String만 지원 |
+| 영속성 | RDB, AOF로 데이터 영속화 가능 | 지원 안 함 |
+| 복제/클러스터 | 지원 | 제한적 |
+| 인기 검색어 | Sorted Set으로 구현 가능 | 불가 |
+
+이미 인기 검색어 집계에 Redis Sorted Set을 사용하고 있어 **인프라 일원화** 차원에서 Redis를 선택했습니다.
+
+### Redis Cache에서 사용한 자료구조
+
+**검색 결과 캐시 - String (JSON 직렬화)**
+
+```
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+→ "[{"@class":"...PerformanceSearchResponse", "performanceId":1, ...}]"
+```
+
+| 자료구조 | 선택 여부 | 이유 |
+|----------|----------|------|
+| String | ✅ 선택 | JSON 직렬화된 객체를 단일 값으로 저장, `@Cacheable`과 자연스럽게 호환 |
+| Hash | ❌ | 필드별 개별 저장으로 복잡도 증가, `@Cacheable`과 호환 어려움 |
+| List | ❌ | 순서 보장은 되지만 단건 조회/갱신이 비효율적 |
+
+**String을 선택한 이유**
+> Spring의 `@Cacheable`은 내부적으로 캐시 값을 단일 직렬화된 객체로 저장합니다.
+> `GenericJackson2JsonRedisSerializer`로 객체를 JSON 문자열로 직렬화하여 String으로 저장하면
+> `@Cacheable`과 자연스럽게 호환되고, 역직렬화 시 타입 정보를 포함해 정확한 객체로 복원할 수 있습니다.
+
+### RDBMS vs NoSQL
+
+| 항목 | RDBMS (MySQL) | NoSQL (Redis) |
+|------|--------------|---------------|
+| 데이터 구조 | 테이블(행/열) | Key-Value, Document 등 |
+| 스키마 | 고정 스키마 | 유연한 스키마 |
+| 저장 위치 | 디스크 | 메모리 (디스크 옵션) |
+| 속도 | 상대적으로 느림 | 매우 빠름 |
+| 용도 | 복잡한 관계형 데이터 | 캐시, 세션, 실시간 데이터 |
+
+### 직렬화 설정
+
+Redis는 네트워크를 통해 데이터를 주고받으므로 반드시 직렬화가 필요합니다.
+
+```java
+ObjectMapper om = new ObjectMapper();
+om.registerModule(new JavaTimeModule());                        // LocalDateTime 직렬화 지원
+om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);    // 날짜를 문자열로 저장
+om.activateDefaultTyping(                                       // 역직렬화 시 타입 정보 포함
+        om.getPolymorphicTypeValidator(),
+        ObjectMapper.DefaultTyping.NON_FINAL
+);
+```
+
+| 설정 | 이유 |
+|------|------|
+| `JavaTimeModule` | `LocalDateTime`, `LocalDate` 직렬화 지원 |
+| `WRITE_DATES_AS_TIMESTAMPS` 비활성화 | 타임스탬프(숫자) 대신 문자열로 저장하여 가독성 향상 |
+| `activateDefaultTyping` | 역직렬화 시 정확한 타입으로 복원 |
+
+### Page 객체 직렬화 문제 해결
+
+`Page<T>` 인터페이스는 Redis에 직렬화할 수 없어 content와 count를 분리하여 캐시에 저장했습니다.
+
+```
+캐시 저장 구조
+performanceSearch::search:... → List<PerformanceSearchResponse>  (content)
+performanceSearch::count:...  → long                             (totalElements)
+
+서비스에서 조립
+return new PageImpl<>(content, pageable, total);
+```
+
+---
+
+## 5️⃣ 성능 테스트 결과 (작성 예정)
+
+---
+
+## 6️⃣ Cache Eviction (작성 예정)
+
+---
+# ⚡ Database Performance Optimization (Indexing)
+## 🚀 대규모 공연 데이터셋 인덱스 최적화 및 확장성 검증 보고서
+
+### 1. 프로젝트 개요 (Background)
+본 작업은 대규모 공연 데이터 조회 성능 문제를 해결하기 위한 데이터베이스 인덱스 최적화 실험입니다. 초기 환경에서 발생하던 Full Table Scan 문제를 진단하고, 600만 건 이상의 데이터 환경에서도 안정적인 성능을 유지하는 구조를 설계/검증했습니다.
+
+---
+
+### 📊 2. 실험 환경
+| 항목 | 내용 |
+| :--- | :--- |
+| **Database** | MySQL 8.x |
+| **데이터 종류** | 공연 정보 데이터 |
+| **초기 데이터** | 약 100만 건 |
+| **확장 테스트** | +500만 건 (총 약 600만 건) |
+
+---
+
+### 📊 3. 성능 개선 결과 (Summary)
+| 구분 | 최적화 전 (Before) | 인덱스 적용 후 (After) | 500만건 추가 후 |
+| :--- | :--- | :--- | :--- |
+| **실행 시간** | **396 ms** | **381 ms** | **379 ms** |
+| **조회 방식** | Full Table Scan (ALL) | **Range Scan** | **Range Scan 유지** |
+| **정렬 방식** | Using filesort | **인덱스 정렬 활용** | **인덱스 정렬 유지** |
+| **인덱스 전략** | 없음 | **Covering Index** | **성능 방어 성공** |
+
+> **핵심 결과:** 데이터 규모가 6배 증가했음에도 실행 시간을 380ms 수준으로 유지하며 강력한 **확장성(Scalability)**을 확보함.
+
+---
+
+### 🔍 4. 문제 분석 (Before Optimization)
+인덱스가 없는 상태에서 `WHERE` 필터링과 `ORDER BY`를 동시에 수행할 경우, 전체 테이블을 스캔하고 메모리 내에서 강제 정렬이 발생함을 확인했습니다.
+
+- **EXPLAIN 분석 결과:** `type: ALL`, `Using filesort` 발생
+- **위험 요소:** 데이터 증가 시 성능이 선형적으로 저하될 가능성 높음
+
+<img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
+*그림 1: 최적화 전 실행 계획 (Full Table Scan)*
+
+---
+
+### 🏗️ 5. 해결 방법 (Index Optimization)
+조회 조건과 정렬 조건을 동시에 최적화하기 위해 다음과 같은 **복합 인덱스**를 설계했습니다.
+
+**[설계된 인덱스]**
+`idx_perf_main (venue_id, start_date, season)`
+
+- **WHERE 필터링:** `venue_id`, `start_date`를 인덱스에서 즉시 필터링
+- **ORDER BY 최적화:** 인덱스의 정렬 순서를 활용하여 `filesort` 제거
+- **Covering Index:** `SELECT` 절의 컬럼을 인덱스에 포함시켜 테이블 접근 최소화(`Using index`)
+
+
+---
+
+### 📈 6. 인덱스 적용 결과 (After Optimization)
+- **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인
+- **개선 효과:** Full Table Scan 제거, 디스크 I/O 감소, 조회 성능 안정화
+
+<img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
+*그림 2: 인덱스 최적화 후 실행 계획 (Covering Index)*
+
+---
+
+### 📈 7. 대규모 데이터 확장 테스트
+실제 서비스 운영 환경을 가정하여 **500만 건의 더미 데이터**를 추가 적재하고 재측정했습니다.
+
+- **테스트 결과:** 데이터가 600만 건으로 증가했음에도 실행 계획과 속도(379ms)가 안정적으로 유지됨.
+
+<img width="100%" alt="Post-Insert 검증" src="https://github.com/user-attachments/assets/f547ad11-e883-4b13-912c-5105d79ff36d" />
+*그림 3: 500만 건 데이터 추가 후 확장성 검증 결과*
+
+---
+
+### 🎯 8. 최종 성과
+1. **쿼리 성능 개선:** Full Scan 및 Filesort 제거를 통한 연산 효율화
+2. **디스크 I/O 감소:** 커버링 인덱스 적용으로 테이블 접근 최소화
+3. **확장성 확보:** 대규모 데이터 환경에서도 고정된 응답 속도 보장
+
+---
+
+### 🗂 9. 작업 진행 과정 (Work Log)
+1. **분석:** 검색 쿼리 수집 및 EXPLAIN 기반 병목 분석
+2. **설계:** 복합 인덱스 초안 설계 및 실행 계획 비교 시뮬레이션
+3. **검증:** 인덱스 적용 전/후 성능 측정 및 5만 건 샘플 테스트
+4. **확장:** 500만 건 데이터 적재를 통한 대규모 환경 최종 테스트
+5. **문서화:** 성능 비교 보고서 작성 및 팀 기술 공유
+
+---
+
+### 📌 핵심 기술 키워드
+`MySQL` `Indexing` `Covering Index` `Composite Index` `Query Optimization` `EXPLAIN Analysis` `Scalability`
+
+
+
+---
+# Concurrency Scenarios
+
+1. 마지막 좌석 동시 예매 (100명)
+2. 좌석 제한 초과 생성 방지 (200 요청)
+
+
+## 1. 마지막 좌석 1개 동시 예매 100명
 
 ### 1. 문제 상황
 
@@ -396,7 +830,7 @@ SET lock:seat:101 UUID NX PX 3000
 
 **락을 생성할 때 TTL(Time to Live)을 함께 설정**
 
-TTL = 3초
+TTL = 10초
 
 서버 장애 또는 사용자 이탈 시 락이 영구적으로 남는 문제 방지
 
@@ -469,9 +903,9 @@ end
 
 **동시성 제어 시스템에 중요한 요소**
 
-- 락 TTL 설정
-- 락 해제 안정성
-- 락 충돌 시 처리 전략
+- Lock TTL 설정
+- Lock 해제 안정성
+- Lock 충돌 시 처리 전략
 - Deadlock 방지
 
 현재 프로젝트에서 구조
@@ -480,6 +914,254 @@ end
 - UUID 기반 락 식별
 - Lua Script 기반 원자적 해제
 ---
+
+## 2. 좌석 제한 20개, 200개 생성 요청
+
+### 1. 문제 상황
+
+**좌석 생성 API가 동시에 여러 요청을 받을 때 상황**
+
+예시)
+
+공연장 좌석 수 제한 : 20석
+
+관리자가 동시에 좌석 생성 요청을 보냄
+
+요청 수 : 200개  
+좌석 제한 : 20개
+
+동시성 제어가 없는 경우 다음과 같은 상황 발생
+
+```
+Thread1 → 현재 좌석 수 조회 → 0
+Thread2 → 현재 좌석 수 조회 → 0
+Thread3 → 현재 좌석 수 조회 → 0
+...
+Thread200 → 현재 좌석 수 조회 → 0
+```
+
+이후 모든 요청이 좌석을 생성하면
+
+```
+좌석 제한 = 20
+실제 생성 좌석 = 22
+```
+
+또는 환경에 따라 더 많은 좌석이 생성될 수 있음
+
+Race Condition으로 인해 좌석 제한 검증 로직이 동시에 통과하면서 발생
+
+---
+
+### 2. 목표
+
+**동시 요청이 발생해도 좌석 제한을 절대 초과하지 않도록 보장**
+
+예시)
+
+요청 수 = 200  
+좌석 제한 = 20
+
+결과
+
+```
+20개 생성 성공
+180개 생성 실패
+```
+
+좌석 수는 항상 20개 이하로 유지
+
+---
+
+### 3. 해결 전략
+
+**Redis 기반 분산 락(Distributed Lock)을 이용하여 동시성을 제어**
+
+좌석 생성 로직은 다음과 같은 과정을 거친다.
+
+```
+현재 좌석 수 조회
+→ 좌석 제한 검증
+→ 좌석 생성
+```
+
+이 과정이 동시에 실행되면 Race Condition이 발생한다.
+
+좌석 생성 전체 로직을 하나의 Lock으로 보호
+
+좌석 생성 Lock
+
+```
+lock:venue:{venueId}:seat:create
+```
+
+동일 공연장에 대한 좌석 생성 요청은 한 번에 하나만 실행
+
+---
+
+### 4. Redis Lock 구현 방식
+
+**Redisson을 사용하지 않고 Lettuce 기반으로 직접 Redis Lock을 구현**
+
+구조
+
+```
+LockRedisRepository → LockService → AdminSeatService
+```
+
+비즈니스 로직에서 Redis에 직접 접근하지 않도록 설계
+
+```
+AdminSeatService → LockService → LockRedisRepository → Redis
+```
+
+비즈니스 로직과 락 구현을 분리
+
+---
+
+### 5. Redis Lock Key 설계
+
+**공연장 단위로 좌석 제한이 존재, 공연장 기준으로 Lock Key 생성**
+
+```
+lock:venue:{venueId}:seat:create
+```
+
+예시)
+
+```
+lock:venue:1:seat:create
+```
+
+동일 공연장에 대한 좌석 생성 요청은 모두 동일 Lock을 사용
+
+---
+
+### 6. Lock 획득 방식
+
+**Redis의 SETNX (Set If Not Exists)를 이용해 락 획득**
+
+```
+SET lock:seat:101 UUID NX PX 3000
+```
+
+- NX : key가 없을 때만 설정
+- PX : TTL 설정
+
+---
+
+### 7. TTL 설정
+
+**락을 생성할 때 TTL(Time to Live)을 함께 설정**
+
+TTL = 10초
+
+서버 장애 또는 사용자 이탈 시 락이 영구적으로 남는 문제 방지
+
+예시)
+
+```
+Lock 획득 → 서버 장애 발생 → Lock 해제 코드 실행 안됨
+```
+
+TTL이 없으면 좌석 생성 기능이 영구적으로 막힐 수 있음
+
+---
+
+### 8. Lock 해제 방식
+
+**본인이 획득한 락만 해제하도록 UUID를 사용**
+
+현재 value == UUID 일 때만 삭제를 위한 Lua Script를 사용해 원자적으로 삭제
+
+예시)
+
+```lua
+if redis.call("get", KEYS[1]) == ARGV[1] then
+    return redis.call("del", KEYS[1])
+else
+    return 0
+end
+```
+
+다른 요청이 획득한 락을 실수로 삭제하는 문제를 방지
+
+---
+
+### 9. Lock 실패 시 처리
+
+**좌석 생성은 Fail Fast 전략이 아닌 Retry 전략을 사용**
+
+이유
+
+좌석 생성은 관리자 기능이며
+
+동시에 요청이 들어와도 최대한 좌석을 생성하는 것이 목표
+
+Lock 획득 실패 → 일정 시간 후 재시도
+
+Retry 전략
+
+```
+Retry 횟수 : 10회
+Backoff : Exponential Backoff + Jitter
+```
+
+예시)
+
+```
+13ms → 28ms → 45ms → 82ms ...
+```
+
+락 경쟁을 완화하기 위한 전략
+
+---
+
+### 10. 동시 좌석 생성 처리 흐름
+
+```
+좌석 생성 요청 → Redis Lock 획득 시도 → Lock 성공 → 현재 좌석 수 조회
+→ 좌석 제한 검증 → 좌석 생성 → Lock 해제
+```
+
+```
+좌석 생성 요청 → Redis Lock 획득 실패 → Backoff 후 재시도 → Retry 초과 시 좌석 생성 실패
+```
+
+---
+
+### 11. 기대 결과
+
+**문제 상황에 대한 제한 초과 생성 문제를 방지**
+
+```
+좌석 제한 = 20
+동시 요청 = 200
+
+좌석 생성 성공 : 20
+좌석 생성 실패 : 180
+```
+
+---
+
+### 12. 추가 고려 사항
+
+동시성 제어에서 중요한 요소
+
+- Lock TTL 설정
+- Lock 해제 안정성
+- Retry 전략
+- Backoff 전략
+- Deadlock 방지
+
+현재 프로젝트 적용 구조
+
+- SET NX + TTL
+- UUID 기반 Lock 식별
+- Lua Script Unlock
+- Retry + Exponential + jitter Backoff
+
+
 
 ## 🚀 로컬 실행 방법
 
@@ -501,6 +1183,50 @@ DB_USERNAME=root
 DB_PASSWORD=secret
 JWT_SECRET=your-jwt-secret
 ```
+
+### Spring Profile 설정
+
+`application.yml`에 기본 프로파일이 지정되어 있지 않으므로, 로컬 실행 시 반드시 `local` 프로파일을 명시해야 합니다.
+
+**IntelliJ 실행 설정**
+```
+Run/Debug Configurations → Active profiles → local
+```
+
+**VM options으로 지정**
+```
+-Dspring.profiles.active=local
+```
+
+## 로컬 실행 방법
+
+### 방법 1. CLI로 직접 실행
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+### 방법 2. Docker Compose로 실행
+
+**[실행]**
+1. 파일 수정 (필요 시)
+2. `./gradlew bootJar`
+3. `docker-compose up --build`
+4. Postman으로 `localhost:8080` 테스트
+
+**[종료]**
+1. `docker-compose down` → 컨테이너 + 네트워크 삭제, DB 유지
+2. `docker-compose down -v` → 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+
+**[이미지 삭제]**
+1. `docker images` → 이미지 ID 확인
+2. `docker rmi {이미지ID}` → 이미지 삭제 (컨테이너 중지 상태여야 함)
+3. `docker rmi -f {이미지ID}` → 실행 중인 컨테이너가 있어도 강제 삭제
+
+| 환경 | 프로파일 | 설정 파일 |
+|------|---------|---------|
+| 로컬 | `local` | `application-local.yml` + `.env` |
+| 테스트 | (자동) | `src/test/resources/application.yml` (H2) |
+| 운영 | `prod` | `application-prod.yml` (GitHub Secrets로 주입) |
 
 ---
 
