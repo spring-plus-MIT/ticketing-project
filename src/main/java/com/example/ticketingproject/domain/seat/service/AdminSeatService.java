@@ -29,7 +29,7 @@ public class AdminSeatService {
     private final VenueRepository venueRepository;
     private final SeatGradeRepository seatGradeRepository;
 
-    // SqEL 표현식으로 Lock Key 동적 생성
+    // SpEL 표현식으로 Lock Key 동적 생성
     // SpEL 작성법 = 문자열은 ' '로 감싸고, 메서드 파라미터는 #파라미터명
     // "'Key 시작 이름' + #파라미터값 변수명(추가로 붙일 키 이름은 '' 감싸서 추가)"
     // 예) venueId = 2 -> Lock:venue:2:seat:create
