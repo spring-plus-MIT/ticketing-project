@@ -16,7 +16,8 @@ import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
-import com.example.ticketingproject.redis.lock.service.LockService;
+import com.example.ticketingproject.redis.lock.annotation.RedisLock;
+import com.example.ticketingproject.redis.lock.enums.LockStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +33,12 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
     private final PerformanceSessionRepository performanceSessionRepository;
-    private final LockService lockService;
 
     @Transactional
+    @RedisLock(
+            key = "'lock:session:' + #requestDto.performanceSessionId + ':seat:' + #requestDto.seatId",
+            strategy = LockStrategy.FAIL_FAST
+    )
     public ReservationResponse createReservation(ReservationCreateRequest requestDto, Long userId) {
 
         User user = userRepository.findById(userId)
@@ -50,38 +54,30 @@ public class ReservationService {
                         ErrorStatus.SESSION_NOT_FOUND
                         )
                 );
-        String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
 
-        String uuid = lockService.lockFailFast(key);
+        Seat seat = seatRepository.findById(requestDto.getSeatId())
+                .orElseThrow(() -> new SeatException(
+                                ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
+                                ErrorStatus.SEAT_NOT_FOUND
+                        )
+                );
 
-        try {
-            Seat seat = seatRepository.findById(requestDto.getSeatId())
-                    .orElseThrow(() -> new SeatException(
-                                    ErrorStatus.SEAT_NOT_FOUND.getHttpStatus(),
-                                    ErrorStatus.SEAT_NOT_FOUND
-                            )
-                    );
+        // 좌석 점유를 위한 seat 메서드 추가 (SeatStatus = RESERVED)
+        seat.reserve();
 
-            // 좌석 점유를 위한 seat 메서드 추가 (SeatStatus = RESERVED)
-            seat.reserve();
+        Reservation reservation = Reservation.builder()
+                .user(user)
+                .performanceSession(performanceSession)
+                .seat(seat)
+                .status(ReservationStatus.PENDING)
+                .totalPrice(seat.getSeatGrade().getPrice())
+                .reservedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
 
-            Reservation reservation = Reservation.builder()
-                    .user(user)
-                    .performanceSession(performanceSession)
-                    .seat(seat)
-                    .status(ReservationStatus.PENDING)
-                    .totalPrice(seat.getSeatGrade().getPrice())
-                    .reservedAt(LocalDateTime.now())
-                    .expiresAt(LocalDateTime.now().plusMinutes(10))
-                    .build();
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-            Reservation savedReservation = reservationRepository.save(reservation);
-
-            return ReservationResponse.from(savedReservation);
-
-        } finally {
-            lockService.unlock(key, uuid);
-        }
+        return ReservationResponse.from(savedReservation);
     }
 
     public ReservationResponse findOneReservation(Long userId, Long reservationId) {

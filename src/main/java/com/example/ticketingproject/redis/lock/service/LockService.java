@@ -108,12 +108,4 @@ public class LockService {
             );
         }
     }
-
-    public String createSessionAndSeatLockKey(Long sessionId, Long seatId) {
-        return "lock:session:" + sessionId + ":seat:" + seatId;
-    }
-
-    public String createVenueAndSeatLockKey(Long venueId){
-        return "lock:venue:" + venueId + ":seat:create";
-    }
 }
