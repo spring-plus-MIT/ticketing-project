@@ -12,6 +12,7 @@ import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeReposit
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ public class AdminSeatServiceTest {
 
     @Mock
     private SeatGradeRepository seatGradeRepository;
+
+    @Mock
+    private LockService lockService;
 
     @InjectMocks
     private AdminSeatService adminSeatService;

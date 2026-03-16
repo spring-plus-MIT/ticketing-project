@@ -15,11 +15,13 @@ import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -46,6 +48,9 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
+    @MockBean
+    private LockService lockService;
 
     @BeforeEach
     void setUp() {
