@@ -1,4 +1,4 @@
-package com.example.ticketingproject.lock.exception;
+package com.example.ticketingproject.redis.lock.exception;
 
 import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.common.exception.BaseException;

@@ -16,7 +16,7 @@ import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
-import com.example.ticketingproject.lock.service.LockService;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +52,7 @@ public class ReservationService {
                 );
         String key = lockService.createSessionAndSeatLockKey(requestDto.getPerformanceSessionId(), requestDto.getSeatId());
 
-        String uuid = lockService.lock(key);
+        String uuid = lockService.lockFailFast(key);
 
         try {
             Seat seat = seatRepository.findById(requestDto.getSeatId())

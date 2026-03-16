@@ -12,7 +12,7 @@ import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeReposit
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.exception.VenueException;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
-import com.example.ticketingproject.lock.service.LockService;
+import com.example.ticketingproject.redis.lock.service.LockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,7 @@ public class AdminSeatService {
     public SeatResponse save(Long venueId, CreateSeatRequest request) {
 
         String key = lockService.createVenueAndSeatLockKey(venueId);
-        String uuid = lockService.lock(key);
+        String uuid = lockService.lockRetry(key);
 
         try {
             Venue venue = venueRepository.findById(venueId).orElseThrow(
