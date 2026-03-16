@@ -6,30 +6,38 @@ import com.example.ticketingproject.domain.work.enums.Category;
 import com.example.ticketingproject.domain.work.exception.WorkException;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 public class WorkServiceTest {
 
-    @Autowired
+    @InjectMocks
     WorkService workService;
 
-    @Autowired
+    @Mock
     WorkRepository workRepository;
 
     @Test
     void 작품_전체_조회_성공_테스트() {
 
         // given
+        List<Work> works = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             Work work = Work.builder()
                     .title("작품 제목 " + i)
@@ -38,17 +46,22 @@ public class WorkServiceTest {
                     .likeCount(0L)
                     .build();
 
-            workRepository.save(work);
+            ReflectionTestUtils.setField(work, "id", (long)i);
+            works.add(work);
         }
 
         Pageable pageable = PageRequest.of(0, 10);
 
+        Page<Work> workPage = new PageImpl<>(works, pageable, works.size());
+
+        when(workRepository.findAll(pageable)).thenReturn(workPage);
+
         // when
-        Page<WorkResponse> works = workService.findAllWork(pageable);
+        Page<WorkResponse> responses = workService.findAllWork(pageable);
 
         // then
-        assertThat(works.getContent().size()).isEqualTo(5);
-        assertThat(works.getContent().get(0).getTitle()).contains("작품 제목 ");
+        assertThat(responses.getContent().size()).isEqualTo(5);
+        assertThat(responses.getContent().get(0).getTitle()).contains("작품 제목 ");
     }
 
     @Test
@@ -62,7 +75,9 @@ public class WorkServiceTest {
                 .likeCount(0L)
                 .build();
 
-        workRepository.save(work);
+        ReflectionTestUtils.setField(work, "id", 1L);
+
+        when(workRepository.findById(work.getId())).thenReturn(Optional.of(work));
 
         // when
         WorkResponse response = workService.findOneWork(work.getId());
@@ -81,6 +96,8 @@ public class WorkServiceTest {
                 .description("작품 설명")
                 .likeCount(0L)
                 .build();
+
+        ReflectionTestUtils.setField(work, "id", 2L);
 
         // when & then
         assertThatThrownBy(() -> workService.findOneWork(999L))

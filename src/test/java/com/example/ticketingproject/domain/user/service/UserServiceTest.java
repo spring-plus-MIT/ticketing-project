@@ -8,36 +8,38 @@ import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
-import com.example.ticketingproject.domain.user.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Autowired
+    @InjectMocks
     private UserService userService;
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
+    @Mock
     private PasswordEncoder passwordEncoder;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void 내_정보_조회_성공_테스트() {
@@ -53,7 +55,9 @@ class UserServiceTest {
                 .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        userRepository.save(user);
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         // when
         GetUserResponse response = userService.findOneUser(user.getId());
@@ -69,6 +73,8 @@ class UserServiceTest {
 
         // given
         Long invalidId = 999L;
+        when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
+
 
         // when & then
         assertThatThrownBy(() -> userService.findOneUser(invalidId))
@@ -89,18 +95,19 @@ class UserServiceTest {
                 .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        userRepository.save(user);
+        ReflectionTestUtils.setField(user, "id", 2L);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         // when
         userService.withdrawUser(user.getId());
 
         // then
-        User withdrawUser = userRepository.findById(user.getId()).get();
 
-        assertThat(withdrawUser.getUserStatus()).isEqualTo(UserStatus.DELETED);
-        assertThat(withdrawUser.getName()).isEqualTo("이**");
-        assertThat(withdrawUser.getEmail()).contains("*");
-        assertThat(withdrawUser.getPhone()).contains("****");
+        assertThat(user.getUserStatus()).isEqualTo(UserStatus.DELETED);
+        assertThat(user.getName()).isEqualTo("이**");
+        assertThat(user.getEmail()).contains("*");
+        assertThat(user.getPhone()).contains("****");
     }
 
     @Test
@@ -117,7 +124,9 @@ class UserServiceTest {
                 .userStatus(UserStatus.DELETED)
                 .build();
 
-        userRepository.save(user);
+        ReflectionTestUtils.setField(user, "id", 3L);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         // when & then
         assertThatThrownBy(() -> userService.withdrawUser(user.getId()))
@@ -138,7 +147,7 @@ class UserServiceTest {
                 .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        userRepository.save(user);
+        ReflectionTestUtils.setField(user, "id", 4L);
 
         String json = """
                 {
@@ -147,9 +156,13 @@ class UserServiceTest {
                     "phone": "010-5678-5678"
                 }
                 """;
-
         UpdateUserRequest request = objectMapper.readValue(json, UpdateUserRequest.class);
 
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded");
+
+        when(passwordEncoder.matches(request.getPassword(), "encoded")).thenReturn(true);
 
         // when
         UpdateUserResponse response = userService.updateUser(user.getId(), request);

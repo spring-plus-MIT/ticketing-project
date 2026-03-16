@@ -9,25 +9,29 @@ import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 public class AdminWorkServiceTest {
 
-    @Autowired
+    @InjectMocks
     private AdminWorkService adminWorkService;
 
-    @Autowired
+    @Mock
     private WorkRepository workRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void 작품_생성_성공_테스트() throws JsonProcessingException {
@@ -44,6 +48,19 @@ public class AdminWorkServiceTest {
 
         CreateWorkRequest request = objectMapper.readValue(json, CreateWorkRequest.class);
 
+        Work work = Work.builder()
+                .title(request.getTitle())
+                .category(request.getCategory())
+                .description(request.getDescription())
+                .likeCount(request.getLikeCount())
+                .build();
+
+        ReflectionTestUtils.setField(work, "id", 1L);
+
+        when(workRepository.save(any(Work.class))).thenReturn(work);
+
+        when(workRepository.findById(work.getId())).thenReturn(Optional.of(work));
+
         // when
         WorkResponse response = adminWorkService.createWork(request);
 
@@ -51,10 +68,10 @@ public class AdminWorkServiceTest {
         assertThat(response.getTitle()).isEqualTo("작품 제목");
         assertThat(response.getDescription()).isEqualTo("작품 설명");
 
-        Work work = workRepository.findById(response.getId()).orElseThrow();
+        Work savedWork = workRepository.findById(response.getId()).orElseThrow();
 
-        assertThat(work.getTitle()).isEqualTo("작품 제목");
-        assertThat(work.getDescription()).isEqualTo("작품 설명");
+        assertThat(savedWork.getTitle()).isEqualTo("작품 제목");
+        assertThat(savedWork.getDescription()).isEqualTo("작품 설명");
     }
 
     @Test
@@ -68,7 +85,7 @@ public class AdminWorkServiceTest {
                 .likeCount(0L)
                 .build();
 
-        workRepository.save(work);
+        ReflectionTestUtils.setField(work, "id", 2L);
 
         String json = """
                 {
@@ -79,6 +96,8 @@ public class AdminWorkServiceTest {
                 """;
 
         UpdateWorkRequest request = objectMapper.readValue(json, UpdateWorkRequest.class);
+
+        when(workRepository.findById(work.getId())).thenReturn(Optional.of(work));
 
         // when
         WorkResponse response = adminWorkService.updateWork(work.getId(), request);
