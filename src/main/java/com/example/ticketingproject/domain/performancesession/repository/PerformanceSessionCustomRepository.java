@@ -13,15 +13,15 @@ public interface PerformanceSessionCustomRepository {
     Page<PerformanceSearchResponse> searchPerformance(
             String keyword,
             Category category,
-            LocalDate startTime,
-            LocalDate endTime,
+            LocalDate startDate,
+            LocalDate endDate,
             PerformanceStatus status,
             Pageable pageable);
 
     long countPerformance(
             String keyword,
             Category category,
-            LocalDate startTime,
-            LocalDate endTime,
+            LocalDate startDate,
+            LocalDate endDate,
             PerformanceStatus status);
 }
