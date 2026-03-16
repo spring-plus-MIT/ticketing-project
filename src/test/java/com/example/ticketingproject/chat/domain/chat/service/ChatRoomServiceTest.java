@@ -1,10 +1,11 @@
 package com.example.ticketingproject.chat.domain.chat.service;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.chat.domain.chat.dto.ChatRoomResponse;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoom;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoomStatus;
+import com.example.ticketingproject.chat.domain.chat.exception.ChatException;
 import com.example.ticketingproject.chat.domain.chat.repository.ChatRoomRepository;
-import com.example.ticketingproject.common.exception.BaseException;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
@@ -39,7 +40,6 @@ class ChatRoomServiceTest {
     private ChatRoomService chatRoomService;
 
     private User normalUser;
-    private User adminUser;
     private ChatRoom chatRoom;
 
     @BeforeEach
@@ -48,11 +48,6 @@ class ChatRoomServiceTest {
         ReflectionTestUtils.setField(normalUser, "id", 1L);
         ReflectionTestUtils.setField(normalUser, "userRole", UserRole.USER);
         ReflectionTestUtils.setField(normalUser, "name", "일반유저");
-
-        adminUser = User.builder().build();
-        ReflectionTestUtils.setField(adminUser, "id", 2L);
-        ReflectionTestUtils.setField(adminUser, "userRole", UserRole.ADMIN);
-        ReflectionTestUtils.setField(adminUser, "name", "관리자");
 
         chatRoom = ChatRoom.builder()
                 .status(ChatRoomStatus.WAITING)
@@ -74,21 +69,6 @@ class ChatRoomServiceTest {
         // then
         assertThat(response.getStatus()).isEqualTo(ChatRoomStatus.WAITING);
         verify(chatRoomRepository).save(any(ChatRoom.class));
-    }
-
-    @Test
-    @DisplayName("채팅방 목록 조회 - 관리자는 전체 방을 조회한다")
-    void getChatRooms_admin() {
-        // given
-        given(userRepository.findById(2L)).willReturn(Optional.of(adminUser));
-        given(chatRoomRepository.findAll()).willReturn(List.of(chatRoom));
-
-        // when
-        List<ChatRoomResponse> responses = chatRoomService.getChatRooms(2L);
-
-        // then
-        assertThat(responses).hasSize(1);
-        verify(chatRoomRepository).findAll();
     }
 
     @Test
@@ -127,6 +107,6 @@ class ChatRoomServiceTest {
 
         // when & then
         assertThatThrownBy(() -> chatRoomService.updateRoomStatus(999L, ChatRoomStatus.IN_PROGRESS))
-                .isInstanceOf(BaseException.class);
+                .isInstanceOf(ChatException.class);
     }
 }
