@@ -1,5 +1,6 @@
 package com.example.ticketingproject.chat.domain.chat.service;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoomStatus;
 import com.example.ticketingproject.chat.domain.chat.exception.ChatException; // 추가!
 import com.example.ticketingproject.common.enums.ErrorStatus;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,17 +36,17 @@ public class ChatService {
     @Transactional
     public ChatMessageResponse saveMessage(ChatMessageRequest request, Long senderId) {
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new ChatException(HttpStatus.NOT_FOUND, ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new AuthException(USER_NOT_FOUND.getHttpStatus(),USER_NOT_FOUND));
 
         ChatRoom chatRoom = chatRoomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new ChatException(HttpStatus.NOT_FOUND, ErrorStatus.CHAT_ROOM_NOT_FOUND));
+                .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND.getHttpStatus(),CHAT_ROOM_NOT_FOUND));
 
         if (sender.getUserRole() != UserRole.ADMIN && !chatRoom.getCreator().getId().equals(senderId)) {
-            throw new ChatException(HttpStatus.FORBIDDEN, ErrorStatus.FORBIDDEN_CHAT_ROOM);
+            throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(),ACCESS_FORBIDDEN);
         }
 
         if (chatRoom.getStatus() == ChatRoomStatus.COMPLETED) {
-            throw new ChatException(HttpStatus.BAD_REQUEST, ErrorStatus.CHAT_ROOM_ALREADY_COMPLETED);
+            throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(),ACCESS_FORBIDDEN);
         }
 
         ChatMessage message = ChatMessage.builder()

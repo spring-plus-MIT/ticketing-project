@@ -1,13 +1,14 @@
 package com.example.ticketingproject.chat.listener;
 
 import com.example.ticketingproject.chat.domain.chat.dto.ChatMessageResponse;
+import com.example.ticketingproject.chat.pubsub.RedisPublisher;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -19,8 +20,9 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 @RequiredArgsConstructor
 public class WebSocketEventListener {
 
-    private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
+    private final RedisPublisher redisPublisher;
+    private final ChannelTopic channelTopic;
 
     /**
      * 1. 유저 입장 감지 (채팅방 구독 시점)
@@ -51,8 +53,8 @@ public class WebSocketEventListener {
 
                 ChatMessageResponse systemMessage = ChatMessageResponse.createSystemMessage(roomId, realName + "님이 입장하셨습니다.");
 
-                messagingTemplate.convertAndSend(destination, systemMessage);
-                log.info("[채팅방 입장] 방 번호: {}, 유저명: {}", roomId, realName);
+                redisPublisher.publish(channelTopic, systemMessage);
+                log.info("[채팅방 입장 발행 완료] 방 번호: {}, 유저명: {}", roomId, realName);
             }
         }
     }
@@ -66,14 +68,14 @@ public class WebSocketEventListener {
 
         if (accessor.getSessionAttributes() != null) {
             Long roomId = (Long) accessor.getSessionAttributes().get("roomId");
-            String username = (String) accessor.getSessionAttributes().get("username"); // 위에서 저장한 진짜 이름
+            String username = (String) accessor.getSessionAttributes().get("username");
 
             if (roomId != null && username != null) {
 
                 ChatMessageResponse systemMessage = ChatMessageResponse.createSystemMessage(roomId, username + "님이 퇴장하셨습니다.");
 
-                messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, systemMessage);
-                log.info("[채팅방 퇴장] 방 번호: {}, 유저명: {}", roomId, username);
+                redisPublisher.publish(channelTopic, systemMessage);
+                log.info("[채팅방 퇴장 발행 완료] 방 번호: {}, 유저명: {}", roomId, username);
             }
         }
     }
