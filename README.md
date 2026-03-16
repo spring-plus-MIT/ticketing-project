@@ -254,6 +254,366 @@ PENDING → ACTIVE → DELETED
 
 ---
 
+# 검색 기능 및 캐시 최적화
+
+---
+
+## 1️⃣ 검색 API 설계
+
+### 문제 상황
+매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
+
+### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+
+| 항목 | 내용 |
+|------|------|
+| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
+| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
+| 페이징 | `PageableExecutionUtils.getPage()`로 count 쿼리 분리 |
+
+### 검색 조건 (동적 쿼리)
+
+| 파라미터 | 조건 | 설명 |
+|----------|------|------|
+| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
+| `category` | `work.category = category` | 장르 필터 |
+| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
+| `status` | `performance.status = status` | 공연 상태 필터 |
+
+### count 쿼리 분리 패턴
+
+```java
+// 마지막 페이지에서는 count 쿼리 실행 생략
+return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+```
+
+> 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리를 실행하지 않아
+> 불필요한 DB 호출을 방지합니다.
+
+---
+
+## 2️⃣ 인기 검색어
+
+### 구현 방식
+Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
+
+```
+# 검색 시 score 증가
+ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
+
+# 상위 10개 조회
+ZREVRANGE popular:search:performance:2025031315 0 9
+```
+
+### 집계 기간 - 실시간 (1시간 단위)
+
+| 항목 | 내용 |
+|------|------|
+| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
+| TTL | 1시간 (자동 만료) |
+| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
+
+> **일별/주간을 선택하지 않은 이유**
+> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
+> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
+
+### 중복 검색 카운팅 방지
+
+```
+키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
+TTL: 1시간
+```
+
+| 흐름 | 동작 |
+|------|------|
+| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
+| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
+| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
+
+> **userId 기반을 선택한 이유**
+> 티켓팅 서비스 특성상 로그인이 필수입니다.
+> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
+
+---
+
+# 검색 기능 및 캐시 최적화
+
+---
+
+## 1️⃣ 검색 API 설계
+
+### 문제 상황
+매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
+
+### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+
+| 항목 | 내용 |
+|------|------|
+| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
+| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
+| 페이징 | content 조회와 count 조회를 별도 메서드로 분리 |
+
+### 검색 조건 (동적 쿼리)
+
+| 파라미터 | 조건 | 설명 |
+|----------|------|------|
+| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
+| `category` | `work.category = category` | 장르 필터 |
+| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
+| `status` | `performance.status = status` | 공연 상태 필터 |
+
+### count 쿼리 분리
+
+**인메모리 캐시(Caffeine) 적용 시**
+```java
+// Page 객체를 메모리에 그대로 저장 가능
+// PageableExecutionUtils로 마지막 페이지 최적화
+return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
+// → 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리 실행 생략
+```
+
+**Redis 캐시 전환 후**
+```java
+// Page 객체는 Redis에 직렬화할 수 없어 content와 count를 분리
+List<PerformanceSearchResponse> content = performanceSearchCacheService.getContent(...);
+long total = performanceSearchCacheService.getCount(...);
+return new PageImpl<>(content, pageable, total);
+```
+
+| 항목 | 인메모리 (Caffeine) | Redis |
+|------|-------------------|-------|
+| Page 저장 | 객체 그대로 저장 가능 | 직렬화 불가 → 분리 필요 |
+| count 최적화 | 마지막 페이지 count 생략 | 별도 캐시로 저장/재사용 |
+| count 키 | 불필요 | pageNumber 제외한 별도 키 |
+
+**count 키에서 pageNumber를 제외한 이유**
+
+> 전체 결과 수는 페이지 번호와 무관하게 동일한 값이므로 동일한 검색 조건이라면
+> count는 한 번만 캐시에 저장되어 재사용됩니다.
+
+---
+
+## 2️⃣ 인기 검색어
+
+### 구현 방식
+Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
+
+```
+# 검색 시 score 증가
+ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
+
+# 상위 10개 조회
+ZREVRANGE popular:search:performance:2025031315 0 9
+```
+
+### 집계 기간 - 실시간 (1시간 단위)
+
+| 항목 | 내용 |
+|------|------|
+| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
+| TTL | 1시간 (자동 만료) |
+| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
+
+> **일별/주간을 선택하지 않은 이유**
+> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
+> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
+
+### 중복 검색 카운팅 방지
+
+```
+키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
+TTL: 1시간
+```
+
+| 흐름 | 동작 |
+|------|------|
+| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
+| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
+| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
+
+**userId 기반을 선택한 이유**
+> 티켓팅 서비스 특성상 로그인이 필수입니다.
+> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
+
+---
+
+## 3️⃣ 검색 API 캐시 적용 (인메모리 → Redis 전환)
+
+### 캐시를 적용한 이유
+
+**검색 API (`performanceSearch`)**
+검색 API는 동일한 조건으로 반복 호출될 가능성이 높고, LIKE 쿼리는 인덱스를 제대로 활용하지 못해 DB 부하가 큽니다.
+검색 결과는 수 분 내에 급격히 변하지 않으므로 캐시 적용으로 DB 부하를 줄이고 응답 속도를 개선했습니다.
+
+**인기 검색어 API (`popularKeywords`)**
+매 요청마다 Redis를 조회하는 비용을 줄이기 위해 캐시를 적용했습니다.
+인기 검색어는 실시간성이 중요하므로 TTL을 1분으로 짧게 설정했습니다.
+
+### v1 vs v2 비교
+
+| 항목 | v1 | v2 (인메모리) | v2 (Redis 전환 후) |
+|------|----|--------------|--------------------|
+| 엔드포인트 | `GET /performance/search/v1` | `GET /performance/search/v2` | `GET /performance/search/v2` |
+| 캐시 적용 | ❌ | ✅ Caffeine (인메모리) | ✅ Redis (리모트 캐시) |
+| 동작 방식 | 매 요청마다 DB 조회 | 캐시 HIT 시 메모리에서 즉시 반환 | 캐시 HIT 시 Redis에서 즉시 반환 |
+| Scale-out | - | 서버 간 공유 불가 | 모든 서버 공유 가능 |
+
+### 캐시 전략 - Cache-aside (Lazy Loading)
+
+```
+요청 → 캐시 확인
+  ├─ HIT  → Redis 캐시에서 즉시 반환
+  └─ MISS → DB 조회 → Redis에 저장 → 반환
+```
+
+> **Cache-aside를 선택한 이유**
+> - 검색 API는 읽기 위주이고 데이터 변경 빈도가 낮습니다.
+> - Write-through는 데이터 변경 시 캐시도 함께 갱신해야 해서 복잡도가 높아집니다.
+> - Write-back은 캐시와 DB 사이의 데이터 정합성 문제가 발생할 수 있습니다.
+
+### TTL 설정
+
+| 캐시 | TTL | 설정 이유 |
+|------|-----|----------|
+| `performanceSearch` | 5분 | DB 부하 감소, 데이터 변경 빈도 낮음 |
+| `popularKeywords` | 1분 | 실시간성 중요, Redis 조회 비용 절감 |
+
+**인메모리(Caffeine) vs Redis TTL/maximumSize 비교**
+
+| 항목 | 인메모리 (Caffeine) | Redis |
+|------|-------------------|-------|
+| TTL | `expireAfterWrite()` | `entryTtl()` |
+| maximumSize | 설정 필요 (서버 메모리 직접 사용) | 설정 불필요 (Redis 서버가 관리) |
+| 메모리 관리 | 애플리케이션 레벨에서 제한 | Redis `maxmemory-policy`로 관리 |
+
+**maximumSize를 설정하지 않은 이유**
+> 인메모리 캐시(Caffeine)는 서버 메모리를 직접 사용하므로 `maximumSize`로 항목 수를 제한해야 했습니다.
+> Redis 리모트 캐시로 전환 후에는 메모리 관리를 Redis 서버가 전담하므로 `maximumSize` 설정이 불필요합니다.
+> Redis 서버의 `maxmemory-policy` 설정으로 메모리 관리 정책을 지정할 수 있습니다.
+
+### 캐시 Key 설계
+
+```
+# content 캐시
+performanceSearch::search:{keyword}:{category}:{startDate}:{endDate}:{status}:{pageNumber}
+
+# count 캐시
+performanceSearch::count:{keyword}:{category}:{startDate}:{endDate}:{status}
+
+# 실제 예시
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+performanceSearch::count:레미제라블:MUSICAL:ALL:ALL:ON_SALE
+
+# 인기 검색어 캐시
+popularKeywords::realtime:{domain}
+popularKeywords::realtime:performance
+```
+
+| 항목 | 설명 |
+|------|------|
+| `value` | 캐시 저장소 이름으로 캐시 종류 구분 |
+| `key` prefix | `search:`, `count:`, `realtime:` prefix로 충돌 방지 |
+| null 처리 | null 값은 `'ALL'`로 대체해 명확한 키 생성 |
+| 구분자 | `:` 사용으로 Spring 캐시 컨벤션(`cacheName::key`)과 일관성 유지 |
+| count 키 | 페이지 번호 제외 (전체 결과 수는 페이지와 무관) |
+
+---
+
+## 4️⃣ Redis 리모트 캐시 전환
+
+### 인메모리 캐시의 한계
+
+```
+서버 A: "레미제라블" 검색 → 로컬 캐시 저장
+서버 B: "레미제라블" 검색 → 캐시 MISS → DB 조회
+
+→ Scale-out 환경에서 서버 간 캐시 공유 불가
+→ 서버마다 다른 캐시 데이터로 정합성 문제 발생
+```
+
+### Redis를 선택한 이유 (vs Memcached)
+
+| 항목 | Redis | Memcached |
+|------|-------|-----------|
+| 자료구조 | String, List, Set, ZSet, Hash 등 다양 | String만 지원 |
+| 영속성 | RDB, AOF로 데이터 영속화 가능 | 지원 안 함 |
+| 복제/클러스터 | 지원 | 제한적 |
+| 인기 검색어 | Sorted Set으로 구현 가능 | 불가 |
+
+이미 인기 검색어 집계에 Redis Sorted Set을 사용하고 있어 **인프라 일원화** 차원에서 Redis를 선택했습니다.
+
+### Redis Cache에서 사용한 자료구조
+
+**검색 결과 캐시 - String (JSON 직렬화)**
+
+```
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+→ "[{"@class":"...PerformanceSearchResponse", "performanceId":1, ...}]"
+```
+
+| 자료구조 | 선택 여부 | 이유 |
+|----------|----------|------|
+| String | ✅ 선택 | JSON 직렬화된 객체를 단일 값으로 저장, `@Cacheable`과 자연스럽게 호환 |
+| Hash | ❌ | 필드별 개별 저장으로 복잡도 증가, `@Cacheable`과 호환 어려움 |
+| List | ❌ | 순서 보장은 되지만 단건 조회/갱신이 비효율적 |
+
+**String을 선택한 이유**
+> Spring의 `@Cacheable`은 내부적으로 캐시 값을 단일 직렬화된 객체로 저장합니다.
+> `GenericJackson2JsonRedisSerializer`로 객체를 JSON 문자열로 직렬화하여 String으로 저장하면
+> `@Cacheable`과 자연스럽게 호환되고, 역직렬화 시 타입 정보를 포함해 정확한 객체로 복원할 수 있습니다.
+
+### RDBMS vs NoSQL
+
+| 항목 | RDBMS (MySQL) | NoSQL (Redis) |
+|------|--------------|---------------|
+| 데이터 구조 | 테이블(행/열) | Key-Value, Document 등 |
+| 스키마 | 고정 스키마 | 유연한 스키마 |
+| 저장 위치 | 디스크 | 메모리 (디스크 옵션) |
+| 속도 | 상대적으로 느림 | 매우 빠름 |
+| 용도 | 복잡한 관계형 데이터 | 캐시, 세션, 실시간 데이터 |
+
+### 직렬화 설정
+
+Redis는 네트워크를 통해 데이터를 주고받으므로 반드시 직렬화가 필요합니다.
+
+```java
+ObjectMapper om = new ObjectMapper();
+om.registerModule(new JavaTimeModule());                        // LocalDateTime 직렬화 지원
+om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);    // 날짜를 문자열로 저장
+om.activateDefaultTyping(                                       // 역직렬화 시 타입 정보 포함
+        om.getPolymorphicTypeValidator(),
+        ObjectMapper.DefaultTyping.NON_FINAL
+);
+```
+
+| 설정 | 이유 |
+|------|------|
+| `JavaTimeModule` | `LocalDateTime`, `LocalDate` 직렬화 지원 |
+| `WRITE_DATES_AS_TIMESTAMPS` 비활성화 | 타임스탬프(숫자) 대신 문자열로 저장하여 가독성 향상 |
+| `activateDefaultTyping` | 역직렬화 시 정확한 타입으로 복원 |
+
+### Page 객체 직렬화 문제 해결
+
+`Page<T>` 인터페이스는 Redis에 직렬화할 수 없어 content와 count를 분리하여 캐시에 저장했습니다.
+
+```
+캐시 저장 구조
+performanceSearch::search:... → List<PerformanceSearchResponse>  (content)
+performanceSearch::count:...  → long                             (totalElements)
+
+서비스에서 조립
+return new PageImpl<>(content, pageable, total);
+```
+
+---
+
+## 5️⃣ 성능 테스트 결과 (작성 예정)
+
+---
+
+## 6️⃣ Cache Eviction (작성 예정)
+
+---
 # ⚡ Database Performance Optimization (Indexing)
 ## 🚀 대규모 공연 데이터셋 인덱스 최적화 및 확장성 검증 보고서
 

@@ -5,10 +5,11 @@ import com.example.ticketingproject.domain.work.enums.Category;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import java.math.BigDecimal;
 
 
 @Getter

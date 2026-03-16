@@ -7,7 +7,6 @@ import com.example.ticketingproject.domain.seatgrade.dto.SeatGradeResponse;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
-import com.example.ticketingproject.domain.seatgrade.service.SeatGradeService;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,9 +25,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class SeatGradeServiceTest {

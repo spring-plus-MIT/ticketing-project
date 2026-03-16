@@ -3,11 +3,9 @@ package com.example.ticketingproject.domain.seat.service;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.common.exception.BaseException;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
-import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.repository.SeatRepository;
-import com.example.ticketingproject.domain.seat.service.SeatService;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.venue.repository.VenueRepository;
@@ -28,9 +26,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class SeatServiceTest {
