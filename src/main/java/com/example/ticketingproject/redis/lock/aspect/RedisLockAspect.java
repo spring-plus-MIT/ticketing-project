@@ -47,7 +47,7 @@ public class RedisLockAspect {
         }
     }
 
-    private String generateKey(ProceedingJoinPoint joinPoint, String keyExpression) {
+    public String generateKey(ProceedingJoinPoint joinPoint, String keyExpression) {
         // joinPoint에 저장된 현재 실행되는 메서드 정보
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         // 해당 메서드에 파라미터 이름
