@@ -12,6 +12,7 @@ import com.example.ticketingproject.domain.work.entity.Work;
 import com.example.ticketingproject.domain.work.exception.WorkException;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,7 @@ public class AdminPerformanceService {
         performanceRepository.save(performance);
     }
 
+    @CacheEvict(value = "performanceSearch", allEntries = true)
     public void updatePerformance(Long performanceId, PerformanceRequest request) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));
@@ -66,6 +68,7 @@ public class AdminPerformanceService {
         );
     }
 
+    @CacheEvict(value = "performanceSearch", allEntries = true)
     public void closePerformance(Long performanceId) {
         Performance performance = performanceRepository.findById(performanceId)
                 .orElseThrow(() -> new PerformanceException(PERFORMANCE_NOT_FOUND.getHttpStatus(), PERFORMANCE_NOT_FOUND));

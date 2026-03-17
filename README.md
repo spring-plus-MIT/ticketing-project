@@ -30,16 +30,16 @@
 
 ## 🛠 기술 스택
 
-| 분류         | 기술                   |
-|------------|----------------------|
-| Language   | Java 17              |
-| Framework  | Spring Boot 3.3.5    |
-| ORM        | Spring Data JPA      |
-| Database   | MySQL 8.0            |
-| Security   | Spring Security, JWT |
-| Build Tool | Gradle               |
-| Cache      | Redis 7.0
-| API Docs   | RestDocs             |
+| 분류         | 기술                    |
+|------------|-----------------------|
+| Language   | Java 17               |
+| Framework  | Spring Boot 3.3.5     |
+| ORM        | Spring Data JPA       |
+| Database   | MySQL 8.0             |
+| Security   | Spring Security, JWT  |
+| Build Tool | Gradle                |
+| Cache      | Redis 7.0             |
+| API Docs   | RestDocs              |
 
 ---
 
@@ -669,6 +669,114 @@ v2: 400명에서도 포화점 미도달
 ---
 
 ## 6️⃣ Cache Eviction (작성 예정)
+
+### @CacheEvict 적용
+
+공연 정보가 수정되거나 상태가 변경되면 기존 캐시는 outdated 상태가 됩니다.
+검색 결과는 여러 공연이 섞인 `List` 타입으로 캐시되어 있어 특정 공연만 골라 삭제할 수 없으므로
+`allEntries = true`로 해당 캐시 전체를 삭제합니다.
+
+```java
+@CacheEvict(value = "performanceSearch", allEntries = true)
+public void updatePerformance(Long performanceId, PerformanceRequest request) { ... }
+ 
+@CacheEvict(value = "performanceSearch", allEntries = true)
+public void closePerformance(Long performanceId) { ... }
+```
+
+**allEntries = true를 선택한 이유**
+
+```
+캐시 키 구조:
+performanceSearch::search:레미제라블:MUSICAL:ALL:ALL:ON_SALE:0
+→ [공연A, 공연B, 공연C, ...] (여러 공연이 섞인 List)
+ 
+공연A가 수정됐을 때
+→ 공연A가 포함된 캐시 키를 특정할 수 없음
+→ 공연A는 "레미제라블" 검색에도, "MUSICAL" 검색에도 포함 가능
+→ allEntries = true로 전체 삭제가 가장 안전한 선택
+```
+
+만약 단건 조회 캐시였다면 ID로 특정이 가능합니다.
+```java
+// 단건 조회 캐시 → ID로 특정 가능
+@CacheEvict(value = "performance", key = "#performanceId")
+```
+ 
+---
+
+### TTL(Time-To-Live) 설계
+
+데이터의 변경 빈도와 실시간성 요구 수준에 따라 TTL을 다르게 설정해야 합니다.
+
+| 데이터 종류 | TTL 범위 | 이유 |
+|------------|---------|------|
+| 실시간 인기 검색어 | 1~5분 | 트렌드 반영이 중요, 오래된 데이터는 의미 없음 |
+| 검색 결과 목록 | 5~30분 | 공연 정보는 자주 바뀌지 않음, DB 부하 감소 우선 |
+| 사용자 프로필 | 1시간~1일 | 변경 빈도 낮음, 정합성보다 성능 우선 |
+| 상품/공연 상세 | 5~30분 | 가격·좌석 정보는 민감하므로 너무 길면 안 됨 |
+| 재고/좌석 현황 | 수 초~1분 | 실시간성이 매우 중요, 짧게 설정 |
+
+**현재 프로젝트 TTL 설정**
+
+| 캐시 | TTL | 설정 이유 |
+|------|-----|----------|
+| `performanceSearch` | 5분 | 공연 정보 변경 빈도 낮음, DB 부하 감소 우선 |
+| `popularKeywords` | 1분 | 실시간 트렌드 반영 중요 |
+ 
+---
+
+### Eviction Policy (캐시가 꽉 찼을 때)
+
+Redis 메모리가 `maxmemory` 한계에 도달했을 때 어떤 데이터를 먼저 삭제할지 결정하는 정책이에요.
+
+| 정책 | 설명 | 적합한 상황 |
+|------|------|------------|
+| `LRU` (Least Recently Used) | 가장 오랫동안 사용되지 않은 데이터 삭제 | 최근 접근한 데이터가 다시 쓰일 가능성이 높을 때 |
+| `LFU` (Least Frequently Used) | 사용 빈도가 가장 낮은 데이터 삭제 | 인기 데이터는 유지하고 비인기 데이터를 제거할 때 |
+| `FIFO` | 가장 먼저 들어온 데이터 삭제 | 단순한 순서 기반 관리가 필요할 때 |
+| `volatile-lru` | TTL이 설정된 키 중 LRU 삭제 | TTL 없는 중요 데이터는 보호하고 싶을 때 |
+| `allkeys-lru` | 전체 키 중 LRU 삭제 | 모든 캐시를 동등하게 취급할 때 |
+| `noeviction` | 메모리 꽉 차면 쓰기 에러 반환 | 캐시 유실을 절대 허용하지 않을 때 |
+
+**권장 설정**
+
+```
+allkeys-lru 또는 volatile-lru 권장
+ 
+→ 검색 캐시는 최근에 자주 검색된 키워드가 다시 검색될 가능성이 높음
+→ LRU로 오래된 검색 결과를 먼저 제거하는 것이 합리적
+→ popularKeywords처럼 TTL이 설정된 캐시는 volatile-lru로 자연 만료 유도 가능
+```
+
+Redis 설정 예시 (운영 환경 적용 필요)
+```
+maxmemory 256mb
+maxmemory-policy allkeys-lru
+```
+ 
+---
+
+### 즉시 무효화 vs TTL 자연 만료 Trade-off
+
+| 항목 | 즉시 무효화 (`@CacheEvict`) | TTL 자연 만료 |
+|------|--------------------------|--------------|
+| 데이터 정합성 | ✅ 수정 즉시 반영 | ❌ TTL 만료 전까지 outdated 데이터 노출 |
+| 구현 복잡도 | 높음 (수정/삭제 로직마다 Evict 추가) | 낮음 (TTL만 설정) |
+| DB 부하 | Evict 직후 Cache MISS → DB 요청 급증 가능 | 점진적으로 만료되어 DB 부하 분산 |
+| 적합한 상황 | 정합성이 중요한 데이터 (재고, 가격, 좌석) | 실시간성이 덜 중요한 데이터 (인기 검색어, 추천 목록) |
+
+**현재 프로젝트 선택**
+
+```
+검색 결과 캐시 → 즉시 무효화 (@CacheEvict)
+→ 공연 정보 수정 시 잘못된 검색 결과가 노출되면 사용자 신뢰 저하
+→ 공연 수정/상태 변경은 자주 발생하지 않으므로 DB 부하 급증 위험 낮음
+ 
+인기 검색어 캐시 → TTL 자연 만료 (1분)
+→ 1분 이내의 오차는 허용 가능
+→ 매 수정마다 Evict하면 캐시 효과가 없어짐
+```
 
 ---
 # ⚡ Database Performance Optimization (Indexing)
