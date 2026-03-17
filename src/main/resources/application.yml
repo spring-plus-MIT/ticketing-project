@@ -29,3 +29,7 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
     org.springframework.security: debug
+
+super-admin:
+  email: ${SUPER_ADMIN_ID}
+  password: ${SUPER_ADMIN_PASSWORD}
