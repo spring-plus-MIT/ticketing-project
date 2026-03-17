@@ -30,15 +30,16 @@
 
 ## 🛠 기술 스택
 
-| 분류 | 기술                   |
-|------|----------------------|
-| Language | Java 17              |
-| Framework | Spring Boot 3.3.5    |
-| ORM | Spring Data JPA      |
-| Database | MySQL 8.4            |
-| Security | Spring Security, JWT |
+| 분류         | 기술                   |
+|------------|----------------------|
+| Language   | Java 17              |
+| Framework  | Spring Boot 3.3.5    |
+| ORM        | Spring Data JPA      |
+| Database   | MySQL 8.0            |
+| Security   | Spring Security, JWT |
 | Build Tool | Gradle               |
-| API Docs | RestDocs             |
+| Cache      | Redis 7.0
+| API Docs   | RestDocs             |
 
 ---
 
@@ -98,7 +99,7 @@ src
 ### 관리자 상태 전이
 ```
 PENDING → ACTIVE → DELETED
-(가입)   (슈퍼관리자 승인)  (슈퍼관리자 삭제)
+(가입)   (관리자 승인)  (관리자 삭제)
 ```
 
 ---
@@ -250,88 +251,6 @@ PENDING → ACTIVE → DELETED
 | 예외 클래스 | 발생 조건            | HTTP 상태 |
 |------------|------------------|-----------|
 | `BaseExceptionHandler` | 런타임 에러           | ErrorStatus |
-
----
-
-# 검색 기능 및 캐시 최적화
-
----
-
-## 1️⃣ 검색 API 설계
-
-### 문제 상황
-매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
-
-### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
-
-| 항목 | 내용 |
-|------|------|
-| 동적 쿼리 | `BooleanExpression`으로 null 조건 자동 제외 |
-| DTO 직접 조회 | `Projections.constructor()`로 필요한 컬럼만 SELECT |
-| 페이징 | `PageableExecutionUtils.getPage()`로 count 쿼리 분리 |
-
-### 검색 조건 (동적 쿼리)
-
-| 파라미터 | 조건 | 설명 |
-|----------|------|------|
-| `keyword` | `work.title LIKE '%keyword%'` | 작품명 검색 |
-| `category` | `work.category = category` | 장르 필터 |
-| `startDate` / `endDate` | `performanceSession.startTime BETWEEN` | 공연 기간 필터 |
-| `status` | `performance.status = status` | 공연 상태 필터 |
-
-### count 쿼리 분리 패턴
-
-```java
-// 마지막 페이지에서는 count 쿼리 실행 생략
-return PageableExecutionUtils.getPage(result, pageable, countQuery::fetchOne);
-```
-
-> 마지막 페이지에서 content 수가 pageSize보다 작으면 count 쿼리를 실행하지 않아
-> 불필요한 DB 호출을 방지합니다.
-
----
-
-## 2️⃣ 인기 검색어
-
-### 구현 방식
-Redis Sorted Set(ZSet)을 활용해 검색어별 score를 관리하고 상위 10개를 조회합니다.
-
-```
-# 검색 시 score 증가
-ZINCRBY popular:search:performance:2025031315 1 "레미제라블"
-
-# 상위 10개 조회
-ZREVRANGE popular:search:performance:2025031315 0 9
-```
-
-### 집계 기간 - 실시간 (1시간 단위)
-
-| 항목 | 내용 |
-|------|------|
-| 키 구조 | `popular:search:{domain}:{yyyyMMddHH}` |
-| TTL | 1시간 (자동 만료) |
-| 선택 이유 | 실시간 트렌드 반영, 테스트 환경에서 집계 결과 즉시 확인 가능 |
-
-> **일별/주간을 선택하지 않은 이유**
-> - 일별: 하루 동안의 데이터가 누적되어 새로운 트렌드 반영이 느림
-> - 주간: 7일치 키를 `ZUNIONSTORE`로 합산하는 추가 로직 필요, 구현 복잡도 증가
-
-### 중복 검색 카운팅 방지
-
-```
-키: search:dedup:{domain}:{yyyyMMddHH}:{userId}:{keyword}
-TTL: 1시간
-```
-
-| 흐름 | 동작 |
-|------|------|
-| 첫 번째 검색 | `setIfAbsent` → true → score 증가 |
-| 1시간 내 재검색 | `setIfAbsent` → false → 카운팅 제외 |
-| 1시간 후 재검색 | TTL 만료 → 다시 카운팅 |
-
-> **userId 기반을 선택한 이유**
-> 티켓팅 서비스 특성상 로그인이 필수입니다.
-> IP 기반 방식은 NAT 환경에서 여러 사용자가 같은 IP를 공유할 경우 부정확할 수 있어 제외했습니다.
 
 ---
 
@@ -591,6 +510,58 @@ om.activateDefaultTyping(                                       // 역직렬화 
 | `WRITE_DATES_AS_TIMESTAMPS` 비활성화 | 타임스탬프(숫자) 대신 문자열로 저장하여 가독성 향상 |
 | `activateDefaultTyping` | 역직렬화 시 정확한 타입으로 복원 |
 
+> **`activateDefaultTyping` 주의사항**
+> `@Bean`으로 전역 등록하면 모든 요청의 JSON 파싱에 영향을 줘서
+> `LoginRequest`, `RegisterRequest` 등 일반 API의 역직렬화가 실패합니다.
+> Redis 전용 `ObjectMapper`를 `private` 메서드로 분리하여 전역 영향을 차단해야 합니다.
+>
+> ```java
+> // ❌ 전역 빈으로 등록 → 일반 API 역직렬화 실패
+> @Bean
+> public ObjectMapper redisObjectMapper() { ... }
+>
+> // ✅ private 메서드로 분리 → Redis 전용으로만 사용
+> private ObjectMapper redisObjectMapper() { ... }
+> ```
+
+### DTO 역직렬화 문제 해결
+
+Redis에서 JSON을 역직렬화할 때 Jackson은 객체를 생성할 생성자가 필요합니다.
+`@RequiredArgsConstructor`만 있고 기본 생성자가 없으면 역직렬화에 실패합니다.
+
+**`@JsonCreator` + `@JsonProperty` 방식으로 해결**
+
+```java
+@Getter
+public class PerformanceSearchResponse {
+ 
+    private final Long performanceId;
+    private final String season;
+    private final Category category;
+    private final PerformanceStatus status;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
+ 
+    @JsonCreator  // Jackson 역직렬화 시 이 생성자 사용
+    public PerformanceSearchResponse(
+            @JsonProperty("performanceId") Long performanceId,
+            @JsonProperty("season") String season,
+            @JsonProperty("category") Category category,
+            @JsonProperty("status") PerformanceStatus status,
+            @JsonProperty("startDate") LocalDateTime startDate,
+            @JsonProperty("endDate") LocalDateTime endDate
+    ) { ... }
+}
+```
+
+| 어노테이션 | 역할 |
+|-----------|------|
+| `@JsonCreator` | Jackson에게 역직렬화 시 이 생성자를 사용하라고 명시 |
+| `@JsonProperty` | JSON 키와 생성자 파라미터를 이름으로 매핑 |
+
+> `Projections.constructor()`는 파라미터 순서 기반으로 동작하고,
+> `@JsonCreator`는 `@JsonProperty` 이름 기반으로 동작해서 두 방식이 충돌 없이 함께 사용 가능합니다.
+
 ### Page 객체 직렬화 문제 해결
 
 `Page<T>` 인터페이스는 Redis에 직렬화할 수 없어 content와 count를 분리하여 캐시에 저장했습니다.
@@ -599,15 +570,102 @@ om.activateDefaultTyping(                                       // 역직렬화 
 캐시 저장 구조
 performanceSearch::search:... → List<PerformanceSearchResponse>  (content)
 performanceSearch::count:...  → long                             (totalElements)
-
+ 
 서비스에서 조립
 return new PageImpl<>(content, pageable, total);
 ```
 
 ---
 
-## 5️⃣ 성능 테스트 결과 (작성 예정)
+## 5️⃣ 성능 테스트 결과
 
+### 테스트 환경
+
+| 항목 | 내용 |
+|------|------|
+| 더미 데이터 | 50,000건 (works, venues, performances, performance_sessions 각 50,000건) |
+| 부하 테스트 도구 | k6 |
+| 기본 테스트 시나리오 | Ramp Up (0 → 10 → 50 → 100 VU, 3분) |
+| 포화점 테스트 시나리오 | Ramp Up (0 → 100 → 200 → 300 → 400 VU, 3분 30초) |
+| 검색 키워드 | 테스트 작품 1, 테스트 작품 100, 테스트 작품 1000, MUSICAL, CONCERT |
+
+### Ramp Up을 사용한 이유
+
+```
+한 번에 400명이 몰리면 → 서버가 갑작스러운 부하로 비정상 종료 가능
+Ramp Up으로 점진적 증가 → 실제 서비스처럼 자연스러운 트래픽 패턴 시뮬레이션
+                        → 어느 시점에서 성능이 저하되는지(포화지점) 정확히 파악 가능
+                        → 단계별 TPS 변화를 관찰해 병목 구간 식별 가능
+```
+ 
+---
+
+### 기본 성능 비교 (최대 100 VU)
+
+| 지표 | v1 (캐시 없음) | v2 (Redis 캐시) | 개선율 |
+|------|--------------|----------------|--------|
+| 평균 응답시간 | 427ms | 6.46ms | **약 66배 향상** |
+| 최대 응답시간 | 1.68s | 455ms | 약 3.7배 향상 |
+| p(95) 응답시간 | 807ms | 7.57ms | **약 106배 향상** |
+| TPS | 42.07/s | 59.41/s | 약 1.4배 향상 |
+| 에러율 | 0% | 0% | 동일 |
+| 총 요청수 | 7,583 | 10,744 | 약 1.4배 증가 |
+ 
+---
+
+### 포화점 분석 (최대 400 VU)
+
+#### 포화점(Saturation Point)이란?
+TPS가 더 이상 증가하지 않고 응답시간이 급격히 증가하기 시작하는 지점입니다.
+이 지점을 넘으면 사용자 수가 늘어도 처리량은 늘지 않고 응답시간만 늘어나게 됩니다.
+
+#### 포화점 테스트 결과 비교
+
+| 지표 | v1 (캐시 없음) | v2 (Redis 캐시) | 개선율 |
+|------|--------------|----------------|--------|
+| 평균 응답시간 | 3.32s | 7.65ms | **약 434배 향상** |
+| 최대 응답시간 | 9.78s | 337ms | 약 29배 향상 |
+| p(95) 응답시간 | 6.05s | 10.64ms | **약 568배 향상** |
+| TPS | 59.97/s | 254.96/s | **약 4.3배 향상** |
+| 에러율 | 0% | 0% | 동일 |
+| 총 요청수 | 12,639 | 53,721 | **약 4.3배 증가** |
+
+#### v1 포화점 분석
+
+```
+100명 → 평균 응답시간: 427ms   TPS: 42/s
+400명 → 평균 응답시간: 3,320ms TPS: 59/s
+ 
+→ VU가 4배 증가했지만 TPS는 1.4배 증가에 그침
+→ 응답시간은 7.8배 급격히 증가
+→ DB LIKE 쿼리 + 여러 테이블 JOIN으로 인한 DB 병목 발생
+→ 200~300명 구간에서 포화점 시작으로 판단
+→ 400명 이상에서는 응답시간 3초 이상으로 서비스 불가 수준
+```
+
+#### v2 포화점 분석
+
+```
+100명 → 평균 응답시간: 6.46ms   TPS: 59/s
+400명 → 평균 응답시간: 7.65ms   TPS: 254/s
+ 
+→ VU가 4배 증가했을 때 TPS도 4.3배 증가 (선형 증가)
+→ 응답시간은 6.46ms → 7.65ms로 거의 변화 없음
+→ Redis 캐시로 DB 병목이 제거되어 포화점 미도달
+→ 400명 이상에서도 안정적인 성능 유지 예상
+```
+
+#### 결론
+
+```
+v1: 200~300명 구간에서 포화점 도달
+    → 그 이상의 동시 사용자는 서비스 품질 저하
+ 
+v2: 400명에서도 포화점 미도달
+    → Redis 캐시가 DB 병목을 제거하여 훨씬 많은 동시 사용자 수용 가능
+    → 실제 서비스 환경에서 캐시의 중요성 확인
+```
+ 
 ---
 
 ## 6️⃣ Cache Eviction (작성 예정)
@@ -1236,6 +1294,9 @@ Run/Debug Configurations → Active profiles → local
 | 문제 | 원인 | 해결 방법 |
 |------|------|-----------|
 | 동시 결제 시 잔액 불일치 | 동시성 이슈 | 비관적 락 적용 |
+| `Page<T>` Redis 직렬화 실패 | `Page` 인터페이스는 Redis에 직렬화 불가 | content(`List`)와 count(`long`)로 분리하여 각각 캐시 저장 후 `PageImpl`로 조립 |
+| DTO 역직렬화 실패 | 기본 생성자 없어 Jackson이 객체 생성 불가 | `@JsonCreator` + `@JsonProperty`로 역직렬화용 생성자 명시 |
+| 일반 API 403 에러 | `activateDefaultTyping`이 전역 `ObjectMapper`에 영향 → 모든 요청 JSON 파싱 실패 | `redisObjectMapper()`를 `@Bean` 제거하고 `private` 메서드로 분리 |
 | (추가 예정) | | |
 
 ---
