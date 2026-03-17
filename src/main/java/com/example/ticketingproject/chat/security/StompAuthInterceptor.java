@@ -33,6 +33,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
         if (accessor != null) {
 
+            // 1. CONNECT: 소켓 연결 시 JWT 토큰 검증
             if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                 String header = accessor.getFirstNativeHeader("Authorization");
 
@@ -68,11 +69,19 @@ public class StompAuthInterceptor implements ChannelInterceptor {
                 }
             }
 
+            // 2. SUBSCRIBE: 채팅방 입장 시 권한 검증
             else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
                 String destination = accessor.getDestination();
 
                 if (destination != null && destination.startsWith("/sub/chat/room/")) {
-                    Long roomId = Long.parseLong(destination.replace("/sub/chat/room/", ""));
+
+                    Long roomId;
+                    try {
+                        roomId = Long.parseLong(destination.replace("/sub/chat/room/", ""));
+                    } catch (NumberFormatException e) {
+                        log.error("비정상적인 채팅방 구독 주소: {}", destination);
+                        throw new IllegalArgumentException("잘못된 채팅방 주소입니다.");
+                    }
 
                     UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) accessor.getUser();
                     if (auth == null) {
@@ -88,7 +97,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
                             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
 
                     if (role != UserRole.ADMIN && !chatRoom.getCreator().getId().equals(userId)) {
-                        log.warn("🚨 [보안 경고] 비정상적인 채팅방 구독 시도 차단 - User ID: {}, Room ID: {}", userId, roomId);
+                        log.warn("비정상적인 채팅방 구독 시도- User ID: {}, Room ID: {}", userId, roomId);
                         throw new IllegalArgumentException("해당 채팅방을 구독할 권한이 없습니다.");
                     }
 
