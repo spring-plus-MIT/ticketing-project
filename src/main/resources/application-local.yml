@@ -19,3 +19,7 @@ jwt:
   secret:
     key: ${JWT_SECRET}
   expiration: 1800000
+
+super-admin:
+  email: ${SUPER_ADMIN_ID}
+  password: ${SUPER_ADMIN_PASSWORD}

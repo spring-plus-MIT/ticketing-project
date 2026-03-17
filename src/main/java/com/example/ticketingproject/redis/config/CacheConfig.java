@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@EnableCaching
 public class CacheConfig {
 
     private ObjectMapper redisObjectMapper() {

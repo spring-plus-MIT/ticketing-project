@@ -46,7 +46,7 @@ public class AuthService {
                 .phone(request.getPhone())
                 .balance(BigDecimal.ZERO)
                 .userRole(UserRole.USER)
-                .userStatus(UserStatus.ACTIVE)
+                .userStatus(UserStatus.PENDING)
                 .build();
 
         User savedUser = userRepository.save(user);
