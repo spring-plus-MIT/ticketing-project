@@ -59,6 +59,13 @@ public class SeatRaceConditionNoLockTest {
 
     @BeforeEach
     void setUp() {
+        seatRepository.deleteAll();
+        seatGradeRepository.deleteAll();
+        performanceSessionRepository.deleteAll();
+        performanceRepository.deleteAll();
+        venueRepository.deleteAll();
+        workRepository.deleteAll();
+
         // given
         Work work = Work.builder()
                 .title("제목")
