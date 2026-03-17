@@ -52,5 +52,12 @@ public class AdminUserController {
         return ResponseEntity.ok(CommonResponse.success(SuccessStatus.DELETE_SUCCESS, null));
     }
 
+    @PostMapping("/super/admins/{adminId}")
+    public ResponseEntity<CommonResponse<Void>> activateAdmin(
+            @PathVariable Long adminId
+    ) {
+        userService.activateUser(adminId);
+        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.UPDATE_SUCCESS, null));
+    }
 
 }
