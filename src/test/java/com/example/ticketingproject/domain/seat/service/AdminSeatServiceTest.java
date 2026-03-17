@@ -47,7 +47,7 @@ public class AdminSeatServiceTest {
     private LockService lockService;
 
     @InjectMocks
-    private AdminSeatService adminSeatService;
+    private SeatTransactionalService seatTransactionalService;
 
     private Seat seat;
     private Venue venue;
@@ -94,7 +94,7 @@ public class AdminSeatServiceTest {
         given(seatRepository.countByVenueId(1L)).willReturn(10);
         given(seatRepository.save(any(Seat.class))).willReturn(seat);
 
-        SeatResponse response = adminSeatService.save(1L, request);
+        SeatResponse response = SeatResponse.from(seatTransactionalService.saveSeat(1L, request));
 
         assertThat(response.getSeatId()).isEqualTo(1L);
         assertThat(response.getVenueId()).isEqualTo(1L);
@@ -112,7 +112,7 @@ public class AdminSeatServiceTest {
         given(venueRepository.findById(1L)).willReturn(Optional.of(venue));
         given(seatGradeRepository.findByGradeName(GradeName.VIP)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adminSeatService.save(1L, request))
+        assertThatThrownBy(() -> seatTransactionalService.saveSeat(1L, request))
                 .isInstanceOf(SeatGradeException.class);
     }
 
@@ -123,7 +123,7 @@ public class AdminSeatServiceTest {
 
         given(venueRepository.findById(999L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> adminSeatService.save(999L, request))
+        assertThatThrownBy(() -> seatTransactionalService.saveSeat(999L, request))
                 .isInstanceOf(VenueException.class);
     }
 }

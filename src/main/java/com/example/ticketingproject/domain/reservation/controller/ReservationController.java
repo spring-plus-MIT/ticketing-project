@@ -40,7 +40,7 @@ public class ReservationController {
        );
     }
 
-    @PatchMapping("/{reservationId}")
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<CommonResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails

@@ -19,9 +19,15 @@ public class AdminSeatController {
 
     private final AdminSeatService adminSeatService;
 
-    @PostMapping
-    public ResponseEntity<CommonResponse<SeatResponse>> create(@PathVariable(name = "venueId") Long venueId, @Valid @RequestBody CreateSeatRequest request) {
+    @PostMapping("/redis")
+    public ResponseEntity<CommonResponse<SeatResponse>> createRedis(@PathVariable(name = "venueId") Long venueId, @Valid @RequestBody CreateSeatRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                CommonResponse.success(CREATE_SUCCESS, adminSeatService.save(venueId, request)));
+                CommonResponse.success(CREATE_SUCCESS, adminSeatService.saveRedisLock(venueId, request)));
+    }
+
+    @PostMapping("/optimistic")
+    public ResponseEntity<CommonResponse<SeatResponse>> createOptimistic(@PathVariable(name = "venueId") Long venueId, @Valid @RequestBody CreateSeatRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                CommonResponse.success(CREATE_SUCCESS, adminSeatService.saveOptimisticLock(venueId, request)));
     }
 }

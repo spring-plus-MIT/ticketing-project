@@ -64,7 +64,7 @@ public class AdminReservationController {
        );
     }
 
-    @PatchMapping("/{reservationId}/{userId}")
+    @DeleteMapping("/{reservationId}/{userId}")
     public ResponseEntity<CommonResponse<Void>> cancelReservation(
             @PathVariable Long reservationId,
             @PathVariable Long userId

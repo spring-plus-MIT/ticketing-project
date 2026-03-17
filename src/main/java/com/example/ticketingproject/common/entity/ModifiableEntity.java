@@ -14,4 +14,8 @@ public abstract class ModifiableEntity extends CreatableEntity{
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
+
+    public void setModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
 }
