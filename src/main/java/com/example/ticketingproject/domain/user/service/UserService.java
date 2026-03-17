@@ -20,6 +20,22 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private User validateUserId(Long userId) throws UserException {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new UserException(
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND
+                )
+        );
+        if (user.getUserStatus() == UserStatus.DELETED) {
+            throw new UserException(
+                    ErrorStatus.ALREADY_DELETED_USER.getHttpStatus(),
+                    ErrorStatus.ALREADY_DELETED_USER
+            );
+        }
+        return user;
+    }
+
     public GetUserResponse findOneUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new UserException(
@@ -65,5 +81,10 @@ public class UserService {
             );
         }
         user.withdraw();
+    }
+
+    public void activateUser(Long adminId) {
+        User user = validateUserId(adminId);
+        user.activate();
     }
 }

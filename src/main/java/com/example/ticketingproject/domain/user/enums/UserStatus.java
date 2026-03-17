@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserStatus {
-
+    PENDING("PENDING"),
     ACTIVE("ACTIVE"),
     DELETED("DELETED");
 

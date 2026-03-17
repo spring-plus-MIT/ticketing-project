@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/ws-chat/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/super/**").hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated()
                 )
 
