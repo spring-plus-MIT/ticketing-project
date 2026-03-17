@@ -21,6 +21,7 @@ import static com.example.ticketingproject.redis.config.RedisConfig.redisObjectM
 @EnableCaching
 public class CacheConfig {
 
+
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
