@@ -116,22 +116,23 @@ PENDING → ACTIVE → DELETED
 
 ### 👥 유저 `/users`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| GET | `/users` | 유저 목록 조회 | ADMIN |
-| GET | `/users/{userId}` | 유저 단건 조회 | USER, ADMIN |
-| PUT | `/users/{userId}` | 유저 정보 수정 | USER |
-| PUT | `/users/{userId}` | (관리자) 유저 정보 수정 | ADMIN |
-| DELETE | `/users/{userId}` | 유저 탈퇴 | USER |
-| DELETE | `/users/{userId}` | (관리자) 유저 탈퇴 처리 | ADMIN |
+| Method | URI                     | 설명             | 권한 |
+|--------|-------------------------|----------------|------|
+| GET | `/admin/users`          | (관리자) 유저 목록 조회 | ADMIN |
+| GET | `/users/me`             | 내 정보 조회        | USER, ADMIN |
+| PUT | `/users/me`             | 내 정보 수정        | USER |
+| PUT | `/admin/users/{userId}` | (관리자) 유저 정보 수정 | ADMIN |
+| DELETE | `/users/delete`         | 유저 탈퇴          | USER |
+| DELETE | `/admin/users/{userId}` | (관리자) 유저 탈퇴 처리 | ADMIN |
 
 ### 🎭 작품 `/works`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/works` | 작품 생성 | ADMIN |
-| GET | `/works/{workId}` | 작품 조회 | - |
-| PUT | `/works/{workId}` | 작품 수정 | ADMIN |
+| Method | URI            | 설명       | 권한 |
+|--------|----------------|----------|------|
+| POST | `/admin/works` | 작품 생성    | ADMIN |
+| GET | `/works/{workId}` | 작품 단건 조회 | - |
+| GET | `/works`       | 작품 목록 조회 | - |
+| PUT | `/admin/works/{workId}` | 작품 수정    | ADMIN |
 
 ### 🎬 공연 `/performances`
 
@@ -155,13 +156,13 @@ PENDING → ACTIVE → DELETED
 
 ### 📍 장소 `/venues`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/venues` | 장소 등록 | ADMIN |
-| GET | `/venues` | 장소 목록 조회 | - |
-| GET | `/venues/{venueId}` | 장소 상세 조회 | - |
-| PUT | `/venues/{venueId}` | 장소 수정 | ADMIN |
-| DELETE | `/venues/{venueId}` | 장소 삭제 | ADMIN |
+| Method | URI                       | 설명 | 권한 |
+|--------|---------------------------|------|------|
+| POST | `/venues`                 | 장소 등록 | ADMIN |
+| GET | `/venues`                 | 장소 목록 조회 | - |
+| GET | `/venues/{venueId}`       | 장소 상세 조회 | - |
+| PUT | `/admin/venues/{venueId}` | 장소 수정 | ADMIN |
+| DELETE | `/admin/venues/{venueId}` | 장소 삭제 | ADMIN |
 
 ### 🎤 멤버(캐스팅) `/cast-members`
 
@@ -193,25 +194,25 @@ PENDING → ACTIVE → DELETED
 
 ### 🎟 예약 `/reservations`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/reservations` | 예약 생성 | USER |
-| GET | `/reservations` | (관리자) 전체 예약 목록 조회 | ADMIN |
-| GET | `/reservations?userId={userId}` | (관리자) 유저별 예약 목록 조회 | ADMIN |
-| GET | `/reservations/{reservationId}` | (관리자) 예약 단건 조회 | ADMIN |
-| GET | `/reservations/{reservationId}` | (고객) 예약 단건 조회 | USER |
-| PUT | `/reservations/{reservationId}` | 예약 정보 수정 | USER |
-| PUT | `/reservations/{reservationId}` | (관리자) 예약 정보 수정 | ADMIN |
-| PATCH | `/reservations/{reservationId}/cancel` | 예약 취소 | USER |
-| PATCH | `/reservations/{reservationId}/cancel` | (관리자) 예약 취소 | ADMIN |
+| Method | URI                                            | 설명 | 권한 |
+|--------|------------------------------------------------|------|------|
+| POST   | `/reservations`                                | 예약 생성 | USER |
+| GET    | `/reservations`                                | (관리자) 전체 예약 목록 조회 | ADMIN |
+| GET    | `/reservations?userId={userId}`                | (관리자) 유저별 예약 목록 조회 | ADMIN |
+| GET    | `/admin/reservations/{userId}{reservationId}`  | (관리자) 예약 단건 조회 | ADMIN |
+| GET    | `/reservations/{reservationId}`                | 예약 단건 조회 | USER |
+| DELETE | `/reservations/{reservationId}`                | 예약 취소 | USER |
+| DELETE | `/admin/reservations/{reservationId}/{userId}` | (관리자) 예약 취소 | ADMIN |
 
 ### 💳 결제 `/payments`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/payments` | 결제 내역 생성 (잔액 차감) | USER |
-| GET | `/payments/{paymentId}` | 결제 내역 단건 조회 | USER, ADMIN |
-| GET | `/payments` | 결제 내역 목록 조회 | USER, ADMIN |
+| Method | URI                                    | 설명                | 권한 |
+|--------|----------------------------------------|-------------------|-----|
+| POST | `/payments`                            | 결제 내역 생성 (잔액 차감)  | USER |
+| GET | `/payments/{paymentId}`                | 결제 내역 단건 조회       | USER |
+| GET | `/admin/payments/{paymentId}/{userId}` | (관리자) 결제 내역 단건 조회 | ADMIN |
+| GET | `/payments`                            | 결제 내역 목록 조회       | USER|
+| GET | `/admin/payments`                      | (관리자) 결제 내역 목록 조회 | ADMIN |
 
 ### 💰 캐시 충전 `/cash-charges`
 
@@ -984,7 +985,7 @@ Seat A2 → 별도의 Lock
 **Redis의 SETNX (Set If Not Exists)를 이용해 락 획득**
 
 ```
-SET lock:seat:101 UUID NX PX 3000
+SET lock:seat:101 UUID NX PX 10000
 ```
 
 - NX : key가 없을 때만 설정
@@ -1037,7 +1038,7 @@ end
 
 현재 프로젝트는 **Fail Fast 전략을 사용**
 
-- 티켓팅 시스템에서는 빠른 실패 응답이 사용자에게 더 좋음?
+- 티켓팅 시스템에서는 빠른 실패 응답이 사용자에게 더 좋음
 - 락 획득 실패 → 즉시 예약 실패 응답
 
 
@@ -1207,7 +1208,7 @@ lock:venue:1:seat:create
 **Redis의 SETNX (Set If Not Exists)를 이용해 락 획득**
 
 ```
-SET lock:seat:101 UUID NX PX 3000
+SET lock:seat:101 UUID NX PX 10000
 ```
 
 - NX : key가 없을 때만 설정

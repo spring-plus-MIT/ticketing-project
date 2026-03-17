@@ -26,11 +26,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class SeatRaceConditionTest {
+public class SeatRaceConditionRedisLockTest {
 
     @Autowired
     private AdminSeatService adminSeatService;
@@ -109,7 +112,7 @@ public class SeatRaceConditionTest {
     }
 
     @Test
-    void 제한_좌석_20개_동시_200개_생성_시_제한_초과_생성_테스트() throws InterruptedException {
+    void RedisLock_제한_좌석_20개_동시_200개_생성_시_동시성_제한_생성_테스트() throws InterruptedException {
         // given
         int threadCount = 200;
 
@@ -132,7 +135,7 @@ public class SeatRaceConditionTest {
                     ReflectionTestUtils.setField(request, "rowName", "A");
                     ReflectionTestUtils.setField(request, "seatNumber", seatNumber);
 
-                    adminSeatService.save(venue.getId(), request);
+                    adminSeatService.saveRedisLock(venue.getId(), request);
 
                 } catch (Exception ignored) {
 

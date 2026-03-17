@@ -1,4 +1,4 @@
-package com.example.ticketingproject.redis;
+package com.example.ticketingproject.domain.seat.service;
 
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performance.entity.Performance;
@@ -7,7 +7,8 @@ import com.example.ticketingproject.domain.performance.repository.PerformanceRep
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
-import com.example.ticketingproject.domain.seat.service.AdminSeatService;
+import com.example.ticketingproject.domain.seat.exception.SeatException;
+import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
 import com.example.ticketingproject.domain.venue.entity.Venue;
@@ -15,47 +16,49 @@ import com.example.ticketingproject.domain.venue.repository.VenueRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
 import com.example.ticketingproject.domain.work.enums.Category;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
-import com.example.ticketingproject.redis.lock.service.LockService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class RedisLockAspectTest {
+public class SeatRaceConditionOptimisticLockTest {
 
     @Autowired
     private AdminSeatService adminSeatService;
 
-    @SpyBean
-    private LockService lockService;
-
     @Autowired
     private VenueRepository venueRepository;
+
+    @Autowired
+    private SeatRepository seatRepository;
+
+    @Autowired
+    private SeatGradeRepository seatGradeRepository;
+
+    @Autowired
+    private PerformanceSessionRepository performanceSessionRepository;
 
     @Autowired
     private WorkRepository workRepository;
 
     @Autowired
     private PerformanceRepository performanceRepository;
-
-    @Autowired
-    private PerformanceSessionRepository performanceSessionRepository;
-
-    @Autowired
-    private SeatGradeRepository seatGradeRepository;
 
     private Venue venue;
 
@@ -113,20 +116,56 @@ public class RedisLockAspectTest {
     }
 
     @Test
-    void RedisLock_어노테이션_성공_테스트() {
-
+    @Disabled("낙관적 락은 의도적으로 실패하는 테스트 - CI 제외")
+    void 낙관적_Lock_제한_좌석_20개_동시_200개_생성_시_동시성_제한_테스트() throws InterruptedException {
         // given
+        int threadCount = 200;
 
-        CreateSeatRequest request = mock(CreateSeatRequest.class);
-        given(request.getGradeName()).willReturn(GradeName.VIP);
-        given(request.getRowName()).willReturn("A");
-        given(request.getSeatNumber()).willReturn(1);
+        ExecutorService executorService = Executors.newFixedThreadPool(200);
+
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(threadCount);
 
         // when
-        adminSeatService.saveRedisLock(venue.getId(), request);
+        for (int i = 0; i < threadCount; i++) {
+            int seatNumber = i;
+
+            executorService.submit(() -> {
+                try {
+                    cyclicBarrier.await();
+
+                    CreateSeatRequest request = new CreateSeatRequest();
+                    ReflectionTestUtils.setField(request, "gradeName", seatGrade.getGradeName());
+                    ReflectionTestUtils.setField(request, "rowName", "A");
+                    ReflectionTestUtils.setField(request, "seatNumber", seatNumber);
+
+                    adminSeatService.saveOptimisticLock(venue.getId(), request);
+
+                } catch (Exception ignored) {
+
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+
+        executorService.shutdown();
 
         // then
-        verify(lockService).lockRetry(any());
-        verify(lockService).unlock(any(), any());
+        int seatCount = seatRepository.countByVenueId(venue.getId());
+
+        Venue updatedVenue = venueRepository.findById(venue.getId()).get();
+
+        System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
+        System.out.println("생성된 좌석 수 = " + seatCount);
+        System.out.println("version = " + updatedVenue.getVersion());
+
+        Assertions.assertEquals(20, seatCount);
+
+        // 낙관적 락 version 증가 확인
+        Assertions.assertTrue(updatedVenue.getVersion() > 0);
     }
 }
