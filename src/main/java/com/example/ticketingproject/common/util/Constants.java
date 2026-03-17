@@ -33,6 +33,7 @@ public class Constants {
     public static final String MSG_SEAT_CAPACITY_EXCEEDED = "Venue의 총 좌석 수를 초과할 수 없습니다.";
     public static final String MSG_ALREADY_RESERVED_SEAT = "이미 예약된 좌석입니다.";
     public static final String MSG_ALREADY_SOLD_SEAT = "이미 판매된 좌석입니다.";
+    public static final String MSG_DUPLICATE_SEAT = "이미 존재하는 좌석 입니다.";
 
     // Performance
     public static final String MSG_PERFORMANCE_NOT_FOUND = "공연이 존재하지 않습니다.";
@@ -75,6 +76,7 @@ public class Constants {
     public static final String MSG_FORBIDDEN_CHAT_ROOM = "해당 채팅방에 접근할 권한이 없습니다.";
     public static final String MSG_CHAT_ROOM_ALREADY_COMPLETED = "이미 종료된 상담입니다.";
     public static final String MSG_INVALID_STATUS_TRANSITION = "올바르지 않은 상태 변경입니다.";
+
 
 
 }

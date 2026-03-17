@@ -13,10 +13,8 @@ import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.security.CustomUserDetails;
 import com.example.ticketingproject.security.jwt.JwtTokenProvider;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +49,30 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
+        return RegisterResponse.from(savedUser);
+    }
+
+    @Transactional
+    public RegisterResponse adminRegister(RegisterRequest request) {
+
+        boolean existence = userRepository.existsByEmail(request.getEmail());
+        if (existence) {
+            throw new UserException(
+                    ErrorStatus.DUPLICATE_EMAIL.getHttpStatus(),
+                    ErrorStatus.DUPLICATE_EMAIL);
+        }
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .balance(BigDecimal.ZERO)
+                .userRole(UserRole.ADMIN)
+                .userStatus(UserStatus.PENDING)
+                .build();
+
+        User savedUser = userRepository.save(user);
         return RegisterResponse.from(savedUser);
     }
 

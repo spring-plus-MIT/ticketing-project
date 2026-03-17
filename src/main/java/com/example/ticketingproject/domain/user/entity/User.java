@@ -121,4 +121,8 @@ public class User extends DeletableEntity {
 
         return this.balance;
     }
+
+    public void activate() {
+        this.userStatus = UserStatus.ACTIVE;
+    }
 }

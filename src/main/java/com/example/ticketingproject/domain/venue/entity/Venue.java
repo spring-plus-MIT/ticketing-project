@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.validator.constraints.Length;
 
+import java.time.LocalDateTime;
+
 import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_LENGTH_ERROR;
 
 @Getter
@@ -31,6 +33,9 @@ public class Venue extends DeletableEntity {
 
     @Min(value = 1)
     private int totalSeats;
+
+    @Version
+    private Long version;
 
     @Builder
     public Venue(String name, String address, int totalSeats) {

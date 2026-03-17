@@ -9,7 +9,6 @@ import com.example.ticketingproject.common.dto.CommonResponse;
 import com.example.ticketingproject.common.enums.SuccessStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +27,12 @@ public class AuthController {
     public ResponseEntity<CommonResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(
                 CommonResponse.success(SuccessStatus.REGISTER_SUCCESS, authService.register(request)));
+    }
+
+    @PostMapping("/admin-register")
+    public ResponseEntity<CommonResponse<RegisterResponse>> adminRegister(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(
+                CommonResponse.success(SuccessStatus.REGISTER_SUCCESS, authService.adminRegister(request)));
     }
 
     @PostMapping("/login")
