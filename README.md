@@ -623,12 +623,12 @@ return new PageImpl<>(content, pageable, total);
 ---
 
 ### 📊 2. 실험 환경
-| 항목 | 내용 |
-| :--- | :--- |
-| **Database** | MySQL 8.x |
-| **데이터 종류** | 공연 정보 데이터 |
-| **초기 데이터** | 약 100만 건 |
-| **확장 테스트** | +500만 건 (총 약 600만 건) |
+| 항목 | 내용                  |
+| :--- |:--------------------|
+| **Database** | MySQL 8.0           |
+| **데이터 종류** | 공연 정보 데이터           |
+| **초기 데이터** | 100만 건              |
+| **확장 테스트** | +500만 건 (총  600만 건) |
 
 ---
 
@@ -661,7 +661,7 @@ return new PageImpl<>(content, pageable, total);
 **[설계된 인덱스]**
 `idx_perf_main (venue_id, start_date, season)`
 
-- **WHERE 필터링:** `venue_id`, `start_date`를 인덱스에서 즉시 필터링
+- **WHERE 필터링:** `venue_id`, `start_date`를 인덱스에서 즉시 필터링 , ' 조회한 rows값 1244218 '
 - **ORDER BY 최적화:** 인덱스의 정렬 순서를 활용하여 `filesort` 제거
 - **Covering Index:** `SELECT` 절의 컬럼을 인덱스에 포함시켜 테이블 접근 최소화(`Using index`)
 
@@ -669,7 +669,7 @@ return new PageImpl<>(content, pageable, total);
 ---
 
 ### 📈 6. 인덱스 적용 결과 (After Optimization)
-- **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인
+- **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인 ,  ' 조회한 rows값 622105 '
 - **개선 효과:** Full Table Scan 제거, 디스크 I/O 감소, 조회 성능 안정화
 
 <img width="100%" alt="After 실행 계획" src="https://github.com/user-attachments/assets/f976c011-b033-419c-b07b-2fa2bf1c9186" />
@@ -690,7 +690,7 @@ return new PageImpl<>(content, pageable, total);
 ### 🎯 8. 최종 성과
 1. **쿼리 성능 개선:** Full Scan 및 Filesort 제거를 통한 연산 효율화
 2. **디스크 I/O 감소:** 커버링 인덱스 적용으로 테이블 접근 최소화
-3. **확장성 확보:** 대규모 데이터 환경에서도 고정된 응답 속도 보장
+3. **확장성 확보:** 대규모 데이터 환경에서도 안정적인 응답 속도 보장
 
 ---
 
@@ -703,8 +703,6 @@ return new PageImpl<>(content, pageable, total);
 
 ---
 
-### 📌 핵심 기술 키워드
-`MySQL` `Indexing` `Covering Index` `Composite Index` `Query Optimization` `EXPLAIN Analysis` `Scalability`
 
 
 
