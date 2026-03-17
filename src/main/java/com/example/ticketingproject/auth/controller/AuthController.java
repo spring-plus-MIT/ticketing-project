@@ -29,6 +29,12 @@ public class AuthController {
                 CommonResponse.success(SuccessStatus.REGISTER_SUCCESS, authService.register(request)));
     }
 
+    @PostMapping("/admin-register")
+    public ResponseEntity<CommonResponse<RegisterResponse>> adminRegister(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(
+                CommonResponse.success(SuccessStatus.REGISTER_SUCCESS, authService.adminRegister(request)));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<CommonResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
