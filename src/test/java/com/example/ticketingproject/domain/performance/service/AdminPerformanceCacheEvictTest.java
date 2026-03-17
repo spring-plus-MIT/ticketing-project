@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -57,8 +57,8 @@ class AdminPerformanceCacheEvictTest {
         cache.clear();
 
         // 캐시에 더미 데이터 저장
-        cache.put("search:레미제라블:ALL:ALL:ALL:ALL:0", List.of());
-        cache.put("search:MUSICAL:ALL:ALL:ALL:ALL:0", List.of());
+        cache.put("search:레미제라블:ALL:ALL:ALL:ALL:0", new ArrayList<>());
+        cache.put("search:MUSICAL:ALL:ALL:ALL:ALL:0", new ArrayList<>());
         cache.put("count:레미제라블:ALL:ALL:ALL:ALL", 5L);
 
         // Mock 엔티티 세팅
