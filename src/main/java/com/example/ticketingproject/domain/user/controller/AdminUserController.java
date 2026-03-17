@@ -52,5 +52,4 @@ public class AdminUserController {
         return ResponseEntity.ok(CommonResponse.success(SuccessStatus.DELETE_SUCCESS, null));
     }
 
-
 }
