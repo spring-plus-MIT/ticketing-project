@@ -1,7 +1,10 @@
 package com.example.ticketingproject.chat.security;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoom;
+import com.example.ticketingproject.chat.domain.chat.exception.ChatException;
 import com.example.ticketingproject.chat.domain.chat.repository.ChatRoomRepository;
+import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.security.CustomUserDetails;
 import com.example.ticketingproject.security.jwt.JwtTokenProvider;
@@ -18,6 +21,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.ticketingproject.common.enums.ErrorStatus.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
         if (accessor != null) {
 
+            // 1. CONNECT: 소켓 연결 시 JWT 토큰 검증
             if (StompCommand.CONNECT.equals(accessor.getCommand())) {
                 String header = accessor.getFirstNativeHeader("Authorization");
 
@@ -60,24 +66,31 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
                     } catch (Exception e) {
                         log.error("웹소켓 JWT 인증 실패: {}", e.getMessage());
-                        throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-                    }
+                        throw new AuthException(INVALID_TOKEN.getHttpStatus(),INVALID_TOKEN);                    }
                 } else {
                     log.error("웹소켓 연결 요청에 Authorization 헤더가 없거나 형식이 올바르지 않습니다.");
-                    throw new IllegalArgumentException("Authorization 헤더가 누락되었습니다.");
+                    throw new AuthException(INVALID_TOKEN.getHttpStatus(), ErrorStatus.INVALID_TOKEN);
                 }
             }
 
+            // 2. SUBSCRIBE: 채팅방 입장 시 권한 검증
             else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
                 String destination = accessor.getDestination();
 
                 if (destination != null && destination.startsWith("/sub/chat/room/")) {
-                    Long roomId = Long.parseLong(destination.replace("/sub/chat/room/", ""));
+
+                    Long roomId;
+                    try {
+                        roomId = Long.parseLong(destination.replace("/sub/chat/room/", ""));
+                    } catch (NumberFormatException e) {
+                        log.error("비정상적인 채팅방 구독 주소: {}", destination);
+                        throw new ChatException(CHAT_ROOM_NOT_FOUND.getHttpStatus(), CHAT_ROOM_NOT_FOUND);
+                    }
 
                     UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) accessor.getUser();
                     if (auth == null) {
                         log.error("구독 요청 시 인증 정보가 없습니다.");
-                        throw new IllegalArgumentException("인증 정보가 없습니다.");
+                        throw new AuthException(ACCESS_FORBIDDEN.getHttpStatus(), ACCESS_FORBIDDEN);
                     }
 
                     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
@@ -85,12 +98,12 @@ public class StompAuthInterceptor implements ChannelInterceptor {
                     UserRole role = userDetails.getUserRole();
 
                     ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+                            .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND.getHttpStatus(), CHAT_ROOM_NOT_FOUND));
 
                     if (role != UserRole.ADMIN && !chatRoom.getCreator().getId().equals(userId)) {
-                        log.warn("🚨 [보안 경고] 비정상적인 채팅방 구독 시도 차단 - User ID: {}, Room ID: {}", userId, roomId);
-                        throw new IllegalArgumentException("해당 채팅방을 구독할 권한이 없습니다.");
-                    }
+                        log.warn("비정상적인 채팅방 구독 시도- User ID: {}, Room ID: {}", userId, roomId);
+
+                        throw new ChatException(FORBIDDEN_CHAT_ROOM.getHttpStatus(), FORBIDDEN_CHAT_ROOM);                    }
 
                     log.info("[채팅방 구독 승인] User ID: {}, Room ID: {}", userId, roomId);
                 }
