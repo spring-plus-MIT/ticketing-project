@@ -18,6 +18,7 @@ import java.util.Map;
 import static com.example.ticketingproject.redis.config.RedisConfig.redisObjectMapper;
 
 @Configuration
+@EnableCaching
 public class CacheConfig {
 
     @Bean
