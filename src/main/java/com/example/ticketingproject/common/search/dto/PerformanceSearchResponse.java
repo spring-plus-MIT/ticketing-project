@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 @Getter
 public class PerformanceSearchResponse {
 
-    private Long performanceId;
-    private String season;
-    private Category category;
-    private PerformanceStatus status;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private final Long performanceId;
+    private final String season;
+    private final Category category;
+    private final PerformanceStatus status;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
 
     @JsonCreator
     public PerformanceSearchResponse(

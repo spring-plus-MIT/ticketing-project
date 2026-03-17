@@ -23,7 +23,7 @@ import java.util.Map;
 @EnableCaching
 public class CacheConfig {
 
-    private ObjectMapper redisObjectMapper() {  // @Bean 제거
+    private ObjectMapper redisObjectMapper() {
         ObjectMapper om = new ObjectMapper();
         om.registerModule(new JavaTimeModule());
         om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
