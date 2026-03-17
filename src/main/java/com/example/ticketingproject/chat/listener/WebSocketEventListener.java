@@ -1,12 +1,15 @@
 package com.example.ticketingproject.chat.listener;
 
+import com.example.ticketingproject.auth.exception.AuthException;
 import com.example.ticketingproject.chat.domain.chat.dto.ChatMessageResponse;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatMessage;
 import com.example.ticketingproject.chat.domain.chat.entity.ChatRoom;
+import com.example.ticketingproject.chat.domain.chat.exception.ChatException;
 import com.example.ticketingproject.chat.domain.chat.repository.ChatMessageRepository;
 import com.example.ticketingproject.chat.domain.chat.repository.ChatRoomRepository;
 import com.example.ticketingproject.chat.pubsub.RedisPublisher;
 import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.exception.UserException;
 import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+
+import static com.example.ticketingproject.common.enums.ErrorStatus.CHAT_ROOM_NOT_FOUND;
+import static com.example.ticketingproject.common.enums.ErrorStatus.USER_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -55,9 +61,9 @@ public class WebSocketEventListener {
                 Long userId = userDetails.getId();
 
                 User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                        .orElseThrow(() -> new AuthException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND));
                 ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+                        .orElseThrow(() -> new ChatException(CHAT_ROOM_NOT_FOUND.getHttpStatus(), CHAT_ROOM_NOT_FOUND));
 
                 String content = user.getName() + "님이 입장하셨습니다.";
 
@@ -87,7 +93,7 @@ public class WebSocketEventListener {
      * 2. 유저 퇴장 감지 (웹소켓 연결 종료 시점)
      */
     @EventListener
-    @Transactional // DB 저장이 일어나므로 추가
+    @Transactional
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 

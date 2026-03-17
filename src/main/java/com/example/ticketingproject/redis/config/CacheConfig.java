@@ -19,20 +19,12 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.ticketingproject.redis.config.RedisConfig.redisObjectMapper;
+
 @Configuration
 @EnableCaching
 public class CacheConfig {
 
-    private ObjectMapper redisObjectMapper() {
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new JavaTimeModule());
-        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        om.activateDefaultTyping(
-                om.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL
-        );
-        return om;
-    }
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
