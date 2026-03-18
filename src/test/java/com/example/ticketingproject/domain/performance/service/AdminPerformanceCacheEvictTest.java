@@ -1,5 +1,6 @@
 package com.example.ticketingproject.domain.performance.service;
 
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performance.repository.PerformanceRepository;
@@ -29,6 +30,9 @@ import static org.mockito.BDDMockito.given;
 @SpringBootTest
 @ActiveProfiles("test")
 class AdminPerformanceCacheEvictTest {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @Autowired
     private AdminPerformanceService adminPerformanceService;

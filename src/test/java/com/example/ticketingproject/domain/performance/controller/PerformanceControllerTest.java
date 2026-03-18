@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.performance.controller;
 
 import com.example.ticketingproject.RestDocsSupport;
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.domain.performance.dto.PerformanceResponse;
 import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performance.service.PerformanceService;
@@ -31,6 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockBean(JpaMetamodelMappingContext.class)
 @Import(SecurityConfig.class)
 class PerformanceControllerTest extends RestDocsSupport {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @MockBean
     private PerformanceService performanceService;

@@ -1,5 +1,6 @@
 package com.example.ticketingproject.common.search.service;
 
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.common.search.dto.PerformanceSearchResponse;
 import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,9 @@ import static org.mockito.Mockito.times;
 @SpringBootTest
 @ActiveProfiles("test")
 class PerformanceSearchCacheServiceIntegrationTest {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @Autowired
     private PerformanceSearchCacheService performanceSearchCacheService;

@@ -1,5 +1,6 @@
 package com.example.ticketingproject.domain.seat.service;
 
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,6 +39,9 @@ import java.util.concurrent.Executors;
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class SeatRaceConditionRedisLockTest {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @Autowired
     private AdminSeatService adminSeatService;

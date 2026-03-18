@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.castmember.controller;
 
 import com.example.ticketingproject.RestDocsSupport;
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.domain.castmember.dto.CastMemberRequest;
 import com.example.ticketingproject.domain.castmember.service.AdminCastMemberService;
 import com.example.ticketingproject.security.SecurityConfig;
@@ -26,6 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockBean(JpaMetamodelMappingContext.class)
 @Import(SecurityConfig.class)
 class AdminCastMemberControllerTest extends RestDocsSupport {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @MockBean
     private AdminCastMemberService adminCastMemberService;

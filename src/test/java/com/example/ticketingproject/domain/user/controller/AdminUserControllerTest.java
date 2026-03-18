@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.user.controller;
 
 import com.example.ticketingproject.RestDocsSupport;
+import com.example.ticketingproject.common.config.SuperAdminInitializer;
 import com.example.ticketingproject.domain.user.dto.GetUserResponse;
 import com.example.ticketingproject.domain.user.dto.UpdateUserResponse;
 import com.example.ticketingproject.domain.user.enums.UserRole;
@@ -37,6 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @MockBean(JpaMetamodelMappingContext.class)
 @Import(SecurityConfig.class)
 class AdminUserControllerTest extends RestDocsSupport {
+
+    @MockBean
+    private SuperAdminInitializer superAdminInitializer;
 
     @MockBean
     private AdminUserService adminUserService;
