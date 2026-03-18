@@ -1,0 +1,44 @@
+spring:
+  cloud:
+    aws:
+      parameterstore:
+        enabled: true
+      secretsmanager:
+        enabled: false
+  config:
+    import:
+      - aws-parameterstore:/ticketing-app/prod/
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+logging:
+  level:
+    root: INFO
+
+info:
+  app:
+    message: ${APP_MESSAGE}
+
+management:
+  endpoint:
+    health:
+      show-details: never
+  info:
+    env:
+      enabled: true

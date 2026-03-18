@@ -130,7 +130,5 @@ public class RedisLockAspectTest {
         // then
         verify(lockService).lockRetry(any());
         verify(lockService).unlock(any(), any());
-        System.out.println(request.getGradeName());
-        System.out.println(seatGrade.getGradeName());
     }
 }
