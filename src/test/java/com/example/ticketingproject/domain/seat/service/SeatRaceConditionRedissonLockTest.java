@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,7 +35,7 @@ import java.util.concurrent.Executors;
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class SeatRaceConditionRedisLockTest {
+public class SeatRaceConditionRedissonLockTest {
 
     @Autowired
     private AdminSeatService adminSeatService;
@@ -138,7 +137,7 @@ public class SeatRaceConditionRedisLockTest {
                     ReflectionTestUtils.setField(request, "rowName", "A");
                     ReflectionTestUtils.setField(request, "seatNumber", seatNumber);
 
-                    adminSeatService.saveRedisLock(venue.getId(), request);
+                    adminSeatService.saveRedissonLock(venue.getId(), request);
 
                 } catch (Exception ignored) {
 
