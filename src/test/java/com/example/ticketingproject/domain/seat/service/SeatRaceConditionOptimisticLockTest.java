@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class SeatRaceConditionOptimisticLockTest {
 
     @Autowired
@@ -79,7 +81,7 @@ public class SeatRaceConditionOptimisticLockTest {
         venue = Venue.builder()
                 .name("장소")
                 .address("주소")
-                .totalSeats(20)
+                .totalSeats(1)
                 .build();
 
         Venue savedVenue = venueRepository.save(venue);
@@ -106,10 +108,10 @@ public class SeatRaceConditionOptimisticLockTest {
 
         seatGrade = SeatGrade.builder()
                 .performanceSession(savedSession)
-                .gradeName(GradeName.VIP)
+                .gradeName(GradeName.S)
                 .price(BigDecimal.valueOf(100))
-                .totalSeats(20)
-                .remainingSeats(20)
+                .totalSeats(1)
+                .remainingSeats(1)
                 .build();
 
         SeatGrade savedSeatGrade = seatGradeRepository.save(seatGrade);
@@ -117,11 +119,11 @@ public class SeatRaceConditionOptimisticLockTest {
 
     @Test
     @Disabled("낙관적 락은 의도적으로 실패하는 테스트 - CI 제외")
-    void 낙관적_Lock_제한_좌석_20개_동시_200개_생성_시_동시성_제한_테스트() throws InterruptedException {
+    void 낙관적_Lock_제한_좌석_1개_동시_10개_생성_시_동시성_제한_테스트() throws InterruptedException {
         // given
-        int threadCount = 200;
+        int threadCount = 10;
 
-        ExecutorService executorService = Executors.newFixedThreadPool(200);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
         CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
@@ -163,7 +165,7 @@ public class SeatRaceConditionOptimisticLockTest {
         System.out.println("생성된 좌석 수 = " + seatCount);
         System.out.println("version = " + updatedVenue.getVersion());
 
-        Assertions.assertEquals(20, seatCount);
+        Assertions.assertEquals(1, seatCount);
 
         // 낙관적 락 version 증가 확인
         Assertions.assertTrue(updatedVenue.getVersion() > 0);

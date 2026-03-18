@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -30,6 +32,7 @@ import java.util.concurrent.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class SeatRaceConditionNoLockTest {
 
     @Autowired
@@ -72,7 +75,7 @@ public class SeatRaceConditionNoLockTest {
         venue = Venue.builder()
                 .name("장소")
                 .address("주소")
-                .totalSeats(20)
+                .totalSeats(1)
                 .build();
 
         Venue savedVenue = venueRepository.save(venue);
@@ -99,21 +102,21 @@ public class SeatRaceConditionNoLockTest {
 
         seatGrade = SeatGrade.builder()
                 .performanceSession(savedSession)
-                .gradeName(GradeName.VIP)
+                .gradeName(GradeName.A)
                 .price(BigDecimal.valueOf(100))
-                .totalSeats(20)
-                .remainingSeats(20)
+                .totalSeats(1)
+                .remainingSeats(1)
                 .build();
 
         SeatGrade savedSeatGrade = seatGradeRepository.save(seatGrade);
     }
 
     @Test
-    void Lock없이_제한_좌석_20개_동시_200개_생성_시_제한_초과_생성_테스트() throws InterruptedException {
+    void Lock없이_제한_좌석_1개_동시_10개_생성_시_제한_초과_생성_테스트() throws InterruptedException {
         // given
-        int threadCount = 200;
+        int threadCount = 10;
 
-        ExecutorService executorService = Executors.newFixedThreadPool(200);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
         CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
@@ -151,7 +154,9 @@ public class SeatRaceConditionNoLockTest {
 
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
+        System.out.println("장소 아이디 : " + venue.getId());
+        System.out.println("좌석등급 아이디 : " + seatGrade.getId());
 
-        Assertions.assertTrue(seatCount > 20);
+        Assertions.assertTrue(seatCount > 1);
     }
 }
