@@ -1352,10 +1352,7 @@ git clone https://github.com/spring-plus-MIT/ticketing-project.git
 ```bash
 cp .env.example .env
 # .env 파일 내 DB 정보, JWT Secret 등 입력
-```
 
-### 환경변수 목록 (`.env`)
-```
 DB_USERNAME=root
 DB_PASSWORD=secret
 DB_URL=secret
