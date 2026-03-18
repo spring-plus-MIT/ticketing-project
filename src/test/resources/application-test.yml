@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  cloud:
+    aws:
+      parameterstore:
+        enabled: false
+      region:
+        static: ap-northeast-2
+jwt:
+  secret:
+    key: test-secret-key-for-junit-test-only
+
+app:
+  init:
+    admin:
+      enabled: false

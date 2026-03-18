@@ -1,0 +1,102 @@
+package com.example.ticketingproject.auth.service;
+
+import com.example.ticketingproject.auth.dto.LoginRequest;
+import com.example.ticketingproject.auth.dto.LoginResponse;
+import com.example.ticketingproject.auth.dto.RegisterRequest;
+import com.example.ticketingproject.auth.dto.RegisterResponse;
+import com.example.ticketingproject.auth.exception.AuthException;
+import com.example.ticketingproject.common.enums.ErrorStatus;
+import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.enums.UserRole;
+import com.example.ticketingproject.domain.user.enums.UserStatus;
+import com.example.ticketingproject.domain.user.exception.UserException;
+import com.example.ticketingproject.domain.user.repository.UserRepository;
+import com.example.ticketingproject.security.CustomUserDetails;
+import com.example.ticketingproject.security.jwt.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public RegisterResponse register(RegisterRequest request) {
+        boolean existence = userRepository.existsByEmail(request.getEmail());
+        if (existence) {
+            throw new UserException(
+                    ErrorStatus.DUPLICATE_EMAIL.getHttpStatus(),
+                    ErrorStatus.DUPLICATE_EMAIL);
+        }
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .balance(BigDecimal.ZERO)
+                .userRole(UserRole.USER)
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        return RegisterResponse.from(savedUser);
+    }
+
+    @Transactional
+    public RegisterResponse adminRegister(RegisterRequest request) {
+
+        boolean existence = userRepository.existsByEmail(request.getEmail());
+        if (existence) {
+            throw new UserException(
+                    ErrorStatus.DUPLICATE_EMAIL.getHttpStatus(),
+                    ErrorStatus.DUPLICATE_EMAIL);
+        }
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .phone(request.getPhone())
+                .balance(BigDecimal.ZERO)
+                .userRole(UserRole.ADMIN)
+                .userStatus(UserStatus.PENDING)
+                .build();
+
+        User savedUser = userRepository.save(user);
+        return RegisterResponse.from(savedUser);
+    }
+
+    @Transactional
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new UserException(
+                        ErrorStatus.USER_NOT_FOUND.getHttpStatus(),
+                        ErrorStatus.USER_NOT_FOUND)
+        );
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AuthException(
+                    ErrorStatus.INVALID_PASSWORD.getHttpStatus(),
+                    ErrorStatus.INVALID_PASSWORD);
+        }
+
+        CustomUserDetails customUserDetails = new CustomUserDetails(
+                user.getId(),
+                user.getEmail(),
+                user.getUserRole()
+        );
+
+        String token = jwtTokenProvider.createToken(customUserDetails);
+
+        return new LoginResponse(token);
+    }
+}

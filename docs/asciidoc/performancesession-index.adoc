@@ -1,0 +1,63 @@
+= 공연 회차 API
+:toc: left
+:toclevels: 3
+:source-highlighter: highlightjs
+
+== 공연 회차 관리 API (관리자 전용)
+이 API는 공연의 세부 회차(일정 및 장소)를 관리하며, **ADMIN 권한**을 가진 사용자만 접근할 수 있습니다.
+
+=== 회차 등록
+특정 공연에 새로운 회차를 추가합니다. (시간 중복 검증 포함)
+
+==== Request
+include::{snippets}/admin-session-create/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-session-create/http-response.adoc[]
+
+---
+
+=== 회차 정보 수정
+특정 공연 회차의 장소나 시간 정보를 수정합니다.
+
+==== Request
+include::{snippets}/admin-session-update/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-session-update/http-response.adoc[]
+
+---
+
+=== 회차 삭제
+특정 공연 회차를 삭제합니다.
+
+==== Request
+include::{snippets}/admin-session-delete/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-session-delete/http-response.adoc[]
+
+---
+
+== 공연 회차 조회 API (사용자용)
+이 API는 특정 공연에 속한 회차 정보를 조회하며, 모든 사용자가 접근할 수 있습니다.
+
+=== 회차 목록 페이징 조회
+특정 공연의 전체 회차 목록을 페이징하여 조회합니다.
+
+==== Request
+include::{snippets}/session-get-pages/http-request.adoc[]
+
+==== Response
+include::{snippets}/session-get-pages/http-response.adoc[]
+
+---
+
+=== 회차 상세 조회
+특정 공연 회차의 상세 정보를 조회합니다.
+
+==== Request
+include::{snippets}/session-get-detail/http-request.adoc[]
+
+==== Response
+include::{snippets}/session-get-detail/http-response.adoc[]
