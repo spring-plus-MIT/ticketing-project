@@ -56,6 +56,12 @@ src
                 │   ├── dto
                 │   ├── exception
                 │   └── service
+                ├── chat                    # 실시간 채팅 기능
+                │   ├── config              # 웹소켓 설정
+                │   ├── domain              # 채팅 비즈니스 로직 (Controller, Service, Entity 등)
+                │   ├── listner             # 웹소켓 연결/해제 세션 이벤트 감지
+                │   ├── pubsub              # Redis 기반 메시지 발행 및 구독 로직
+                │   └── security            # STOMP 통신 JWT 인증 및 권한 인터셉터
                 ├── common
                 │   ├── config
                 │   ├── dto
@@ -239,6 +245,24 @@ PENDING → ACTIVE → DELETED
 |--------|-----|------|------|
 | POST | `/wishlists` | 찜 생성 | USER |
 | DELETE | `/wishlists/{wishlistId}` | 찜 삭제 | USER |
+
+### 💬 실시간 채팅 (1:1 고객 문의) `/chat`
+
+| Method | URI | 설명                      | 권한 |
+|--------|-----|-------------------------|------|
+| POST | `/chat/rooms` | 문의 채팅방 생성               | USER |
+| GET | `/chat/rooms` | 내 채팅방 목록 조회             | USER |
+| GET | `/admin/chat/rooms` | (관리자) 전체/상태별 채팅방 목록 조회  | ADMIN |
+| PATCH | `/chat/rooms/{roomId}/status` | 채팅방 상태 변경 (대기, 처리중, 완료) | ADMIN, USER |
+| GET | `/chat/rooms/{roomId}/messages` | 채팅방 이전 메시지 내역 조회 (페이징) | ADMIN, USER |
+
+**⚡ WebSocket & STOMP 통신 명세**
+* **Endpoint (연결):** `ws://{host}/ws-stomp`
+    * 연결 시 `Authorization` 헤더에 Bearer 토큰(JWT)이 반드시 필요합니다.
+* **Subscribe (구독):** `/sub/chat/room/{roomId}`
+    * 해당 채팅방의 메시지를 수신합니다.
+* **Publish (발행):** `/pub/chat/send`
+    * `ChatMessageRequest` DTO 형식으로 JSON 데이터를 전송합니다.
 
 ---
 
@@ -778,6 +802,28 @@ maxmemory-policy allkeys-lru
 → 1분 이내의 오차는 허용 가능
 → 매 수정마다 Evict하면 캐시 효과가 없어짐
 ```
+## 7️⃣ 실시간 채팅 및 다중 서버 환경(Scale-out) 대응
+
+고객과 관리자 간의 1:1 문의 채널을 위해 STOMP 기반의 실시간 웹소켓 채팅을 구현했습니다. 다중 서버(Scale-out) 환경에서의 세션 불일치 문제를 해결하고, 소켓 통신의 보안을 강화하는 데 집중했습니다.
+
+### 1. STOMP 기반 양방향 통신
+일반적인 WebSocket 대신 **STOMP(Simple Text Oriented Messaging Protocol)**를 채택하여 메시지 브로커를 활용한 Pub/Sub(발행/구독) 아키텍처를 구성했습니다.
+이를 통해 메시지의 라우팅(`@MessageMapping`)과 페이로드(`@Payload`) 객체 매핑을 편리하게 처리하고, 채팅방(Room) 단위의 메시지 브로드캐스팅을 효율적으로 구현했습니다.
+
+### 2. 다중 서버 환경의 한계와 Redis Pub/Sub 도입
+
+**[문제 상황: 세션 동기화 불일치]**
+웹소켓은 클라이언트와 서버 간의 연결이 유지되는 **상태 유지(Stateful)** 프로토콜입니다.
+로드 밸런서를 통해 서버가 여러 대로 확장(Scale-out)될 경우, 사용자가 접속한 서버와 관리자가 접속한 서버가 다르면 메시지를 주고받을 수 없는 문제가 발생합니다.
+
+[해결 전략: Redis Pub/Sub을 활용한 메시지 브로커]
+이 문제를 해결하기 위해 애플리케이션 서버 외부의 Redis를 글로벌 메시지 브로커로 활용했습니다.
+
+| 단계 | 동작|  설명 |
+| :--- | :--- |---|
+| 1. 발행 (Publish)| Server A → Redis | 고객이 Server A로 메시지를 보내면, Server A는 DB에 메시지를 저장하고 Redis 특정 채널(topic)로 메시지를 발행(Publish)합니다.  |
+| 2. 구독 (Subscribe)| Redis → All Servers | Redis의 채널을 리슨(Listen)하고 있는 모든 애플리케이션 서버가 해당 메시지를 수신합니다.  |
+| 3. 전송 (Send)| Server B → 관리자 | 메시지를 수신한 서버들은 자신과 웹소켓이 연결된 클라이언트 중, 해당 채팅방을 구독 중인 사용자(관리자)에게 메시지를 전달합니다.  |
 
 ---
 # ⚡ Database Performance Optimization (Indexing)
