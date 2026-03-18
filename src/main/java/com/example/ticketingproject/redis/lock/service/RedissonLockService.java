@@ -24,7 +24,7 @@ public class RedissonLockService {
             // Redisson 은 Retry 전략을 기본적으로 가지고 있음
             Boolean available = lock.tryLock(5, 10, TimeUnit.SECONDS);
 
-            if (!Boolean.TRUE.equals(available)) {
+            if (Boolean.FALSE.equals(available)) {
                 throw new LockException(
                         ErrorStatus.LOCK_ACQUISITION_FAILED.getHttpStatus(),
                         ErrorStatus.LOCK_ACQUISITION_FAILED
