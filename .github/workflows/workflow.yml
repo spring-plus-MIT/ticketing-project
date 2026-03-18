@@ -56,6 +56,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      image_tag: ${{ github.sha }}
 
     steps:
       - name: Checkout code
@@ -100,3 +102,93 @@ jobs:
           docker build -t $IMAGE_URI:${{ github.sha }} -t $IMAGE_URI:latest .
           docker push $IMAGE_URI:${{ github.sha }}
           docker push $IMAGE_URI:latest
+
+  deploy:
+    name: Deploy to EC2 via SSM
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      # Step 2: Launch Template 새 버전 생성 (User Data의 IMAGE_TAG를 새 커밋 SHA로 교체)
+      - name: Update Launch Template
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+          LAUNCH_TEMPLATE_ID: ${{ vars.LAUNCH_TEMPLATE_ID }}
+        run: |
+          ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
+
+          USER_DATA=$(cat <<'USERDATA' | sed 's/^[[:space:]]*//' | sed "s|__IMAGE_TAG__|${IMAGE_TAG}|g; s|__AWS_ACCOUNT_ID__|${AWS_ACCOUNT_ID}|g; s|__AWS_REGION__|${AWS_REGION}|g; s|__ECR_REPOSITORY__|${ECR_REPOSITORY}|g" | base64 -w 0
+          #!/bin/bash
+          set -e
+          AWS_REGION="__AWS_REGION__"
+          AWS_ACCOUNT_ID="__AWS_ACCOUNT_ID__"
+          ECR_REPOSITORY="__ECR_REPOSITORY__"
+          IMAGE_TAG="__IMAGE_TAG__"
+          ECR_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}"
+          dnf update -y
+          dnf install -y docker
+          systemctl enable docker
+          systemctl start docker
+          aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+          docker pull ${ECR_URI}:${IMAGE_TAG}
+          docker run -d -p 8080:8080 --restart unless-stopped --name ci-demo -e SPRING_PROFILES_ACTIVE=prod ${ECR_URI}:${IMAGE_TAG}
+          USERDATA
+          )
+
+          NEW_VERSION=$(aws ec2 create-launch-template-version \
+            --launch-template-id ${LAUNCH_TEMPLATE_ID} \
+            --source-version '$Latest' \
+            --launch-template-data "{\"UserData\":\"${USER_DATA}\"}" \
+            --query 'LaunchTemplateVersion.VersionNumber' \
+            --output text)
+
+          echo "✅ Launch Template v${NEW_VERSION} 생성 완료"
+
+          aws ec2 modify-launch-template \
+            --launch-template-id ${LAUNCH_TEMPLATE_ID} \
+            --default-version ${NEW_VERSION}
+
+          echo "✅ 기본 버전 → v${NEW_VERSION} 변경 완료"
+
+      - name: Start ASG Instance Refresh
+        env:
+          ASG_NAME: ${{ vars.ASG_NAME }}
+        run: |
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name ${ASG_NAME} \
+            --query 'InstanceRefreshId' \
+            --output text)
+
+          echo "✅ 인스턴스 리프레시 시작: ${REFRESH_ID}"
+
+          while true; do
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name ${ASG_NAME} \
+              --instance-refresh-ids ${REFRESH_ID} \
+              --query 'InstanceRefreshes[0].Status' \
+              --output text)
+
+            echo "현재 상태: ${STATUS}"
+
+            if [ "${STATUS}" = "Successful" ]; then
+              echo "✅ 인스턴스 리프레시 완료"
+              break
+            elif [ "${STATUS}" = "Failed" ] || [ "${STATUS}" = "Cancelled" ]; then
+              echo "❌ 인스턴스 리프레시 실패: ${STATUS}"
+              exit 1
+            fi
+
+            sleep 30
+          done
