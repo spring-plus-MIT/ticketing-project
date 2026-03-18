@@ -49,36 +49,44 @@
 src
 └── main
     └── java
-        └── example
-            └── ticketingproject
-                ├── auth
-                │   ├── controller
-                │   ├── dto
-                │   ├── exception
-                │   └── service
-                ├── common
-                │   ├── config
-                │   ├── dto
-                │   ├── entity
-                │   ├── enums
-                │   └── exception
-                ├── domain
-                │   ├── cashcharge          # 캐시 충전
-                │   ├── castmember          # 캐스팅 멤버
-                │   ├── like                # 찜
-                │   ├── payment             # 결제
-                │   ├── performance         # 공연
-                │   ├── performancesession  # 공연 회차
-                │   ├── reservation         # 예약
-                │   ├── review              # 리뷰
-                │   ├── seat                # 좌석
-                │   ├── seatgrade           # 좌석 등급
-                │   ├── user                # 유저
-                │   ├── venue               # 장소
-                │   └── work                # 작품
-                └── security
-                    ├── exception
-                    └── jwt
+        └── com
+            └── example
+                └── ticketingproject
+                    ├── auth
+                    │   ├── controller
+                    │   ├── dto
+                    │   ├── exception
+                    │   └── service
+                    ├── chat
+                    │   ├── config
+                    │   ├── domain
+                    │   ├── listener
+                    │   ├── pubsub
+                    │   └── security
+                    ├── common
+                    │   ├── config
+                    │   ├── dto
+                    │   ├── entity
+                    │   ├── enums
+                    │   ├── exception
+                    │   ├── search
+                    │   └── util
+                    ├── domain
+                    │   ├── castmember          # 캐스팅 멤버
+                    │   ├── charge              # 캐시 충전
+                    │   ├── like                # 찜
+                    │   ├── payment             # 결제
+                    │   ├── performance         # 공연
+                    │   ├── performancesession  # 공연 회차
+                    │   ├── reservation         # 예약
+                    │   ├── review              # 리뷰
+                    │   ├── seat                # 좌석
+                    │   ├── seatgrade           # 좌석 등급
+                    │   ├── user                # 유저
+                    │   ├── venue               # 장소
+                    │   └── work                # 작품
+                    ├── redis
+                    └── security
 ```
 
 ---
@@ -91,15 +99,16 @@ src
 
 ## 🔐 권한 체계
 
-| 역할 | 설명 |
-|------|------|
-| `ADMIN` | 일반 관리자. 공연 등록, 캐시 충전 등 가능 |
-| `USER` | 일반 고객. 예매, 리뷰, 찜 가능 |
+| 역할           | 설명                        |
+|--------------|---------------------------|
+| `SUPERADMIN` | 슈퍼 관리자. 일반 관리자의 관리        |
+| `ADMIN`      | 일반 관리자. 공연 등록, 캐시 충전 등 가능 |
+| `USER`       | 일반 고객. 예매, 리뷰, 찜 가능       |
 
 ### 관리자 상태 전이
 ```
 PENDING → ACTIVE → DELETED
-(가입)   (관리자 승인)  (관리자 삭제)
+(가입)   (슈퍼 관리자 승인)  (슈퍼 관리자 삭제)
 ```
 
 ---
@@ -511,18 +520,23 @@ om.activateDefaultTyping(                                       // 역직렬화 
 | `WRITE_DATES_AS_TIMESTAMPS` 비활성화 | 타임스탬프(숫자) 대신 문자열로 저장하여 가독성 향상 |
 | `activateDefaultTyping` | 역직렬화 시 정확한 타입으로 복원 |
 
-> **`activateDefaultTyping` 주의사항**
+**`activateDefaultTyping` 주의사항**
 > `@Bean`으로 전역 등록하면 모든 요청의 JSON 파싱에 영향을 줘서
 > `LoginRequest`, `RegisterRequest` 등 일반 API의 역직렬화가 실패합니다.
-> Redis 전용 `ObjectMapper`를 `private` 메서드로 분리하여 전역 영향을 차단해야 합니다.
+> `RedisConfig`에서 `public static` 정적 메서드로 분리하면, `@Bean` 등록 없이 전역 영향을 차단하면서
+> `CacheConfig` 등 다른 설정 클래스에서도 `import static`으로 재사용할 수 있습니다.
 >
 > ```java
 > // ❌ 전역 빈으로 등록 → 일반 API 역직렬화 실패
 > @Bean
 > public ObjectMapper redisObjectMapper() { ... }
 >
-> // ✅ private 메서드로 분리 → Redis 전용으로만 사용
-> private ObjectMapper redisObjectMapper() { ... }
+> // ✅ RedisConfig에 public static 정적 메서드로 분리 → Redis 전용으로만 사용, 다른 Config에서도 재사용 가능
+> // RedisConfig.java
+> public static ObjectMapper redisObjectMapper() { ... }
+>
+> // CacheConfig.java
+> import static com.example.ticketingproject.redis.config.RedisConfig.redisObjectMapper;
 > ```
 
 ### DTO 역직렬화 문제 해결
@@ -666,10 +680,10 @@ v2: 400명에서도 포화점 미도달
     → Redis 캐시가 DB 병목을 제거하여 훨씬 많은 동시 사용자 수용 가능
     → 실제 서비스 환경에서 캐시의 중요성 확인
 ```
- 
+
 ---
 
-## 6️⃣ Cache Eviction (작성 예정)
+## 6️⃣ Cache Eviction 
 
 ### @CacheEvict 적용
 
@@ -870,12 +884,9 @@ maxmemory-policy allkeys-lru
 3. **검증:** 인덱스 적용 전/후 성능 측정 및 rows 감소 수치 확인
 4. **확장:** 500만 건 데이터 적재를 통한 대규모 환경 최종 테스트
 5. **문서화:** 성능 비교 보고서 작성 및 팀 기술 공유
----
-
-
-
 
 ---
+
 # Concurrency Scenarios
 
 1. 마지막 좌석 동시 예매 (100명)
@@ -1328,72 +1339,57 @@ Backoff : Exponential Backoff + Jitter
 - Lua Script Unlock
 - Retry + Exponential + jitter Backoff
 
-
+---
 
 ## 🚀 로컬 실행 방법
 
+### 1. 저장소 클론
 ```bash
-# 1. 저장소 클론
 git clone https://github.com/spring-plus-MIT/ticketing-project.git
+```
 
-# 2. 환경변수 설정
+### 2. 환경변수 설정
+```bash
 cp .env.example .env
 # .env 파일 내 DB 정보, JWT Secret 등 입력
 
-# 3. 빌드 및 실행
-./gradlew bootRun
-```
-
-### 환경변수 목록 (`.env`)
-```
 DB_USERNAME=root
 DB_PASSWORD=secret
+DB_URL=secret
 JWT_SECRET=your-jwt-secret
+SUPER_ADMIN_ID=secret
+SUPER_ADMIN_PASSWORD=secret
 ```
 
-### Spring Profile 설정
-
-`application.yml`에 기본 프로파일이 지정되어 있지 않으므로, 로컬 실행 시 반드시 `local` 프로파일을 명시해야 합니다.
-
-**IntelliJ 실행 설정**
-```
-Run/Debug Configurations → Active profiles → local
-```
-
-**VM options으로 지정**
-```
--Dspring.profiles.active=local
-```
-
-## 로컬 실행 방법
-
-### 방법 1. CLI로 직접 실행
-```bash
-./gradlew bootRun --args='--spring.profiles.active=local'
-```
-
-### 방법 2. Docker Compose로 실행
+### 3. Docker Compose로 실행
 
 **[실행]**
-1. 파일 수정 (필요 시)
-2. `./gradlew bootJar`
-3. `docker-compose up --build`
-4. Postman으로 `localhost:8080` 테스트
+```bash
+./gradlew build -x test
+docker-compose up --build
+```
 
 **[종료]**
-1. `docker-compose down` → 컨테이너 + 네트워크 삭제, DB 유지
-2. `docker-compose down -v` → 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+```bash
+# 컨테이너 + 네트워크 삭제, DB 유지
+docker-compose down
+ 
+# 컨테이너 + 네트워크 + DB 볼륨까지 삭제
+docker-compose down -v
+```
 
 **[이미지 삭제]**
-1. `docker images` → 이미지 ID 확인
-2. `docker rmi {이미지ID}` → 이미지 삭제 (컨테이너 중지 상태여야 함)
-3. `docker rmi -f {이미지ID}` → 실행 중인 컨테이너가 있어도 강제 삭제
+```bash
+docker images                  # 이미지 ID 확인
+docker rmi {이미지ID}           # 이미지 삭제 (컨테이너 중지 상태여야 함)
+docker rmi -f {이미지ID}        # 실행 중인 컨테이너가 있어도 강제 삭제
+```
 
-| 환경 | 프로파일 | 설정 파일 |
-|------|---------|---------|
-| 로컬 | `local` | `application-local.yml` + `.env` |
-| 테스트 | (자동) | `src/test/resources/application.yml` (H2) |
-| 운영 | `prod` | `application-prod.yml` (GitHub Secrets로 주입) |
+| 환경 | 프로파일    | 설정 파일                                          |
+|------|---------|------------------------------------------------|
+| 로컬 | `local` | `application-local.yml` + `.env`               |
+| 테스트 | `test`   | `src/test/resources/application-test.yml` (H2) |
+| 운영 | `prod`  | `application-prod.yml` (AWS Parameter store)                   |
 
 ---
 
@@ -1401,13 +1397,19 @@ Run/Debug Configurations → Active profiles → local
 
 > 개발 중 마주친 문제와 해결 방법을 기록합니다.
 
-| 문제 | 원인 | 해결 방법 |
-|------|------|-----------|
-| 동시 결제 시 잔액 불일치 | 동시성 이슈 | 비관적 락 적용 |
-| `Page<T>` Redis 직렬화 실패 | `Page` 인터페이스는 Redis에 직렬화 불가 | content(`List`)와 count(`long`)로 분리하여 각각 캐시 저장 후 `PageImpl`로 조립 |
-| DTO 역직렬화 실패 | 기본 생성자 없어 Jackson이 객체 생성 불가 | `@JsonCreator` + `@JsonProperty`로 역직렬화용 생성자 명시 |
-| 일반 API 403 에러 | `activateDefaultTyping`이 전역 `ObjectMapper`에 영향 → 모든 요청 JSON 파싱 실패 | `redisObjectMapper()`를 `@Bean` 제거하고 `private` 메서드로 분리 |
-| (추가 예정) | | |
+| 문제 | 원인 | 해결 방법                                                                                                    |
+|------|------|----------------------------------------------------------------------------------------------------------|
+| `Page<T>` Redis 직렬화 실패 | `Page` 인터페이스는 Redis에 직렬화 불가 | content(`List`)와 count(`long`)로 분리하여 각각 캐시 저장 후 `PageImpl`로 조립                                           |
+| DTO 역직렬화 실패 | 기본 생성자 없어 Jackson이 객체 생성 불가 | `@JsonCreator` + `@JsonProperty`로 역직렬화용 생성자 명시                                                           |
+| 일반 API 403 에러 | `activateDefaultTyping`이 전역 `ObjectMapper`에 영향 → 모든 요청 JSON 파싱 실패 | `RedisConfig`에 `public static` 정적 메서드로 분리하여 `@Bean` 전역 등록 제거, `CacheConfig`에서 `import static`으로 호출하여 재사용 |
+| `GetUserResponse`로 인한 애플리케이션 실행 실패 | `Response` 생성자를 Builder 패턴으로 수정하는 과정에서 참조하는 곳 중 리팩토링이 누락됨 | 누락된 부분을 Builder 기반으로 리팩토링 |
+| 테스트 실행 시 `testCompileClasspath` 해석 실패 | `build.gradle`에 존재하지 않는 아티팩트 `spring-boot-starter-data-jpa-test`가 선언되어 있음. Maven Central에 해당 아티팩트가 없으며 JPA 테스트 지원은 이미 `spring-boot-starter-test`에 포함되어 있음 | `testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'` 의존성 제거, `spring-boot-starter-test`만으로 대체 |
+| RestDocs 빌드 실패 (`asciidoctorExtensions()` 메서드를 찾을 수 없음) | `build.gradle`에 `asciidoctorExtensions` 설정 누락 | `build.gradle`에 `asciidoctorExtensions` 구성 추가 |
+| 코드 실행 시 `SeatGradeRepository` 에러 | Spring Data JPA가 메서드명의 `SessionId`를 `SeatGrade` 엔티티의 필드로 찾으려 하지만, 엔티티에는 `sessionId` 필드가 없고 `performanceSession` 객체로 연관관계가 맺어져 있어 매핑 실패 | 메서드명의 `sessionId`를 `performanceSessionId`로 변경하여 `performanceSession.id`로 올바르게 매핑되도록 수정 |
+| 좌석 생성 실패 테스트 코드에서 `UnnecessaryStubbingException` 발생 | `MockitoExtension`은 기본적으로 Strict Stubbing 모드로 동작하여 `given()`으로 설정했지만 실제로 호출되지 않는 stubbing이 존재 | 사용되지 않는 stubbing 제거 |
+| 클라이언트-서버 간 STOMP 연결 시 CORS 에러 및 핸드셰이크 오류 발생 | WebSocket 연결 시 HTTP 메서드 설정 미비로 핸드셰이크 단계에서 오류 발생 | WebSocket CORS 설정 추가 및 HTTP 메서드 설정 보완, `test.html` 클라이언트를 직접 제작하여 로컬 환경에서 STOMP 메시지 발행/구독 기능 검증 |
+| 순수 단위 테스트에서 `LockService`가 `null`로 주입됨 | `@SpringBootTest` 없는 단위 테스트에서 `@MockBean`을 사용하면 Spring Context가 뜨지 않아 Mockito가 인식하지 못하고 `@InjectMocks` 주입 시 `null`이 됨 | `@MockBean`을 `@Mock`으로 변경 |
+| 테스트 실행 시 `SuperAdminInitializer` 오류 발생 | 테스트 환경에서도 `SuperAdminInitializer`가 실행되어 초기화 로직이 동작함 | `SuperAdminInitializer`에 `@ConditionalOnProperty(name = "app.init.admin.enabled", havingValue = "true", matchIfMissing = true)` 추가, `test.yml`에 `app.init.admin.enabled: false` 설정하여 테스트 환경에서 초기화 로직 비활성화 |                                                                                              |
 
 ---
 
