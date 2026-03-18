@@ -38,6 +38,12 @@ public class AdminSeatService {
         return SeatResponse.from(seat);
     }
 
+    @RedisLock(key = "'lock:venue:' + #venueId + ':seat:create'", strategy = LockStrategy.REDISSON)
+    public SeatResponse saveRedissonLock(Long venueId, CreateSeatRequest request) {
+        Seat seat = seatTransactionalService.saveSeat(venueId, request);
+        return SeatResponse.from(seat);
+    }
+
     // 낙관적 Lock 적용 메서드 (Retry 전략 위한 Transactional 분리)
     public SeatResponse saveOptimisticLock(Long venueId, CreateSeatRequest request) {
         int retry = 3;
