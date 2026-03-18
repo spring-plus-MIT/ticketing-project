@@ -1,0 +1,32 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# IDE / OS
+.gradle/
+.idea/
+.DS_Store
+.claude/
+
+# 민감 정보
+.env
+
+# 소스 및 빌드 도구
+src/
+gradle/
+gradlew
+gradlew.bat
+build.gradle
+settings.gradle
+
+# 빌드 산출물 (jar 제외)
+build/
+!build/libs/*.jar
+
+# 문서
+docs/
+README.md
+MIT-ERD.png
+docker-compose.yml
