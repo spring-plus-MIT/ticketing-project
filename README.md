@@ -1402,7 +1402,14 @@ docker rmi -f {이미지ID}        # 실행 중인 컨테이너가 있어도 강
 | `Page<T>` Redis 직렬화 실패 | `Page` 인터페이스는 Redis에 직렬화 불가 | content(`List`)와 count(`long`)로 분리하여 각각 캐시 저장 후 `PageImpl`로 조립                                           |
 | DTO 역직렬화 실패 | 기본 생성자 없어 Jackson이 객체 생성 불가 | `@JsonCreator` + `@JsonProperty`로 역직렬화용 생성자 명시                                                           |
 | 일반 API 403 에러 | `activateDefaultTyping`이 전역 `ObjectMapper`에 영향 → 모든 요청 JSON 파싱 실패 | `RedisConfig`에 `public static` 정적 메서드로 분리하여 `@Bean` 전역 등록 제거, `CacheConfig`에서 `import static`으로 호출하여 재사용 |
-| (추가 예정) | |                                                                                                          |
+| `GetUserResponse`로 인한 애플리케이션 실행 실패 | `Response` 생성자를 Builder 패턴으로 수정하는 과정에서 참조하는 곳 중 리팩토링이 누락됨 | 누락된 부분을 Builder 기반으로 리팩토링 |
+| 테스트 실행 시 `testCompileClasspath` 해석 실패 | `build.gradle`에 존재하지 않는 아티팩트 `spring-boot-starter-data-jpa-test`가 선언되어 있음. Maven Central에 해당 아티팩트가 없으며 JPA 테스트 지원은 이미 `spring-boot-starter-test`에 포함되어 있음 | `testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'` 의존성 제거, `spring-boot-starter-test`만으로 대체 |
+| RestDocs 빌드 실패 (`asciidoctorExtensions()` 메서드를 찾을 수 없음) | `build.gradle`에 `asciidoctorExtensions` 설정 누락 | `build.gradle`에 `asciidoctorExtensions` 구성 추가 |
+| 코드 실행 시 `SeatGradeRepository` 에러 | Spring Data JPA가 메서드명의 `SessionId`를 `SeatGrade` 엔티티의 필드로 찾으려 하지만, 엔티티에는 `sessionId` 필드가 없고 `performanceSession` 객체로 연관관계가 맺어져 있어 매핑 실패 | 메서드명의 `sessionId`를 `performanceSessionId`로 변경하여 `performanceSession.id`로 올바르게 매핑되도록 수정 |
+| 좌석 생성 실패 테스트 코드에서 `UnnecessaryStubbingException` 발생 | `MockitoExtension`은 기본적으로 Strict Stubbing 모드로 동작하여 `given()`으로 설정했지만 실제로 호출되지 않는 stubbing이 존재 | 사용되지 않는 stubbing 제거 |
+| 클라이언트-서버 간 STOMP 연결 시 CORS 에러 및 핸드셰이크 오류 발생 | WebSocket 연결 시 HTTP 메서드 설정 미비로 핸드셰이크 단계에서 오류 발생 | WebSocket CORS 설정 추가 및 HTTP 메서드 설정 보완, `test.html` 클라이언트를 직접 제작하여 로컬 환경에서 STOMP 메시지 발행/구독 기능 검증 |
+| 순수 단위 테스트에서 `LockService`가 `null`로 주입됨 | `@SpringBootTest` 없는 단위 테스트에서 `@MockBean`을 사용하면 Spring Context가 뜨지 않아 Mockito가 인식하지 못하고 `@InjectMocks` 주입 시 `null`이 됨 | `@MockBean`을 `@Mock`으로 변경 |
+| 테스트 실행 시 `SuperAdminInitializer` 오류 발생 | 테스트 환경에서도 `SuperAdminInitializer`가 실행되어 초기화 로직이 동작함 | `SuperAdminInitializer`에 `@ConditionalOnProperty(name = "app.init.admin.enabled", havingValue = "true", matchIfMissing = true)` 추가, `test.yml`에 `app.init.admin.enabled: false` 설정하여 테스트 환경에서 초기화 로직 비활성화 |                                                                                              |
 
 ---
 
