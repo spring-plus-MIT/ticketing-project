@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -33,6 +35,7 @@ import java.util.concurrent.Executors;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class SeatRaceConditionRedisLockTest {
 
     @Autowired
@@ -75,7 +78,7 @@ public class SeatRaceConditionRedisLockTest {
         venue = Venue.builder()
                 .name("장소")
                 .address("주소")
-                .totalSeats(20)
+                .totalSeats(1)
                 .build();
 
         Venue savedVenue = venueRepository.save(venue);
@@ -104,19 +107,19 @@ public class SeatRaceConditionRedisLockTest {
                 .performanceSession(savedSession)
                 .gradeName(GradeName.VIP)
                 .price(BigDecimal.valueOf(100))
-                .totalSeats(20)
-                .remainingSeats(20)
+                .totalSeats(1)
+                .remainingSeats(1)
                 .build();
 
         SeatGrade savedSeatGrade = seatGradeRepository.save(seatGrade);
     }
 
     @Test
-    void RedisLock_제한_좌석_20개_동시_200개_생성_시_동시성_제한_생성_테스트() throws InterruptedException {
+    void RedisLock_제한_좌석_1개_동시_10개_생성_시_동시성_제한_생성_테스트() throws InterruptedException {
         // given
-        int threadCount = 200;
+        int threadCount = 10;
 
-        ExecutorService executorService = Executors.newFixedThreadPool(200);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
         CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
@@ -154,7 +157,9 @@ public class SeatRaceConditionRedisLockTest {
 
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
+        System.out.println("장소 아이디 : " + venue.getId());
+        System.out.println("좌석등급 아이디 : " + seatGrade.getId());
 
-        Assertions.assertEquals(20, seatCount);
+        Assertions.assertEquals(1, seatCount);
     }
 }

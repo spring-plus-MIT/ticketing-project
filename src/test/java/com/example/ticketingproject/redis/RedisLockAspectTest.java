@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RedisLockAspectTest {
 
     @Autowired
@@ -103,7 +105,7 @@ public class RedisLockAspectTest {
 
         seatGrade = SeatGrade.builder()
                 .performanceSession(savedSession)
-                .gradeName(GradeName.VIP)
+                .gradeName(GradeName.R)
                 .price(BigDecimal.valueOf(100))
                 .totalSeats(20)
                 .remainingSeats(20)
@@ -118,7 +120,7 @@ public class RedisLockAspectTest {
         // given
 
         CreateSeatRequest request = mock(CreateSeatRequest.class);
-        given(request.getGradeName()).willReturn(GradeName.VIP);
+        given(request.getGradeName()).willReturn(GradeName.R);
         given(request.getRowName()).willReturn("A");
         given(request.getSeatNumber()).willReturn(1);
 
@@ -128,5 +130,7 @@ public class RedisLockAspectTest {
         // then
         verify(lockService).lockRetry(any());
         verify(lockService).unlock(any(), any());
+        System.out.println(request.getGradeName());
+        System.out.println(seatGrade.getGradeName());
     }
 }
