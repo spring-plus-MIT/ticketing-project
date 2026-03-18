@@ -157,8 +157,6 @@ public class SeatRaceConditionRedisLockTest {
 
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
-        System.out.println("장소 아이디 : " + venue.getId());
-        System.out.println("좌석등급 아이디 : " + seatGrade.getId());
 
         Assertions.assertEquals(1, seatCount);
     }
