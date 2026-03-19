@@ -19,6 +19,7 @@ import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.redis.lock.annotation.RedisLock;
 import com.example.ticketingproject.redis.lock.enums.LockStrategy;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,7 +102,16 @@ public class ReservationService {
     @Transactional
     public void cancelExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
-        List<Reservation> expiredReservations = reservationRepository.findByStatusAndExpiresAtBefore(ReservationStatus.PENDING, now);
+
+        List<Reservation> expiredReservations = reservationRepository.findExpiredReservationsWithSeat(
+                ReservationStatus.PENDING,
+                now,
+                PageRequest.of(0, 100)
+        );
+
+        if (expiredReservations.isEmpty()) {
+            return;
+        }
 
         for (Reservation reservation : expiredReservations) {
             reservation.cancel();
