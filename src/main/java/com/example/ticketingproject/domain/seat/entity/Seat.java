@@ -7,12 +7,16 @@ import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_LENGTH_ERROR;
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 @Table(name = "seats")
@@ -26,17 +30,18 @@ public class Seat extends CreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private Venue venue;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_grade_id", nullable = false)
     private SeatGrade seatGrade;
 
-    @NotBlank
-    @Length(max = 10)
+    @Length(min = 1, max = 10)
     private String rowName;
 
-    @NotNull
+    @Min(value = 1, message = MSG_VALIDATION_LENGTH_ERROR)
+    @Max(value = 10, message = MSG_VALIDATION_LENGTH_ERROR)
     private int seatNumber;
 
     @Enumerated(EnumType.STRING)
