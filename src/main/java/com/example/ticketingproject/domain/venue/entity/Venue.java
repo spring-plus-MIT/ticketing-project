@@ -4,6 +4,8 @@ import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.domain.venue.dto.UpdateVenueRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,12 +27,15 @@ public class Venue extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Length(min = 1, max = 100)
+    @NotBlank
+    @Length(max = 100)
     private String name;
 
-    @Length(min = 1, max = 255)
+    @NotBlank
+    @Length(max = 255)
     private String address;
 
+    @NotNull
     @Min(value = 1)
     private int totalSeats;
 

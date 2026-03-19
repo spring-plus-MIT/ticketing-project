@@ -35,11 +35,9 @@ public class PerformanceSession extends DeletableEntity {
     private Venue venue;
 
     @NotNull
-    @Column(nullable = false)
     private LocalDateTime startTime;
 
     @NotNull
-    @Column(nullable = false)
     private LocalDateTime endTime;
 
     @Builder

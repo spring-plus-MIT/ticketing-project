@@ -22,16 +22,19 @@ public class Work extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Length(min = 1, max = 100)
+    @NotBlank
+    @Length(max = 100)
     private String title;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private Category category;
 
-    @Length(min = 1, max = 255)
+    @NotBlank
+    @Length(max = 255)
     private String description;
 
+    @NotNull
     @Min(value = 0)
     private Long likeCount;
 

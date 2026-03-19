@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.charge.entity;
 import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -21,19 +22,25 @@ public class Charge extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
-    @Column(precision = 10, scale = 2)
+    @NotNull
+    @DecimalMin(value = "0.0")
+    @Column(precision = 10, scale = 2, nullable = false)
     @Digits(integer = 8, fraction = 2)
     private BigDecimal amount;
 
-    @Column(precision = 10, scale = 2)
+    @NotNull
+    @DecimalMin(value = "0.0")
+    @Column(precision = 10, scale = 2, nullable = false)
     @Digits(integer = 8, fraction = 2)
     private BigDecimal balanceAfterCharge;
 

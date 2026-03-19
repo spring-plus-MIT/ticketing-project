@@ -9,6 +9,7 @@ import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,22 +29,26 @@ public class Seat extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private Venue venue;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_grade_id", nullable = false)
     private SeatGrade seatGrade;
 
-    @Length(min = 1, max = 10)
+    @NotBlank
+    @Length(max = 10)
     private String rowName;
 
-    @Min(value = 1, message = MSG_VALIDATION_LENGTH_ERROR)
-    @Max(value = 10, message = MSG_VALIDATION_LENGTH_ERROR)
+    @NotNull
+    @Min(value = 1)
+    @Max(value = 10)
     private int seatNumber;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private SeatStatus seatStatus;
 

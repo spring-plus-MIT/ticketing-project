@@ -28,25 +28,29 @@ public class Reservation extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "performance_session_id", nullable = false)
     private PerformanceSession performanceSession;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
-    @Enumerated(EnumType.STRING)
     @NotNull
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     @NotNull
-    @Digits(integer = 8, fraction = 2)
     @DecimalMin(value = "0.0")
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal totalPrice;
 
     @NotNull

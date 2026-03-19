@@ -5,6 +5,7 @@ import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,22 +37,18 @@ public class Performance extends ModifiableEntity {
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @NotNull
-    @Length(min = 1, max = 20)
-    @Column(nullable = false, length = 20)
+    @NotBlank
+    @Length(max = 20)
     private String season;
 
     @NotNull
-    @Column(nullable = false)
     private LocalDate startDate;
 
     @NotNull
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private PerformanceStatus status;
 
     @Builder

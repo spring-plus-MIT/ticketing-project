@@ -35,18 +35,18 @@ public class Payment extends CreatableEntity {
 
     @NotNull
     @DecimalMin(value = "0.0")
-    @Digits(integer = 8, fraction = 0)
-    @Column(nullable = false, precision = 8, scale = 0)
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal amount;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
     @NotNull
     @DecimalMin(value = "0.0")
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal balanceAfterPayment;
 
     @Builder

@@ -17,6 +17,6 @@ public class CreatePaymentRequest {
 
     @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
-    @Digits(integer = 8, fraction = 0, message = MSG_VALIDATION_DIGITS_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
     private BigDecimal amount;
 }

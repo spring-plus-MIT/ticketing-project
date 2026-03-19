@@ -6,10 +6,7 @@ import com.example.ticketingproject.domain.payment.exception.PaymentException;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,39 +26,35 @@ public class User extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Column(nullable = false)
-    @Length(min = 1, max = 30, message = "이름은 1자 이상 30자 이하로 입력해주세요.")
+    @NotBlank
+    @Length(max = 30)
     private String name;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotBlank
+    @Email
+    @Length(max = 50)
     @Column(nullable = false, unique = true)
-    @Email(message = "유효한 이메일 형식이 아닙니다.")
-    @Length(max = 50, message = "이메일은 최대 50자까지 가능합니다.")
     private String email;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Column(nullable = false)
-    @Length(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
+    @NotBlank
     private String password;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Column(nullable = false)
-    @Length(max = 14, message = "전화번호 형식을 확인해주세요.")
+    @NotBlank
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$")
     private String phone;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @DecimalMin(value = "0.0")
+    @Column(nullable = false, precision = 10, scale = 2)
     @Digits(integer = 8, fraction = 2)
     private BigDecimal balance;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private UserRole userRole;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private UserStatus userStatus;
 
     @Builder
