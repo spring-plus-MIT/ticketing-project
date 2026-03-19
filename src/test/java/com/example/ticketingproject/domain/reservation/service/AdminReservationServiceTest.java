@@ -5,6 +5,7 @@ import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
+import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
@@ -135,5 +136,46 @@ class AdminReservationServiceTest {
 
         assertThat(result).isNotNull();
         verify(reservationRepository, times(1)).findAllByUserId(userId, pageable);
+    }
+
+    @Test
+    void 예약_단건_조회_성공_테스트() {
+        // given
+        Work mockWork = Work.builder().title("테스트 공연").build();
+        Performance mockPerformance = Performance.builder().work(mockWork).build();
+        PerformanceSession mockSession = PerformanceSession.builder().performance(mockPerformance).build();
+
+        SeatGrade mockGrade = SeatGrade.builder().build();
+        ReflectionTestUtils.setField(mockGrade, "gradeName", GradeName.values()[0]);
+        ReflectionTestUtils.setField(mockGrade, "id", 1L);
+
+        Seat mockSeat = Seat.builder().seatNumber(1).build();
+        ReflectionTestUtils.setField(mockSeat, "seatGrade", mockGrade);
+        ReflectionTestUtils.setField(mockSeat, "id", 1L);
+
+        User mockUser = User.builder().build();
+        ReflectionTestUtils.setField(mockUser, "id", 1L);
+
+        Reservation reservation = Reservation.builder()
+                .user(mockUser)
+                .performanceSession(mockSession)
+                .seat(mockSeat)
+                .status(ReservationStatus.PENDING)
+                .build();
+
+        ReflectionTestUtils.setField(reservation, "id", 1L);
+
+        when(reservationRepository.findByIdAndUserId(reservation.getId(), mockUser.getId())).thenReturn(Optional.of(reservation));
+
+        // when
+        ReservationResponse response = reservationService.findOneReservation(mockUser.getId(), reservation.getId());
+
+        // then
+        verify(reservationRepository).findByIdAndUserId(reservation.getId(), mockUser.getId());
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(reservation.getId());
+        assertThat(response.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        assertThat(response.getPerformanceTitle()).isEqualTo("테스트 공연");
     }
 }

@@ -28,7 +28,7 @@ public class Venue extends DeletableEntity {
     @Length(min = 1, max = 100)
     private String name;
 
-    @Length(max = 255)
+    @Length(min = 1, max = 255)
     private String address;
 
     @Min(value = 1)

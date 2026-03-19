@@ -4,16 +4,17 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 public class CreateVenueRequest {
 
-    @Size(min = 1, max = 100)
+    @Length(min = 1, max = 100, message = "이름은 1자 이상 100자 이하로 입력해주세요.")
     private String name;
 
-    @Max(255)
+    @Length(min = 1, max = 255, message = "주소는 1자 이상 255자 이하로 입력해주세요.")
     private String address;
 
-    @Min(1)
+    @Min(value = 1, message = "총 좌석 수는 1 이상으로 입력해주세요.")
     private int totalSeats;
 }

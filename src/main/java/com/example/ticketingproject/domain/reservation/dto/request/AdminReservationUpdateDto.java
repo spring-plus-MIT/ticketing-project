@@ -5,8 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+
 @Getter
 public class AdminReservationUpdateDto {
-    @NotNull(message = "변경할 상태값은 필수입니다.")
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private ReservationStatus status;
 }
