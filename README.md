@@ -815,7 +815,7 @@ maxmemory-policy allkeys-lru
 인덱스가 없는 상태에서 `WHERE` 필터링과 `ORDER BY`를 동시에 수행할 경우, 전체 테이블을 스캔하고 메모리 내에서 강제 정렬이 발생함을 확인했습니다.
 
 - **EXPLAIN 분석 결과:** `type: ALL`, `Using filesort` 발생
-- **위험 요소:** 데이터 증가 시 성능이 선형적으로 저하될 가능성 매우 높음
+- **위험 요소:** 데이터가 늘어날수록 성능이 일정하게 계속 떨어질 가능성이 매우 높음
 
 <img width="100%" alt="Before 실행 계획" src="https://github.com/user-attachments/assets/dacd843c-2884-4cc3-881e-8395aaf91388" />
 *그림 1: 최적화 전 실행 계획 (Full Table Scan)*
@@ -837,7 +837,7 @@ maxmemory-policy allkeys-lru
 ---
 
 ### 📈 6. 인덱스 적용 결과 (After Optimization)
-- **탐색 효율 개선:** <span style="color: #2ea44f;">**1,244,210 rows → 622,105 rows (약 50% 최적화)**</span>
+- **탐색 효율 개선:** 1,244,210 rows → 622,105 rows (약 50% 최적화)
 - **EXPLAIN 분석 결과:** `type: range`, `Using index` 확인
 - **개선 효과:** Full Table Scan 제거, 디스크 I/O 감소, 조회 성능 안정화
 
