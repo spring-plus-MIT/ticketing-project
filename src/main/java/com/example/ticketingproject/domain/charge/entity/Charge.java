@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.charge.entity;
 import com.example.ticketingproject.common.entity.CreatableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -28,10 +29,12 @@ public class Charge extends CreatableEntity {
     @JoinColumn(name = "admin_id", nullable = false)
     private User admin;
 
-    @NotNull
+    @Column(precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal amount;
 
-    @NotNull
+    @Column(precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal balanceAfterCharge;
 
     @Builder
