@@ -6,8 +6,7 @@ import com.example.ticketingproject.domain.payment.exception.PaymentException;
 import com.example.ticketingproject.domain.user.enums.UserRole;
 import com.example.ticketingproject.domain.user.enums.UserStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +14,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 @Entity
@@ -29,25 +30,30 @@ public class User extends DeletableEntity {
     @Length(max = 30)
     private String name;
 
-    @Column(unique = true)
-    @Length(max = 50)
     @NotBlank
     @Email
+    @Length(max = 50)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank
-    @Length(min = 8)
     private String password;
 
-    @Length(max = 14)
     @NotBlank
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$")
     private String phone;
 
+    @NotNull
+    @DecimalMin(value = "0.0")
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal balance;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 

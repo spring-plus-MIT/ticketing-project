@@ -8,11 +8,15 @@ import com.example.ticketingproject.domain.reservation.exception.ReservationExce
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 @Entity
@@ -24,26 +28,35 @@ public class Reservation extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "performance_session_id", nullable = false)
     private PerformanceSession performanceSession;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     @NotNull
+    @DecimalMin(value = "0.0")
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal totalPrice;
 
+    @NotNull
     private LocalDateTime reservedAt;
 
+    @NotNull
     private LocalDateTime expiresAt;
 
     @Builder

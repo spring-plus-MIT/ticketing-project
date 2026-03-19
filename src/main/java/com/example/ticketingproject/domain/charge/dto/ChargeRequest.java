@@ -2,18 +2,18 @@ package com.example.ticketingproject.domain.charge.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 public class ChargeRequest {
 
-    @NotBlank(message = MSG_VALIDATION_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
     private BigDecimal amount;
 }

@@ -4,11 +4,16 @@ import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Entity
@@ -21,18 +26,23 @@ public class Review extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
-    @Column(nullable = false, length = 1000)
+    @NotBlank
+    @Length(max = 200)
     private String content;
 
-    @Column(nullable = false)
+    @NotNull
+    @Min(value = 1)
+    @Max(value = 5)
     private Integer rating;
 
     @Builder

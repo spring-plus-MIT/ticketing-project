@@ -36,20 +36,4 @@ public class AdminUserController {
         return ResponseEntity.ok(CommonResponse.success(SuccessStatus.READ_SUCCESS, adminUserService.findAllUser(converted)));
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(
-            @PathVariable Long userId,
-            @Valid @RequestBody UpdateUserRequest request
-    ) {
-        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.UPDATE_SUCCESS, userService.updateUser(userId, request)));
-    }
-
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<CommonResponse<Void>> withdrawUser(
-            @PathVariable Long userId
-    ) {
-        userService.withdrawUser(userId);
-        return ResponseEntity.ok(CommonResponse.success(SuccessStatus.DELETE_SUCCESS, null));
-    }
-
 }

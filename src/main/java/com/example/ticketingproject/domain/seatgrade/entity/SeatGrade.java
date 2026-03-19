@@ -5,6 +5,9 @@ import com.example.ticketingproject.common.enums.GradeName;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.seatgrade.exeption.SeatGradeException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,8 +17,8 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 
-import static com.example.ticketingproject.common.enums.ErrorStatus.*;
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+import static com.example.ticketingproject.common.enums.ErrorStatus.SEAT_GRADE_CAPACITY_EXCEEDED;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 @Entity
@@ -28,21 +31,27 @@ public class SeatGrade extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_session_id", nullable = false)
     private PerformanceSession performanceSession;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private GradeName gradeName;
 
-    @Column(nullable = false)
+    @NotNull
+    @DecimalMin(value = "0.0")
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal price;
 
     @NotNull
+    @Min(value = 0)
     private int totalSeats;
 
     @NotNull
+    @Min(value = 0)
     private int remainingSeats;
 
 

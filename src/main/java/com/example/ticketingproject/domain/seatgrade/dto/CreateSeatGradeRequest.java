@@ -1,27 +1,32 @@
 package com.example.ticketingproject.domain.seatgrade.dto;
 
 import com.example.ticketingproject.common.enums.GradeName;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 public class CreateSeatGradeRequest {
 
-    @NotBlank(message = MSG_VALIDATION_ERROR)
+    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
+    @Enumerated(EnumType.STRING)
     private GradeName gradeName;
 
-    @NotBlank(message = MSG_VALIDATION_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
     private BigDecimal price;
 
-    @NotBlank
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @Min(value = 1, message = "전체 좌석 수는 1개 이상으로 입력해주세요")
     private int totalSeats;
 
-    @NotBlank
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @Min(value = 0, message = "남은 좌석 수는 0개 이상으로 입력해주세요")
     private int remainingSeats;
 }

@@ -7,12 +7,17 @@ import com.example.ticketingproject.domain.seat.exception.SeatException;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_LENGTH_ERROR;
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 @Table(name = "seats")
@@ -24,10 +29,12 @@ public class Seat extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_grade_id", nullable = false)
     private SeatGrade seatGrade;
@@ -37,8 +44,11 @@ public class Seat extends CreatableEntity {
     private String rowName;
 
     @NotNull
+    @Min(value = 1)
+    @Max(value = 10)
     private int seatNumber;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private SeatStatus seatStatus;
 

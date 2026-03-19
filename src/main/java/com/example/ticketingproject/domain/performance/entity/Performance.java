@@ -5,6 +5,7 @@ import com.example.ticketingproject.domain.performance.enums.PerformanceStatus;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import com.example.ticketingproject.domain.work.entity.Work;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 @Table(name = "performances")
@@ -26,14 +27,17 @@ public class Performance extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
+    @NotBlank
     @Length(max = 20)
     private String season;
 
@@ -43,6 +47,7 @@ public class Performance extends ModifiableEntity {
     @NotNull
     private LocalDate endDate;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private PerformanceStatus status;
 
