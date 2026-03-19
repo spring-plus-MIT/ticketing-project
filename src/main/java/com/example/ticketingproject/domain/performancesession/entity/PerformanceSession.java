@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,21 +24,21 @@ public class PerformanceSession extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id", nullable = false)
     private Performance performance;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @Column(nullable = false)
     private LocalDateTime endTime;
 

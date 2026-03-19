@@ -12,6 +12,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+import static com.example.ticketingproject.common.util.Constants.*;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,29 +23,29 @@ public class Payment extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
-    @DecimalMin(value = "0.0")
-    @Digits(integer = 8, fraction = 0)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @Digits(integer = 8, fraction = 0, message = MSG_VALIDATION_DIGITS_ERROR)
     @Column(nullable = false, precision = 8, scale = 0)
     private BigDecimal amount;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
-    @NotNull
-    @DecimalMin(value = "0.0")
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
     @Column(nullable = false)
     private BigDecimal balanceAfterPayment;
 

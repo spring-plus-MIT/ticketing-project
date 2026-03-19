@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 public class PerformanceRequest {
@@ -19,7 +19,7 @@ public class PerformanceRequest {
     private Long venueId;
 
     @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Length(min = 1, max = 20)
+    @Length(min = 1, max = 20, message = MSG_VALIDATION_LENGTH_ERROR)
     private String season;
 
     @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
