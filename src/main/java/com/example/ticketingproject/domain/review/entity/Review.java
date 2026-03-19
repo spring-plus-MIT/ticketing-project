@@ -33,11 +33,11 @@ public class Review extends DeletableEntity {
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
-    @Length(min = 1, max = 200, message = "리뷰 내용은 최소 1글자 부터 최대 200자 까지만 입력 가능합니다.")
+    @Length(min = 1, max = 200)
     private String content;
 
-    @Min(value = 1, message = "평점은 최소 1점부터 입력 가능합니다.")
-    @Max(value = 5, message = "평점은 최대 5점까지 입력 가능합니다.")
+    @Min(value = 1)
+    @Max(value = 5)
     private Integer rating;
 
     @Builder

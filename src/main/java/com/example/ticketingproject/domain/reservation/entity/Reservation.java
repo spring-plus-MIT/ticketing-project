@@ -41,18 +41,18 @@ public class Reservation extends ModifiableEntity {
     private Seat seat;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     private ReservationStatus status;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @NotNull
+    @Digits(integer = 8, fraction = 2)
+    @DecimalMin(value = "0.0")
     private BigDecimal totalPrice;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     private LocalDateTime reservedAt;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     private LocalDateTime expiresAt;
 
     @Builder
