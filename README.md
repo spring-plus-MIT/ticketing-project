@@ -49,44 +49,42 @@
 src
 └── main
     └── java
-        └── com
-            └── example
-                └── ticketingproject
-                    ├── auth
-                    │   ├── controller
-                    │   ├── dto
-                    │   ├── exception
-                    │   └── service
-                    ├── chat
-                    │   ├── config
-                    │   ├── domain
-                    │   ├── listener
-                    │   ├── pubsub
-                    │   └── security
-                    ├── common
-                    │   ├── config
-                    │   ├── dto
-                    │   ├── entity
-                    │   ├── enums
-                    │   ├── exception
-                    │   ├── search
-                    │   └── util
-                    ├── domain
-                    │   ├── castmember          # 캐스팅 멤버
-                    │   ├── charge              # 캐시 충전
-                    │   ├── like                # 찜
-                    │   ├── payment             # 결제
-                    │   ├── performance         # 공연
-                    │   ├── performancesession  # 공연 회차
-                    │   ├── reservation         # 예약
-                    │   ├── review              # 리뷰
-                    │   ├── seat                # 좌석
-                    │   ├── seatgrade           # 좌석 등급
-                    │   ├── user                # 유저
-                    │   ├── venue               # 장소
-                    │   └── work                # 작품
-                    ├── redis
-                    └── security
+        └── example
+            └── ticketingproject
+                ├── auth
+                │   ├── controller
+                │   ├── dto
+                │   ├── exception
+                │   └── service
+                ├── chat                    # 실시간 채팅 기능
+                │   ├── config              # 웹소켓 설정
+                │   ├── domain              # 채팅 비즈니스 로직 (Controller, Service, Entity 등)
+                │   ├── listner             # 웹소켓 연결/해제 세션 이벤트 감지
+                │   ├── pubsub              # Redis 기반 메시지 발행 및 구독 로직
+                │   └── security            # STOMP 통신 JWT 인증 및 권한 인터셉터
+                ├── common
+                │   ├── config
+                │   ├── dto
+                │   ├── entity
+                │   ├── enums
+                │   └── exception
+                ├── domain
+                │   ├── cashcharge          # 캐시 충전
+                │   ├── castmember          # 캐스팅 멤버
+                │   ├── like                # 찜
+                │   ├── payment             # 결제
+                │   ├── performance         # 공연
+                │   ├── performancesession  # 공연 회차
+                │   ├── reservation         # 예약
+                │   ├── review              # 리뷰
+                │   ├── seat                # 좌석
+                │   ├── seatgrade           # 좌석 등급
+                │   ├── user                # 유저
+                │   ├── venue               # 장소
+                │   └── work                # 작품
+                └── security
+                    ├── exception
+                    └── jwt
 ```
 
 ---
@@ -113,141 +111,151 @@ PENDING → ACTIVE → DELETED
 
 ---
 
-## 📡 API 명세
+## # 📡 API 명세
 
-### 🔑 인증 `/auth`
-
+### 🔑 인증 `Auth`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/auth/signup` | 회원가입 | - |
+| :--- | :--- | :--- | :---: |
+| POST   | `/auth/admin-register` | (관리자) 회원가입 | - |
+| POST | `/auth/register` | 회원가입 | - |
 | POST | `/auth/login` | 로그인 | - |
 | POST | `/auth/logout` | 로그아웃 | USER |
-
-### 👥 유저 `/users`
-
-| Method | URI                     | 설명             | 권한 |
-|--------|-------------------------|----------------|------|
-| GET | `/admin/users`          | (관리자) 유저 목록 조회 | ADMIN |
-| GET | `/users/me`             | 내 정보 조회        | USER, ADMIN |
-| PUT | `/users/me`             | 내 정보 수정        | USER |
-| PUT | `/admin/users/{userId}` | (관리자) 유저 정보 수정 | ADMIN |
-| DELETE | `/users/delete`         | 유저 탈퇴          | USER |
-| DELETE | `/admin/users/{userId}` | (관리자) 유저 탈퇴 처리 | ADMIN |
-
-### 🎭 작품 `/works`
-
-| Method | URI            | 설명       | 권한 |
-|--------|----------------|----------|------|
-| POST | `/admin/works` | 작품 생성    | ADMIN |
-| GET | `/works/{workId}` | 작품 단건 조회 | - |
-| GET | `/works`       | 작품 목록 조회 | - |
-| PUT | `/admin/works/{workId}` | 작품 수정    | ADMIN |
-
-### 🎬 공연 `/performances`
-
+### 👥 유저 `Users`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/performances` | 공연 생성 | ADMIN |
+|:-------| :--- | :--- | :---: |
+| GET    | `/admin/users` | (관리자)유저 목록 조회 | ADMIN |
+| GET    | `/users/me` | 내 정보 조회 | USER, ADMIN |
+| PUT    | `/users/me` | 내 정보 수정 | USER |
+| DELETE | `/users/delete` | 내 정보 삭제(탈퇴) | USER |
+| PUT    | `/admin/users/{userId}` | (관리자)유저 정보 수정 (삭제 예정) | ADMIN |
+| DELETE | `/admin/users/{userId}` | (관리자)유저 정보 삭제(탈퇴) (삭제 예정) | ADMIN |
+| POST   | `/super/admins/{adminId}` | 관리자 활성화(슈퍼 관리자) | SUPER |
+| PUT    | `/super/admin/users/{userId}` | 유저 정보 수정(슈퍼 관리자) | SUPER |
+| DELETE | `/super/admin/users/{userId}` | 유저 삭제(슈퍼 관리자) | SUPER |
+
+### 🎭 작품 `Works`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/works` | 작품 생성 | ADMIN |
+| PUT | `/admin/works/{workId}` | 작품 수정 | ADMIN |
+| GET | `/works/{workId}` | 작품 단건 조회 | - |
+| GET | `/works` | 작품 목록 조회 | - |
+
+### 🎬 공연 `Performance`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances` | 공연 생성 | ADMIN |
 | GET | `/performances` | 공연 목록 조회 | - |
 | GET | `/performances/{performanceId}` | 공연 단건 조회 | - |
-| PUT | `/performances/{performanceId}` | 공연 정보 수정 | ADMIN |
-| PATCH | `/performances/{performanceId}/status` | 공연 상태 수정 (STATUS) | ADMIN |
+| PATCH | `/admin/performances/{performanceId}` | 공연 정보 수정 | ADMIN |
+| DELETE | `/admin/performances/{performanceId}` | 공연 폐쇄 | ADMIN |
 
-### 🗓 공연 회차 `/performances/{performanceId}/sessions`
-
+### 🗓 공연 회차 `Performance Session`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/performances/{performanceId}/sessions` | 공연 회차 생성 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances/{performanceId}/sessions` | 공연 회차 생성 | ADMIN |
 | GET | `/performances/{performanceId}/sessions` | 공연 회차 목록 조회 | - |
 | GET | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 단건 조회 | - |
-| PUT | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 정보 수정 | ADMIN |
-| DELETE | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 삭제 | ADMIN |
+| PATCH | `/admin/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 정보 수정 | ADMIN |
+| DELETE | `/admin/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 삭제 | ADMIN |
 
-### 📍 장소 `/venues`
+### 🎟 예약 `Reservations`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/reservations` | 예약 생성 | USER |
+| GET | `/admin/reservations` | (관리자)전체 예약 목록 조회 | ADMIN |
+| GET | `/admin/reservations/{userId}` | (관리자)예약 목록 조회(유저별) | ADMIN |
+| GET | `/admin/reservations/{userId}/{reservationId}` | (관리자)예약 단건 조회 | ADMIN |
+| GET | `/reservations/{reservationId}` | (고객) 예약 단건 조회 | USER |
+| DELETE | `/reservations/{reservationId}` | 예약 상태 수정(취소) | USER |
+| DELETE | `/admin/reservations/{reservationId}/{userId}` | (관리자)예약 상태 수정(취소) | ADMIN |
 
-| Method | URI                       | 설명 | 권한 |
-|--------|---------------------------|------|------|
-| POST | `/venues`                 | 장소 등록 | ADMIN |
-| GET | `/venues`                 | 장소 목록 조회 | - |
-| GET | `/venues/{venueId}`       | 장소 상세 조회 | - |
-| PUT | `/admin/venues/{venueId}` | 장소 수정 | ADMIN |
+### 💳 결제 `Payments`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/payments` | 결제 내역 생성 | USER |
+| GET | `/payments/{paymentId}` | 결제 내역 단건 조회 | USER |
+| GET | `/admin/payments/{paymentId}/{userId}` | (관리자)결제 내역 단건 조회 | ADMIN |
+| GET | `/payments` | 결제 내역 목록 조회 | USER |
+| GET | `/admin/payments` | (관리자)결제 내역 목록 조회 | ADMIN |
+
+### 💰 캐시 충전 `Charges`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/charges/{userId}` | 캐시 충전 내역 생성 | ADMIN |
+| GET | `/charges` | 캐시 충전 내역 조회 | USER |
+| GET | `/admin/charges` | 캐시 충전 내역 조회 (관리자) | ADMIN |
+| GET | `/admin/charges/{userId}` | 캐시 특정 유저 충전 내역 조회 (관리자) | ADMIN |
+
+### 📍 장소 `Venues`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/venues` | 장소 등록 (관리자) | ADMIN |
+| GET | `/venues` | 장소 목록 조회 | - |
+| GET | `/venues/{venueId}` | 장소 단건 조회 | - |
+| PATCH | `/admin/venues/{venueId}` | 장소 수정 | ADMIN |
 | DELETE | `/admin/venues/{venueId}` | 장소 삭제 | ADMIN |
 
-### 🎤 멤버(캐스팅) `/cast-members`
-
+### 🎤 멤버 `Cast Members`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/cast-members` | 멤버 등록 | ADMIN |
-| GET | `/cast-members` | 멤버 목록 조회 | - |
-| GET | `/cast-members/{castMemberId}` | 멤버 상세 조회 | - |
-| PUT | `/cast-members/{castMemberId}` | 멤버 수정 | ADMIN |
-| DELETE | `/cast-members/{castMemberId}` | 멤버 삭제 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances/{perfId}/sessions/{sessId}/casts` | 멤버 등록 | ADMIN |
+| GET | `/performances/{perfId}/sessions/{sessId}/casts` | 멤버 목록 조회 | - |
+| PATCH | `/admin/performances/{perfId}/sessions/{sessId}/casts/{castId}` | 멤버 수정 | ADMIN |
+| DELETE | `/admin/performances/{perfId}/sessions/{sessId}/casts` | 멤버 삭제 | ADMIN |
 
-### 💺 좌석 `/seats`
+### 💺 좌석 `Seats`
+| Method | URI                                         | 설명 | 권한 |
+| :--- |:--------------------------------------------| :--- | :---: |
+| POST | `/admin/venues/{venueId}/seats`             | 좌석 생성 | ADMIN |
+| GET | `/venues/{venueId}/seats`                   | 좌석 목록 조회 | - |
+| GET | `/venues/{venueId}/seats/{seatId}`          | 좌석 단건 조회 | - |
+| POST | `/admin/venues/{venueId}/seats/optimistic`  | 좌석 생성(낙관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/pessimistic` | 좌석 생성(비관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redisson Redisson`                           | 좌석 생성(Redisson 분산 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redis Lettuce`                            | 좌석 생성(Lettuce 분산 락) | ADMIN |
 
+### 🏷 좌석 등급 `Seat Grades`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/seats` | 좌석 생성 | ADMIN |
-| GET | `/seats` | 좌석 목록 조회 | - |
-| GET | `/seats/{seatId}` | 좌석 단건 조회 | - |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/sessions/{sessionId}/seat-grades` | 좌석 등급 생성 | ADMIN |
+| GET | `/sessions/{sessionId}/seat-grades` | 좌석 등급 목록 조회 | - |
+| GET | `/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 단건 조회 | - |
+| PUT | `/admin/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 수정 | ADMIN |
+| DELETE | `/admin/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 삭제 | ADMIN |
 
-### 🏷 좌석 등급 `/seat-grades`
-
+### ⭐ 리뷰 `Reviews`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/seat-grades` | 좌석 등급 생성 | ADMIN |
-| GET | `/seat-grades` | 좌석 등급 목록 조회 | - |
-| GET | `/seat-grades/{seatGradeId}` | 좌석 등급 단건 조회 | - |
-| PUT | `/seat-grades/{seatGradeId}` | 좌석 등급 수정 | ADMIN |
-| DELETE | `/seat-grades/{seatGradeId}` | 좌석 등급 삭제 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/works/{workId}/reviews` | 리뷰 생성 | USER |
+| PUT | `/works/{workId}/reviews/{reviewId}` | 리뷰 수정(본인것만) | USER |
+| GET | `/works/{workId}/reviews` | 리뷰 목록 조회 | - |
+| DELETE | `/works/{workId}/reviews/{reviewId}` | 내 리뷰 삭제 | USER |
+| DELETE | `/admin/works/{workId}/reviews/{reviewId}` | (관리자) 리뷰 삭제 | ADMIN |
 
-### 🎟 예약 `/reservations`
-
-| Method | URI                                            | 설명 | 권한 |
-|--------|------------------------------------------------|------|------|
-| POST   | `/reservations`                                | 예약 생성 | USER |
-| GET    | `/reservations`                                | (관리자) 전체 예약 목록 조회 | ADMIN |
-| GET    | `/reservations?userId={userId}`                | (관리자) 유저별 예약 목록 조회 | ADMIN |
-| GET    | `/admin/reservations/{userId}{reservationId}`  | (관리자) 예약 단건 조회 | ADMIN |
-| GET    | `/reservations/{reservationId}`                | 예약 단건 조회 | USER |
-| DELETE | `/reservations/{reservationId}`                | 예약 취소 | USER |
-| DELETE | `/admin/reservations/{reservationId}/{userId}` | (관리자) 예약 취소 | ADMIN |
-
-### 💳 결제 `/payments`
-
-| Method | URI                                    | 설명                | 권한 |
-|--------|----------------------------------------|-------------------|-----|
-| POST | `/payments`                            | 결제 내역 생성 (잔액 차감)  | USER |
-| GET | `/payments/{paymentId}`                | 결제 내역 단건 조회       | USER |
-| GET | `/admin/payments/{paymentId}/{userId}` | (관리자) 결제 내역 단건 조회 | ADMIN |
-| GET | `/payments`                            | 결제 내역 목록 조회       | USER|
-| GET | `/admin/payments`                      | (관리자) 결제 내역 목록 조회 | ADMIN |
-
-### 💰 캐시 충전 `/cash-charges`
-
+### ❤️ 찜 `Likes`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/cash-charges` | 캐시 충전 내역 생성 | ADMIN |
-| GET | `/cash-charges/{chargeId}` | 캐시 충전 내역 단건 조회 | ADMIN |
-| GET | `/cash-charges/me` | (고객) 나의 캐시 충전 내역 조회 | USER |
+| :--- | :--- | :--- | :---: |
+| POST | `/works/{workId}/likes` | 찜 생성 | USER |
+| DELETE | `/works/{workId}/likes/{likeId}` | 찜 삭제 | USER |
 
-### ⭐ 리뷰 `/reviews`
+### 💬 실시간 채팅 (1:1 고객 문의) `/chat`
 
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/reviews` | 리뷰 생성 | USER |
-| GET | `/reviews/{reviewId}` | 리뷰 조회 | - |
-| GET | `/reviews` | 리뷰 목록 조회 | - |
-| PUT | `/reviews/{reviewId}` | 리뷰 수정 (본인 것만) | USER |
-| DELETE | `/reviews/{reviewId}` | 내 리뷰 삭제 | USER |
-| DELETE | `/reviews/{reviewId}` | (관리자) 리뷰 삭제 | ADMIN |
+| Method | URI | 설명                      | 권한 |
+|--------|-----|-------------------------|------|
+| POST | `/chat/rooms` | 문의 채팅방 생성               | USER |
+| GET | `/chat/rooms` | 내 채팅방 목록 조회             | USER |
+| GET | `/admin/chat/rooms` | (관리자) 전체/상태별 채팅방 목록 조회  | ADMIN |
+| PATCH | `/chat/rooms/{roomId}/status` | 채팅방 상태 변경 (대기, 처리중, 완료) | ADMIN, USER |
+| GET | `/chat/rooms/{roomId}/messages` | 채팅방 이전 메시지 내역 조회 (페이징) | ADMIN, USER |
 
-### 🩷 찜 `/wishlists`
-
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/wishlists` | 찜 생성 | USER |
-| DELETE | `/wishlists/{wishlistId}` | 찜 삭제 | USER |
+**⚡ WebSocket & STOMP 통신 명세**
+* **Endpoint (연결):** `ws://{host}/ws-stomp`
+    * 연결 시 `Authorization` 헤더에 Bearer 토큰(JWT)이 반드시 필요합니다.
+* **Subscribe (구독):** `/sub/chat/room/{roomId}`
+    * 해당 채팅방의 메시지를 수신합니다.
+* **Publish (발행):** `/pub/chat/send`
+    * `ChatMessageRequest` DTO 형식으로 JSON 데이터를 전송합니다.
 
 ---
 
@@ -792,6 +800,28 @@ maxmemory-policy allkeys-lru
 → 1분 이내의 오차는 허용 가능
 → 매 수정마다 Evict하면 캐시 효과가 없어짐
 ```
+## 7️⃣ 실시간 채팅 및 다중 서버 환경(Scale-out) 대응
+
+고객과 관리자 간의 1:1 문의 채널을 위해 STOMP 기반의 실시간 웹소켓 채팅을 구현했습니다. 다중 서버(Scale-out) 환경에서의 세션 불일치 문제를 해결하고, 소켓 통신의 보안을 강화하는 데 집중했습니다.
+
+### 1. STOMP 기반 양방향 통신
+일반적인 WebSocket 대신 **STOMP(Simple Text Oriented Messaging Protocol)**를 채택하여 메시지 브로커를 활용한 Pub/Sub(발행/구독) 아키텍처를 구성했습니다.
+이를 통해 메시지의 라우팅(`@MessageMapping`)과 페이로드(`@Payload`) 객체 매핑을 편리하게 처리하고, 채팅방(Room) 단위의 메시지 브로드캐스팅을 효율적으로 구현했습니다.
+
+### 2. 다중 서버 환경의 한계와 Redis Pub/Sub 도입
+
+**[문제 상황: 세션 동기화 불일치]**
+웹소켓은 클라이언트와 서버 간의 연결이 유지되는 **상태 유지(Stateful)** 프로토콜입니다.
+로드 밸런서를 통해 서버가 여러 대로 확장(Scale-out)될 경우, 사용자가 접속한 서버와 관리자가 접속한 서버가 다르면 메시지를 주고받을 수 없는 문제가 발생합니다.
+
+[해결 전략: Redis Pub/Sub을 활용한 메시지 브로커]
+이 문제를 해결하기 위해 애플리케이션 서버 외부의 Redis를 글로벌 메시지 브로커로 활용했습니다.
+
+| 단계 | 동작|  설명 |
+| :--- | :--- |---|
+| 1. 발행 (Publish)| Server A → Redis | 고객이 Server A로 메시지를 보내면, Server A는 DB에 메시지를 저장하고 Redis 특정 채널(topic)로 메시지를 발행(Publish)합니다.  |
+| 2. 구독 (Subscribe)| Redis → All Servers | Redis의 채널을 리슨(Listen)하고 있는 모든 애플리케이션 서버가 해당 메시지를 수신합니다.  |
+| 3. 전송 (Send)| Server B → 관리자 | 메시지를 수신한 서버들은 자신과 웹소켓이 연결된 클라이언트 중, 해당 채팅방을 구독 중인 사용자(관리자)에게 메시지를 전달합니다.  |
 
 ---
 # ⚡ Database Performance Optimization (Indexing)
