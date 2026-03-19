@@ -22,7 +22,7 @@ public class LockService {
 
         Boolean success = lockRedisRepository.tryLock(key, uuid, LOCK_TTL);
 
-        if (!success) {
+        if (!Boolean.TRUE.equals(success)) {
             throw new LockException(
                     ErrorStatus.LOCK_ACQUISITION_FAILED.getHttpStatus(),
                     ErrorStatus.LOCK_ACQUISITION_FAILED

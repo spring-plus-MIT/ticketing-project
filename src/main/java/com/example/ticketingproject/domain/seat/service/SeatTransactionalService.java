@@ -1,6 +1,7 @@
 package com.example.ticketingproject.domain.seat.service;
 
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
+import com.example.ticketingproject.domain.seat.dto.SeatResponse;
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.enums.SeatStatus;
 import com.example.ticketingproject.domain.seat.exception.SeatException;
@@ -63,5 +64,35 @@ public class SeatTransactionalService {
     public void venueTouch(Venue venue) {
         venue.setModifiedAt(LocalDateTime.now());
         venueRepository.saveAndFlush(venue);
+    }
+
+    public SeatResponse savePessimisticLock(Long venueId, CreateSeatRequest request) {
+        Venue venue = venueRepository.findByIdWithLock(venueId).orElseThrow(
+                () -> new VenueException(VENUE_NOT_FOUND.getHttpStatus(), VENUE_NOT_FOUND)
+        );
+
+        SeatGrade seatGrade = seatGradeRepository.findByGradeName(request.getGradeName()).orElseThrow(
+                () -> new SeatGradeException(SEAT_GRADE_NOT_FOUND.getHttpStatus(), SEAT_GRADE_NOT_FOUND)
+        );
+
+        int currentSeatCount = seatRepository.countByVenueId(venue.getId());
+
+        if (currentSeatCount >= venue.getTotalSeats()) {
+            throw new SeatException(SEAT_CAPACITY_EXCEEDED.getHttpStatus(), SEAT_CAPACITY_EXCEEDED);
+        }
+
+        seatGrade.decreaseRemainingSeats();
+
+        Seat seat = Seat.builder()
+                .venue(venue)
+                .seatGrade(seatGrade)
+                .rowName(request.getRowName())
+                .seatNumber(request.getSeatNumber())
+                .seatStatus(SeatStatus.AVAILABLE)
+                .build();
+
+        Seat savedSeat = seatRepository.save(seat);
+
+        return SeatResponse.from(savedSeat);
     }
 }

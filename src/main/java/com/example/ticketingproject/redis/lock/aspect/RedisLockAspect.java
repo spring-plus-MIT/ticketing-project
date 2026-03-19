@@ -3,6 +3,7 @@ package com.example.ticketingproject.redis.lock.aspect;
 import com.example.ticketingproject.redis.lock.annotation.RedisLock;
 import com.example.ticketingproject.redis.lock.enums.LockStrategy;
 import com.example.ticketingproject.redis.lock.service.LockService;
+import com.example.ticketingproject.redis.lock.service.RedissonLockService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisLockAspect {
     private final LockService lockService;
+    private final RedissonLockService redissonLockService;
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -32,6 +34,10 @@ public class RedisLockAspect {
     public Object applyLock(ProceedingJoinPoint joinPoint, RedisLock redisLock) throws Throwable {
         String key = generateKey(joinPoint, redisLock.key());
 
+        if (redisLock.strategy() == LockStrategy.REDISSON) {
+            return redissonLockService.redissonLock(key, joinPoint);
+        }
+
         String uuid;
 
         if (redisLock.strategy() == LockStrategy.RETRY) {
@@ -43,7 +49,11 @@ public class RedisLockAspect {
         try {
             return joinPoint.proceed();
         } finally {
-            lockService.unlock(key, uuid);
+            try {
+                lockService.unlock(key, uuid);
+            } catch (Exception ignored) {
+
+            }
         }
     }
 

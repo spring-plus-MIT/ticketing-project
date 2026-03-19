@@ -36,9 +36,6 @@ dependencies {
     // websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-    // redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
     // H2
     testImplementation 'com.h2database:h2'
 
@@ -76,6 +73,9 @@ dependencies {
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // Redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
 
     // Cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'

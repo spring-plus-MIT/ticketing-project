@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -28,12 +27,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class SeatRaceConditionNoLockTest {
+public class SeatRaceConditionLettuceRedisLockTest {
+
+    @Autowired
+    private AdminSeatService adminSeatService;
 
     @Autowired
     private VenueRepository venueRepository;
@@ -52,9 +57,6 @@ public class SeatRaceConditionNoLockTest {
 
     @Autowired
     private PerformanceRepository performanceRepository;
-
-    @Autowired
-    private SeatTransactionalService seatTransactionalService;
 
     private Venue venue;
 
@@ -102,7 +104,7 @@ public class SeatRaceConditionNoLockTest {
 
         seatGrade = SeatGrade.builder()
                 .performanceSession(savedSession)
-                .gradeName(GradeName.A)
+                .gradeName(GradeName.VIP)
                 .price(BigDecimal.valueOf(100))
                 .totalSeats(1)
                 .remainingSeats(1)
@@ -112,7 +114,7 @@ public class SeatRaceConditionNoLockTest {
     }
 
     @Test
-    void Lock없이_제한_좌석_1개_동시_10개_생성_시_제한_초과_생성_테스트() throws InterruptedException {
+    void RedisLock_제한_좌석_1개_동시_10개_생성_시_동시성_제한_생성_테스트() throws InterruptedException {
         // given
         int threadCount = 10;
 
@@ -135,7 +137,7 @@ public class SeatRaceConditionNoLockTest {
                     ReflectionTestUtils.setField(request, "rowName", "A");
                     ReflectionTestUtils.setField(request, "seatNumber", seatNumber);
 
-                    seatTransactionalService.saveSeat(venue.getId(), request);
+                    adminSeatService.saveRedisLock(venue.getId(), request);
 
                 } catch (Exception ignored) {
 
@@ -155,6 +157,6 @@ public class SeatRaceConditionNoLockTest {
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
 
-        Assertions.assertTrue(seatCount > 1);
+        Assertions.assertEquals(1, seatCount);
     }
 }

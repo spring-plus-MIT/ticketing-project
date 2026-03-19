@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,10 +35,10 @@ import java.util.concurrent.Executors;
 @SpringBootTest
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class SeatRaceConditionRedisLockTest {
+public class SeatRaceConditionPessimisticLockTest {
 
     @Autowired
-    private AdminSeatService adminSeatService;
+    private SeatTransactionalService seatTransactionalService;
 
     @Autowired
     private VenueRepository venueRepository;
@@ -105,7 +104,7 @@ public class SeatRaceConditionRedisLockTest {
 
         seatGrade = SeatGrade.builder()
                 .performanceSession(savedSession)
-                .gradeName(GradeName.VIP)
+                .gradeName(GradeName.S)
                 .price(BigDecimal.valueOf(100))
                 .totalSeats(1)
                 .remainingSeats(1)
@@ -115,7 +114,7 @@ public class SeatRaceConditionRedisLockTest {
     }
 
     @Test
-    void RedisLock_제한_좌석_1개_동시_10개_생성_시_동시성_제한_생성_테스트() throws InterruptedException {
+    void 비관적_Lock_제한_좌석_1개_동시_10개_생성_시_동시성_제한_테스트() throws InterruptedException {
         // given
         int threadCount = 10;
 
@@ -138,7 +137,7 @@ public class SeatRaceConditionRedisLockTest {
                     ReflectionTestUtils.setField(request, "rowName", "A");
                     ReflectionTestUtils.setField(request, "seatNumber", seatNumber);
 
-                    adminSeatService.saveRedisLock(venue.getId(), request);
+                    seatTransactionalService.savePessimisticLock(venue.getId(), request);
 
                 } catch (Exception ignored) {
 
@@ -157,8 +156,6 @@ public class SeatRaceConditionRedisLockTest {
 
         System.out.println("제한된 좌석 수 = " + venue.getTotalSeats());
         System.out.println("생성된 좌석 수 = " + seatCount);
-        System.out.println("장소 아이디 : " + venue.getId());
-        System.out.println("좌석등급 아이디 : " + seatGrade.getId());
 
         Assertions.assertEquals(1, seatCount);
     }
