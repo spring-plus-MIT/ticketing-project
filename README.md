@@ -118,14 +118,13 @@ PENDING → ACTIVE → DELETED
 ### 🔑 인증 `Auth`
 | Method | URI | 설명 | 권한 |
 | :--- | :--- | :--- | :---: |
+| POST   | `/auth/admin-register` | (관리자) 회원가입 | - |
 | POST | `/auth/register` | 회원가입 | - |
 | POST | `/auth/login` | 로그인 | - |
 | POST | `/auth/logout` | 로그아웃 | USER |
-
 ### 👥 유저 `Users`
 | Method | URI | 설명 | 권한 |
 |:-------| :--- | :--- | :---: |
-| POST   | `/auth/admin-register` | (관리자) 회원가입 | - |
 | GET    | `/admin/users` | (관리자)유저 목록 조회 | ADMIN |
 | GET    | `/users/me` | 내 정보 조회 | USER, ADMIN |
 | PUT    | `/users/me` | 내 정보 수정 | USER |
@@ -208,15 +207,15 @@ PENDING → ACTIVE → DELETED
 | DELETE | `/admin/performances/{perfId}/sessions/{sessId}/casts` | 멤버 삭제 | ADMIN |
 
 ### 💺 좌석 `Seats`
-| Method | URI | 설명 | 권한 |
-| :--- | :--- | :--- | :---: |
-| POST | `/admin/venues/{venueId}/seats` | 좌석 생성 | ADMIN |
-| GET | `/venues/{venueId}/seats` | 좌석 목록 조회 | - |
-| GET | `/venues/{venueId}/seats/{seatId}` | 좌석 단건 조회 | - |
-| POST | `/seats/optimistic` | 좌석 생성(낙관적 락) | ADMIN |
-| POST | `/seats/pessimistic` | 좌석 생성(비관적 락) | ADMIN |
-| POST | `/seats/redisson` | 좌석 생성(Redisson 분산 락) | ADMIN |
-| POST | `/seats/lettuce` | 좌석 생성(Lettuce 분산 락) | ADMIN |
+| Method | URI                                         | 설명 | 권한 |
+| :--- |:--------------------------------------------| :--- | :---: |
+| POST | `/admin/venues/{venueId}/seats`             | 좌석 생성 | ADMIN |
+| GET | `/venues/{venueId}/seats`                   | 좌석 목록 조회 | - |
+| GET | `/venues/{venueId}/seats/{seatId}`          | 좌석 단건 조회 | - |
+| POST | `/admin/venues/{venueId}/seats/optimistic`  | 좌석 생성(낙관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/pessimistic` | 좌석 생성(비관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redisson Redisson`                           | 좌석 생성(Redisson 분산 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redis Lettuce`                            | 좌석 생성(Lettuce 분산 락) | ADMIN |
 
 ### 🏷 좌석 등급 `Seat Grades`
 | Method | URI | 설명 | 권한 |
