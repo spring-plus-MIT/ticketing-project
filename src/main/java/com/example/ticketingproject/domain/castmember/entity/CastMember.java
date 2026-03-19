@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Entity
@@ -18,8 +19,10 @@ public class CastMember extends ModifiableEntity {
     @JoinColumn(name = "performance_session_id", nullable = false)
     private PerformanceSession performanceSession;
 
+    @Length(min = 1, max = 50)
     private String name;
 
+    @Length(min = 1, max = 50)
     private String roleName;
 
     @Builder
