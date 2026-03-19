@@ -8,11 +8,15 @@ import com.example.ticketingproject.domain.reservation.exception.ReservationExce
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 @Entity
@@ -37,13 +41,18 @@ public class Reservation extends ModifiableEntity {
     private Seat seat;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private ReservationStatus status;
 
-    @NotNull
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
     private BigDecimal totalPrice;
 
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private LocalDateTime reservedAt;
 
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private LocalDateTime expiresAt;
 
     @Builder
