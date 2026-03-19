@@ -1,7 +1,10 @@
 package com.example.ticketingproject.domain.seatgrade.dto;
 
 import com.example.ticketingproject.common.enums.GradeName;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -19,9 +22,9 @@ public class CreateSeatGradeRequest {
     @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
     private BigDecimal price;
 
-    @Min(value = 0, message = MSG_VALIDATION_LENGTH_ERROR)
+    @Min(value = 1, message = "전체 좌석 수는 1개 이상이어야 합니다.")
     private int totalSeats;
 
-    @Min(value = 0, message = MSG_VALIDATION_LENGTH_ERROR)
+    @Min(value = 0, message = "남은 좌석 수는 0개 이상이어야 합니다.")
     private int remainingSeats;
 }

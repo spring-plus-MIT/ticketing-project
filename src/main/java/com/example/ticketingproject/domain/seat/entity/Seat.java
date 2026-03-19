@@ -35,12 +35,10 @@ public class Seat extends CreatableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_grade_id", nullable = false)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private SeatGrade seatGrade;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @Column(nullable = false)
-    @Length(min = 1, max = 10, message = "좌석 열 이름은 1자에서 10자 사이여야 합니다.")
+    @Length(min = 1, max = 10)
     private String rowName;
 
     @Min(value = 1, message = MSG_VALIDATION_LENGTH_ERROR)
@@ -48,7 +46,6 @@ public class Seat extends CreatableEntity {
     private int seatNumber;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private SeatStatus seatStatus;
 
     @Builder
