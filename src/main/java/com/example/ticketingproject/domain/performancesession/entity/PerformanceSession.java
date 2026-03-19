@@ -4,6 +4,7 @@ import com.example.ticketingproject.common.entity.DeletableEntity;
 import com.example.ticketingproject.domain.performance.entity.Performance;
 import com.example.ticketingproject.domain.venue.entity.Venue;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,29 +22,35 @@ public class PerformanceSession extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id", nullable = false)
     private Performance performance;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
+    @NotNull
+    @Column(nullable = false)
     private LocalDateTime startTime;
 
+    @NotNull
+    @Column(nullable = false)
     private LocalDateTime endTime;
 
     @Builder
-    public PerformanceSession(Performance performance, Venue venue, LocalDateTime startTime, LocalDateTime endTime ) {
+    public PerformanceSession(Performance performance, Venue venue, LocalDateTime startTime, LocalDateTime endTime) {
         this.performance = performance;
         this.venue = venue;
-        this.startTime  = startTime;
-        this.endTime  = endTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public void update(Venue venue, LocalDateTime startTime, LocalDateTime endTime) {
         this.venue = venue;
-        this.startTime  = startTime;
-        this.endTime  = endTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 }
