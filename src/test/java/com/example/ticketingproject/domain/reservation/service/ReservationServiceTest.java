@@ -183,6 +183,4 @@ class ReservationServiceTest {
         verify(reservation).cancel();
         verify(seat).release();
     }
-
-
 }
