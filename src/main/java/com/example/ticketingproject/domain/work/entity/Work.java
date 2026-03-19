@@ -3,6 +3,7 @@ package com.example.ticketingproject.domain.work.entity;
 import com.example.ticketingproject.common.entity.ModifiableEntity;
 import com.example.ticketingproject.domain.work.enums.Category;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -21,16 +22,17 @@ public class Work extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Length(max = 100)
+    @Length(min = 1, max = 100)
     private String title;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private Category category;
 
+    @Length(min = 1, max = 255)
     private String description;
 
+    @Min(value = 0)
     private Long likeCount;
 
     @Builder
