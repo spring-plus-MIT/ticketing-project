@@ -41,7 +41,7 @@ public class SuperAdminInitializer implements ApplicationRunner {
                 .name("SUPER_ADMIN")
                 .email(email)
                 .password(passwordEncoder.encode(password))
-                .phone("01000000000")
+                .phone("010-0000-0000")
                 .balance(BigDecimal.ZERO)
                 .userRole(UserRole.SUPER_ADMIN)
                 .userStatus(UserStatus.ACTIVE) // 승인 불필요
