@@ -65,7 +65,7 @@ public class Constants {
     public static final String MSG_VALIDATION_LENGTH_ERROR = "입력 길이가 잘못되었습니다.";
     public static final String MSG_VALIDATION_PATTERN_ERROR = "입력 형식이 잘못되었습니다.";
     public static final String MSG_VALIDATION_DIGITS_ERROR = "금액은 소수점 2자리 부터 천만원 단위 까지만 입력 가능합니다";
-    public static final String MSG_VALIDATION_DECIMAL_MIN_ERROR = "금액은 정수만 입력 가능합니다.";
+    public static final String MSG_VALIDATION_DECIMAL_MIN_ERROR = "금액은 음수일 수 없습니다.";
 
     // Lock
     public static final String MSG_LOCK_ACQUISITION_FAILED = "다른 사용자가 이미 요청 중입니다.";
