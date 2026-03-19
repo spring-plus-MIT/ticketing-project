@@ -18,8 +18,8 @@ public class CreateSeatGradeRequest {
     private GradeName gradeName;
 
     @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
     private BigDecimal price;
 
     @Min(value = 1, message = "전체 좌석 수는 1개 이상이어야 합니다.")

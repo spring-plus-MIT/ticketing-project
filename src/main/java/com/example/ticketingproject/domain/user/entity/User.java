@@ -18,7 +18,6 @@ import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
 import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
@@ -53,8 +52,8 @@ public class User extends DeletableEntity {
 
     @Column(nullable = false, precision = 10, scale = 2)
     @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
+    @DecimalMin(value = "0.0")
+    @Digits(integer = 8, fraction = 2)
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)

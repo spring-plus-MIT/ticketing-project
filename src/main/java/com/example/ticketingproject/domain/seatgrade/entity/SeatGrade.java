@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,18 +32,15 @@ public class SeatGrade extends DeletableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_session_id", nullable = false)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private PerformanceSession performanceSession;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private GradeName gradeName;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_ERROR)
-    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_ERROR)
+    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @Digits(integer = 8, fraction = 2, message = MSG_VALIDATION_DIGITS_ERROR)
     private BigDecimal price;
 
     @Min(value = 0, message = MSG_VALIDATION_LENGTH_ERROR)

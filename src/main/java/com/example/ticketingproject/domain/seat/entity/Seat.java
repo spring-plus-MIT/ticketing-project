@@ -37,7 +37,6 @@ public class Seat extends CreatableEntity {
     @JoinColumn(name = "seat_grade_id", nullable = false)
     private SeatGrade seatGrade;
 
-    @Column(nullable = false)
     @Length(min = 1, max = 10)
     private String rowName;
 
@@ -54,7 +53,7 @@ public class Seat extends CreatableEntity {
         this.seatGrade = seatGrade;
         this.rowName = rowName;
         this.seatNumber = seatNumber;
-        this.seatStatus = (seatStatus != null) ? seatStatus : SeatStatus.AVAILABLE;
+        this.seatStatus = seatStatus;
     }
 
     public void reserve() {
