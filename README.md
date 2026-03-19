@@ -113,142 +113,140 @@ PENDING → ACTIVE → DELETED
 
 ---
 
-## 📡 API 명세
+## # 📡 API 명세
 
-### 🔑 인증 `/auth`
-
+### 🔑 인증 `Auth`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/auth/signup` | 회원가입 | - |
+| :--- | :--- | :--- | :---: |
+| POST   | `/auth/admin-register` | (관리자) 회원가입 | - |
+| POST | `/auth/register` | 회원가입 | - |
 | POST | `/auth/login` | 로그인 | - |
 | POST | `/auth/logout` | 로그아웃 | USER |
-
-### 👥 유저 `/users`
-
-| Method | URI                     | 설명             | 권한 |
-|--------|-------------------------|----------------|------|
-| GET | `/admin/users`          | (관리자) 유저 목록 조회 | ADMIN |
-| GET | `/users/me`             | 내 정보 조회        | USER, ADMIN |
-| PUT | `/users/me`             | 내 정보 수정        | USER |
-| PUT | `/admin/users/{userId}` | (관리자) 유저 정보 수정 | ADMIN |
-| DELETE | `/users/delete`         | 유저 탈퇴          | USER |
-| DELETE | `/admin/users/{userId}` | (관리자) 유저 탈퇴 처리 | ADMIN |
-
-### 🎭 작품 `/works`
-
-| Method | URI            | 설명       | 권한 |
-|--------|----------------|----------|------|
-| POST | `/admin/works` | 작품 생성    | ADMIN |
-| GET | `/works/{workId}` | 작품 단건 조회 | - |
-| GET | `/works`       | 작품 목록 조회 | - |
-| PUT | `/admin/works/{workId}` | 작품 수정    | ADMIN |
-
-### 🎬 공연 `/performances`
-
+### 👥 유저 `Users`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/performances` | 공연 생성 | ADMIN |
+|:-------| :--- | :--- | :---: |
+| GET    | `/admin/users` | (관리자)유저 목록 조회 | ADMIN |
+| GET    | `/users/me` | 내 정보 조회 | USER, ADMIN |
+| PUT    | `/users/me` | 내 정보 수정 | USER |
+| DELETE | `/users/delete` | 내 정보 삭제(탈퇴) | USER |
+| PUT    | `/admin/users/{userId}` | (관리자)유저 정보 수정 (삭제 예정) | ADMIN |
+| DELETE | `/admin/users/{userId}` | (관리자)유저 정보 삭제(탈퇴) (삭제 예정) | ADMIN |
+| POST   | `/super/admins/{adminId}` | 관리자 활성화(슈퍼 관리자) | SUPER |
+| PUT    | `/super/admin/users/{userId}` | 유저 정보 수정(슈퍼 관리자) | SUPER |
+| DELETE | `/super/admin/users/{userId}` | 유저 삭제(슈퍼 관리자) | SUPER |
+
+### 🎭 작품 `Works`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/works` | 작품 생성 | ADMIN |
+| PUT | `/admin/works/{workId}` | 작품 수정 | ADMIN |
+| GET | `/works/{workId}` | 작품 단건 조회 | - |
+| GET | `/works` | 작품 목록 조회 | - |
+
+### 🎬 공연 `Performance`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances` | 공연 생성 | ADMIN |
 | GET | `/performances` | 공연 목록 조회 | - |
 | GET | `/performances/{performanceId}` | 공연 단건 조회 | - |
-| PUT | `/performances/{performanceId}` | 공연 정보 수정 | ADMIN |
-| PATCH | `/performances/{performanceId}/status` | 공연 상태 수정 (STATUS) | ADMIN |
+| PATCH | `/admin/performances/{performanceId}` | 공연 정보 수정 | ADMIN |
+| DELETE | `/admin/performances/{performanceId}` | 공연 폐쇄 | ADMIN |
 
-### 🗓 공연 회차 `/performances/{performanceId}/sessions`
-
+### 🗓 공연 회차 `Performance Session`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/performances/{performanceId}/sessions` | 공연 회차 생성 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances/{performanceId}/sessions` | 공연 회차 생성 | ADMIN |
 | GET | `/performances/{performanceId}/sessions` | 공연 회차 목록 조회 | - |
 | GET | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 단건 조회 | - |
-| PUT | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 정보 수정 | ADMIN |
-| DELETE | `/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 삭제 | ADMIN |
+| PATCH | `/admin/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 정보 수정 | ADMIN |
+| DELETE | `/admin/performances/{performanceId}/sessions/{sessionId}` | 공연 회차 삭제 | ADMIN |
 
-### 📍 장소 `/venues`
+### 🎟 예약 `Reservations`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/reservations` | 예약 생성 | USER |
+| GET | `/admin/reservations` | (관리자)전체 예약 목록 조회 | ADMIN |
+| GET | `/admin/reservations/{userId}` | (관리자)예약 목록 조회(유저별) | ADMIN |
+| GET | `/admin/reservations/{userId}/{reservationId}` | (관리자)예약 단건 조회 | ADMIN |
+| GET | `/reservations/{reservationId}` | (고객) 예약 단건 조회 | USER |
+| DELETE | `/reservations/{reservationId}` | 예약 상태 수정(취소) | USER |
+| DELETE | `/admin/reservations/{reservationId}/{userId}` | (관리자)예약 상태 수정(취소) | ADMIN |
 
-| Method | URI                       | 설명 | 권한 |
-|--------|---------------------------|------|------|
-| POST | `/venues`                 | 장소 등록 | ADMIN |
-| GET | `/venues`                 | 장소 목록 조회 | - |
-| GET | `/venues/{venueId}`       | 장소 상세 조회 | - |
-| PUT | `/admin/venues/{venueId}` | 장소 수정 | ADMIN |
+### 💳 결제 `Payments`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/payments` | 결제 내역 생성 | USER |
+| GET | `/payments/{paymentId}` | 결제 내역 단건 조회 | USER |
+| GET | `/admin/payments/{paymentId}/{userId}` | (관리자)결제 내역 단건 조회 | ADMIN |
+| GET | `/payments` | 결제 내역 목록 조회 | USER |
+| GET | `/admin/payments` | (관리자)결제 내역 목록 조회 | ADMIN |
+
+### 💰 캐시 충전 `Charges`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/charges/{userId}` | 캐시 충전 내역 생성 | ADMIN |
+| GET | `/charges` | 캐시 충전 내역 조회 | USER |
+| GET | `/admin/charges` | 캐시 충전 내역 조회 (관리자) | ADMIN |
+| GET | `/admin/charges/{userId}` | 캐시 특정 유저 충전 내역 조회 (관리자) | ADMIN |
+
+### 📍 장소 `Venues`
+| Method | URI | 설명 | 권한 |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/venues` | 장소 등록 (관리자) | ADMIN |
+| GET | `/venues` | 장소 목록 조회 | - |
+| GET | `/venues/{venueId}` | 장소 단건 조회 | - |
+| PATCH | `/admin/venues/{venueId}` | 장소 수정 | ADMIN |
 | DELETE | `/admin/venues/{venueId}` | 장소 삭제 | ADMIN |
 
-### 🎤 멤버(캐스팅) `/cast-members`
-
+### 🎤 멤버 `Cast Members`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/cast-members` | 멤버 등록 | ADMIN |
-| GET | `/cast-members` | 멤버 목록 조회 | - |
-| GET | `/cast-members/{castMemberId}` | 멤버 상세 조회 | - |
-| PUT | `/cast-members/{castMemberId}` | 멤버 수정 | ADMIN |
-| DELETE | `/cast-members/{castMemberId}` | 멤버 삭제 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/performances/{perfId}/sessions/{sessId}/casts` | 멤버 등록 | ADMIN |
+| GET | `/performances/{perfId}/sessions/{sessId}/casts` | 멤버 목록 조회 | - |
+| PATCH | `/admin/performances/{perfId}/sessions/{sessId}/casts/{castId}` | 멤버 수정 | ADMIN |
+| DELETE | `/admin/performances/{perfId}/sessions/{sessId}/casts` | 멤버 삭제 | ADMIN |
 
-### 💺 좌석 `/seats`
+### 💺 좌석 `Seats`
+| Method | URI                                         | 설명 | 권한 |
+| :--- |:--------------------------------------------| :--- | :---: |
+| POST | `/admin/venues/{venueId}/seats`             | 좌석 생성 | ADMIN |
+| GET | `/venues/{venueId}/seats`                   | 좌석 목록 조회 | - |
+| GET | `/venues/{venueId}/seats/{seatId}`          | 좌석 단건 조회 | - |
+| POST | `/admin/venues/{venueId}/seats/optimistic`  | 좌석 생성(낙관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/pessimistic` | 좌석 생성(비관적 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redisson Redisson`                           | 좌석 생성(Redisson 분산 락) | ADMIN |
+| POST | `/admin/venues/{venueId}/seats/redis Lettuce`                            | 좌석 생성(Lettuce 분산 락) | ADMIN |
 
+### 🏷 좌석 등급 `Seat Grades`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/seats` | 좌석 생성 | ADMIN |
-| GET | `/seats` | 좌석 목록 조회 | - |
-| GET | `/seats/{seatId}` | 좌석 단건 조회 | - |
+| :--- | :--- | :--- | :---: |
+| POST | `/admin/sessions/{sessionId}/seat-grades` | 좌석 등급 생성 | ADMIN |
+| GET | `/sessions/{sessionId}/seat-grades` | 좌석 등급 목록 조회 | - |
+| GET | `/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 단건 조회 | - |
+| PUT | `/admin/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 수정 | ADMIN |
+| DELETE | `/admin/sessions/{sessionId}/seat-grades/{seatGradeId}` | 좌석 등급 삭제 | ADMIN |
 
-### 🏷 좌석 등급 `/seat-grades`
-
+### ⭐ 리뷰 `Reviews`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/seat-grades` | 좌석 등급 생성 | ADMIN |
-| GET | `/seat-grades` | 좌석 등급 목록 조회 | - |
-| GET | `/seat-grades/{seatGradeId}` | 좌석 등급 단건 조회 | - |
-| PUT | `/seat-grades/{seatGradeId}` | 좌석 등급 수정 | ADMIN |
-| DELETE | `/seat-grades/{seatGradeId}` | 좌석 등급 삭제 | ADMIN |
+| :--- | :--- | :--- | :---: |
+| POST | `/works/{workId}/reviews` | 리뷰 생성 | USER |
+| PUT | `/works/{workId}/reviews/{reviewId}` | 리뷰 수정(본인것만) | USER |
+| GET | `/works/{workId}/reviews` | 리뷰 목록 조회 | - |
+| DELETE | `/works/{workId}/reviews/{reviewId}` | 내 리뷰 삭제 | USER |
+| DELETE | `/admin/works/{workId}/reviews/{reviewId}` | (관리자) 리뷰 삭제 | ADMIN |
 
-### 🎟 예약 `/reservations`
-
-| Method | URI                                            | 설명 | 권한 |
-|--------|------------------------------------------------|------|------|
-| POST   | `/reservations`                                | 예약 생성 | USER |
-| GET    | `/reservations`                                | (관리자) 전체 예약 목록 조회 | ADMIN |
-| GET    | `/reservations?userId={userId}`                | (관리자) 유저별 예약 목록 조회 | ADMIN |
-| GET    | `/admin/reservations/{userId}{reservationId}`  | (관리자) 예약 단건 조회 | ADMIN |
-| GET    | `/reservations/{reservationId}`                | 예약 단건 조회 | USER |
-| DELETE | `/reservations/{reservationId}`                | 예약 취소 | USER |
-| DELETE | `/admin/reservations/{reservationId}/{userId}` | (관리자) 예약 취소 | ADMIN |
-
-### 💳 결제 `/payments`
-
-| Method | URI                                    | 설명                | 권한 |
-|--------|----------------------------------------|-------------------|-----|
-| POST | `/payments`                            | 결제 내역 생성 (잔액 차감)  | USER |
-| GET | `/payments/{paymentId}`                | 결제 내역 단건 조회       | USER |
-| GET | `/admin/payments/{paymentId}/{userId}` | (관리자) 결제 내역 단건 조회 | ADMIN |
-| GET | `/payments`                            | 결제 내역 목록 조회       | USER|
-| GET | `/admin/payments`                      | (관리자) 결제 내역 목록 조회 | ADMIN |
-
-### 💰 캐시 충전 `/cash-charges`
-
+### ❤️ 찜 `Likes`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/cash-charges` | 캐시 충전 내역 생성 | ADMIN |
-| GET | `/cash-charges/{chargeId}` | 캐시 충전 내역 단건 조회 | ADMIN |
-| GET | `/cash-charges/me` | (고객) 나의 캐시 충전 내역 조회 | USER |
+| :--- | :--- | :--- | :---: |
+| POST | `/works/{workId}/likes` | 찜 생성 | USER |
+| DELETE | `/works/{workId}/likes/{likeId}` | 찜 삭제 | USER |
 
-### ⭐ 리뷰 `/reviews`
-
+### 🔍 검색 `Cache`
 | Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/reviews` | 리뷰 생성 | USER |
-| GET | `/reviews/{reviewId}` | 리뷰 조회 | - |
-| GET | `/reviews` | 리뷰 목록 조회 | - |
-| PUT | `/reviews/{reviewId}` | 리뷰 수정 (본인 것만) | USER |
-| DELETE | `/reviews/{reviewId}` | 내 리뷰 삭제 | USER |
-| DELETE | `/reviews/{reviewId}` | (관리자) 리뷰 삭제 | ADMIN |
-
-### 🩷 찜 `/wishlists`
-
-| Method | URI | 설명 | 권한 |
-|--------|-----|------|------|
-| POST | `/wishlists` | 찜 생성 | USER |
-| DELETE | `/wishlists/{wishlistId}` | 찜 삭제 | USER |
-
+| :--- | :--- | :--- | :---: |
+| GET | `/performances/search/v1` | 검색어 검색 | - |
+| GET | `/performances/search/v2` | 검색어 검색 (캐시 적용) | - |
+| GET | `/search/popular` | 인기 검색어 조회 | - |
 ---
 
 ## 💡 핵심 기능 및 구현 전략
