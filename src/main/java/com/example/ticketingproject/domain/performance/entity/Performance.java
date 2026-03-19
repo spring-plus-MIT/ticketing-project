@@ -14,7 +14,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
+import static com.example.ticketingproject.common.util.Constants.*;
 
 @Getter
 @Table(name = "performances")
@@ -26,24 +26,32 @@ public class Performance extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @Length(max = 20)
+    @NotNull
+    @Length(min = 1, max = 20)
+    @Column(nullable = false, length = 20)
     private String season;
 
     @NotNull
+    @Column(nullable = false)
     private LocalDate startDate;
 
     @NotNull
+    @Column(nullable = false)
     private LocalDate endDate;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PerformanceStatus status;
 
     @Builder
