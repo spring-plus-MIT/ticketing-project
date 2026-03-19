@@ -129,7 +129,7 @@ class ReviewServiceTest {
 
         assertThatThrownBy(() -> reviewService.updateReview(workId, reviewId, new ReviewRequestDto(), loginUserId))
                 .isInstanceOf(ReviewException.class)
-                .hasMessageContaining("리뷰가 존재하지 않습니다.");
+                .hasMessageContaining("리뷰가 존재하지 않습니다");
     }
 
     @Test
