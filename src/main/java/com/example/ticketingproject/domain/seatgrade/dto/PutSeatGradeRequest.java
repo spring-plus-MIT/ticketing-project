@@ -1,14 +1,14 @@
 package com.example.ticketingproject.domain.seatgrade.dto;
 
 import com.example.ticketingproject.common.enums.GradeName;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
-import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_ERROR;
+import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
 @Getter
 public class PutSeatGradeRequest {
 
-    @NotBlank(message = MSG_VALIDATION_ERROR)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     private GradeName gradeName;
 }
