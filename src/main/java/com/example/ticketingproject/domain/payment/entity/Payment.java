@@ -23,29 +23,29 @@ public class Payment extends CreatableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
-    @Digits(integer = 8, fraction = 0, message = MSG_VALIDATION_DIGITS_ERROR)
+    @NotNull
+    @DecimalMin(value = "0.0")
+    @Digits(integer = 8, fraction = 0)
     @Column(nullable = false, precision = 8, scale = 0)
     private BigDecimal amount;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @DecimalMin(value = "0.0", message = MSG_VALIDATION_DECIMAL_MIN_ERROR)
+    @NotNull
+    @DecimalMin(value = "0.0")
     @Column(nullable = false)
     private BigDecimal balanceAfterPayment;
 

@@ -26,30 +26,30 @@ public class Performance extends ModifiableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_id", nullable = false)
     private Work work;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
-    @Length(min = 1, max = 20, message = MSG_VALIDATION_LENGTH_ERROR)
+    @NotNull
+    @Length(min = 1, max = 20)
     @Column(nullable = false, length = 20)
     private String season;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PerformanceStatus status;

@@ -24,21 +24,21 @@ public class PerformanceSession extends DeletableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performance_id", nullable = false)
     private Performance performance;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Column(nullable = false)
     private LocalDateTime startTime;
 
-    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
+    @NotNull
     @Column(nullable = false)
     private LocalDateTime endTime;
 
