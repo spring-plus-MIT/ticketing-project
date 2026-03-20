@@ -35,7 +35,6 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RedisLockAspectTest {
 
     @Autowired
@@ -65,6 +64,14 @@ public class RedisLockAspectTest {
 
     @BeforeEach
     void setUp() {
+
+        seatGradeRepository.deleteAll();
+        performanceSessionRepository.deleteAll();
+        performanceRepository.deleteAll();
+        venueRepository.deleteAll();
+        workRepository.deleteAll();
+
+
         // given
         Work work = Work.builder()
                 .title("제목")

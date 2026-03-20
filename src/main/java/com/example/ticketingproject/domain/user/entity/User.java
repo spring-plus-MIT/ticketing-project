@@ -40,7 +40,7 @@ public class User extends DeletableEntity {
     private String password;
 
     @NotBlank
-    @Pattern(regexp = "^010-\\d{4}-\\d{4}$")
+    @Pattern(regexp = "^010-[\\d*]{4}-\\d{4}$")
     private String phone;
 
     @NotNull
