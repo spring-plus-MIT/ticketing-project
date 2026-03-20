@@ -63,6 +63,6 @@ public class AdminSeatControllerTest extends RestDocsSupport {
                         .content(requestBody))
                 .andExpect(status().isCreated()) // 201 Created 응답 확인
                 .andExpect(jsonPath("$.code").value("201_CREATE_SUCCESS"))
-                .andDo(restDocsHandler("admin-session-create"));
+                .andDo(restDocsHandler("admin-seat-create"));
     }
 }
