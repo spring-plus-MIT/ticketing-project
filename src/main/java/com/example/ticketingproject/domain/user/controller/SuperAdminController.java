@@ -5,6 +5,7 @@ import com.example.ticketingproject.common.enums.SuccessStatus;
 import com.example.ticketingproject.domain.user.dto.UpdateUserRequest;
 import com.example.ticketingproject.domain.user.dto.UpdateUserResponse;
 import com.example.ticketingproject.domain.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class SuperAdminController {
     @PutMapping("/{userId}")
     public ResponseEntity<CommonResponse<UpdateUserResponse>> updateUser(
             @PathVariable Long userId,
-            @RequestBody UpdateUserRequest request
+            @Valid @RequestBody UpdateUserRequest request
     ) {
         return ResponseEntity.ok(CommonResponse.success(
                 SuccessStatus.UPDATE_SUCCESS, userService.updateUser(userId, request)));
