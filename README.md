@@ -127,8 +127,6 @@ PENDING → ACTIVE → DELETED
 | GET    | `/users/me` | 내 정보 조회 | USER, ADMIN |
 | PUT    | `/users/me` | 내 정보 수정 | USER |
 | DELETE | `/users/delete` | 내 정보 삭제(탈퇴) | USER |
-| PUT    | `/admin/users/{userId}` | (관리자)유저 정보 수정 (삭제 예정) | ADMIN |
-| DELETE | `/admin/users/{userId}` | (관리자)유저 정보 삭제(탈퇴) (삭제 예정) | ADMIN |
 | POST   | `/super/admin/{adminId}` | 관리자 활성화(슈퍼 관리자) | SUPER |
 | PUT    | `/super/admin/{userId}` | 유저 정보 수정(슈퍼 관리자) | SUPER |
 | DELETE | `/super/admin/{userId}` | 유저 삭제(슈퍼 관리자) | SUPER |
