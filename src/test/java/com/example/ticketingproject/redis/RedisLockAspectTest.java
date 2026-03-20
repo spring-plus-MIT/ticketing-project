@@ -16,12 +16,12 @@ import com.example.ticketingproject.domain.work.entity.Work;
 import com.example.ticketingproject.domain.work.enums.Category;
 import com.example.ticketingproject.domain.work.repository.WorkRepository;
 import com.example.ticketingproject.redis.lock.service.LockService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -35,7 +35,6 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class RedisLockAspectTest {
 
     @Autowired
@@ -62,6 +61,15 @@ public class RedisLockAspectTest {
     private Venue venue;
 
     private SeatGrade seatGrade;
+
+    @AfterEach
+    void tearDown() {
+        seatGradeRepository.deleteAll();
+        performanceSessionRepository.deleteAll();
+        performanceRepository.deleteAll();
+        venueRepository.deleteAll();
+        workRepository.deleteAll();
+    }
 
     @BeforeEach
     void setUp() {
