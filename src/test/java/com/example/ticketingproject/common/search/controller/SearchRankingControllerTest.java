@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ class SearchRankingControllerTest extends RestDocsSupport {
 
     @Test
     @DisplayName("인기 검색어 조회")
-    @WithAnonymousUser
+    @WithMockUser
     void get_popular_keywords_with_domain_success() throws Exception {
         // given
         List<String> keywords = List.of("아이유콘서트", "BTS", "뉴진스");
