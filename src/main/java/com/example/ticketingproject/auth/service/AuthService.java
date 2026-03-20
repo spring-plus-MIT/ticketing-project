@@ -83,6 +83,11 @@ public class AuthService {
                         ErrorStatus.USER_NOT_FOUND)
         );
 
+        if(user.getUserStatus().equals(UserStatus.PENDING))
+            throw new AuthException(
+                    ErrorStatus.ACCESS_FORBIDDEN.getHttpStatus(),
+                    ErrorStatus.ACCESS_FORBIDDEN);
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AuthException(
                     ErrorStatus.INVALID_PASSWORD.getHttpStatus(),

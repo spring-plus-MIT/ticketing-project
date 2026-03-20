@@ -164,21 +164,21 @@ class AuthServiceTest {
     void 로그인_성공() {
         // given
         LoginRequest loginRequest = new LoginRequest();
-        ReflectionTestUtils.setField(loginRequest, "email", "admin@test.com");
+        ReflectionTestUtils.setField(loginRequest, "email", "user@test.com");
         ReflectionTestUtils.setField(loginRequest, "password", "password123");
 
         User user = User.builder()
-                .name("테스트어드민")
-                .email("admin@test.com")
+                .name("테스트유저")
+                .email("user@test.com")
                 .password("encodedPassword")
                 .phone("010-1234-5678")
                 .balance(BigDecimal.ZERO)
-                .userRole(UserRole.ADMIN)
+                .userRole(UserRole.USER)
                 .userStatus(UserStatus.ACTIVE)
                 .build();
         ReflectionTestUtils.setField(user, "id", 1L);
 
-        given(userRepository.findByEmail("admin@test.com")).willReturn(Optional.of(user));
+        given(userRepository.findByEmail("user@test.com")).willReturn(Optional.of(user));
         given(passwordEncoder.matches("password123", "encodedPassword")).willReturn(true);
         given(jwtTokenProvider.createToken(any())).willReturn("jwtToken");
 
@@ -187,6 +187,7 @@ class AuthServiceTest {
 
         // then
         assertThat(response.getAccessToken()).isEqualTo("jwtToken");
+        verify(jwtTokenProvider).createToken(any());
     }
 
     @Test
@@ -202,31 +203,66 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(UserException.class)
                 .hasMessageContaining(ErrorStatus.USER_NOT_FOUND.getMessage());
+
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(jwtTokenProvider, never()).createToken(any());
+    }
+
+    @Test
+    void 로그인_실패_PENDING_상태() {
+        // given
+        LoginRequest loginRequest = new LoginRequest();
+        ReflectionTestUtils.setField(loginRequest, "email", "pending@test.com");
+        ReflectionTestUtils.setField(loginRequest, "password", "password123");
+
+        User user = User.builder()
+                .name("승인대기유저")
+                .email("pending@test.com")
+                .password("encodedPassword")
+                .phone("010-1234-5678")
+                .balance(BigDecimal.ZERO)
+                .userRole(UserRole.ADMIN)
+                .userStatus(UserStatus.PENDING)
+                .build();
+        ReflectionTestUtils.setField(user, "id", 2L);
+
+        given(userRepository.findByEmail("pending@test.com")).willReturn(Optional.of(user));
+
+        // when & then
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(AuthException.class)
+                .hasMessageContaining(ErrorStatus.ACCESS_FORBIDDEN.getMessage());
+
+        verify(passwordEncoder, never()).matches(any(), any());
+        verify(jwtTokenProvider, never()).createToken(any());
     }
 
     @Test
     void 로그인_실패_비밀번호_불일치() {
         // given
         LoginRequest loginRequest = new LoginRequest();
-        ReflectionTestUtils.setField(loginRequest, "email", "admin@test.com");
+        ReflectionTestUtils.setField(loginRequest, "email", "user@test.com");
         ReflectionTestUtils.setField(loginRequest, "password", "wrongPassword");
 
         User user = User.builder()
-                .name("테스트어드민")
-                .email("admin@test.com")
+                .name("테스트유저")
+                .email("user@test.com")
                 .password("encodedPassword")
                 .phone("010-1234-5678")
                 .balance(BigDecimal.ZERO)
-                .userRole(UserRole.ADMIN)
+                .userRole(UserRole.USER)
                 .userStatus(UserStatus.ACTIVE)
                 .build();
+        ReflectionTestUtils.setField(user, "id", 1L);
 
-        given(userRepository.findByEmail("admin@test.com")).willReturn(Optional.of(user));
+        given(userRepository.findByEmail("user@test.com")).willReturn(Optional.of(user));
         given(passwordEncoder.matches("wrongPassword", "encodedPassword")).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(ErrorStatus.INVALID_PASSWORD.getMessage());
+
+        verify(jwtTokenProvider, never()).createToken(any());
     }
 }
