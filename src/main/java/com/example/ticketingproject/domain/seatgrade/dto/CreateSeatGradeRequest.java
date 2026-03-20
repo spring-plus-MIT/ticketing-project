@@ -13,7 +13,7 @@ import static com.example.ticketingproject.common.util.Constants.*;
 @Getter
 public class CreateSeatGradeRequest {
 
-    @NotBlank(message = MSG_VALIDATION_NOT_BLANK_ERROR)
+    @NotNull(message = MSG_VALIDATION_NOT_NULL_ERROR)
     @Enumerated(EnumType.STRING)
     private GradeName gradeName;
 

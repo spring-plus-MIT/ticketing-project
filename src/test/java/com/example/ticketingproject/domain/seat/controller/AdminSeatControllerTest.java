@@ -3,7 +3,6 @@ package com.example.ticketingproject.domain.seat.controller;
 import com.example.ticketingproject.RestDocsSupport;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
 import com.example.ticketingproject.domain.seat.dto.SeatResponse;
-import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seat.service.AdminSeatService;
 import com.example.ticketingproject.domain.seat.service.SeatTransactionalService;
 import com.example.ticketingproject.security.SecurityConfig;
@@ -18,7 +17,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,7 +37,7 @@ public class AdminSeatControllerTest extends RestDocsSupport {
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
 
-    private SeatResponse SeatResponse;
+    private SeatResponse seatResponse;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -54,7 +52,7 @@ public class AdminSeatControllerTest extends RestDocsSupport {
                 }
                 """;
 
-        when(adminSeatService.saveRedissonLock(eq(1L), any(CreateSeatRequest.class))).thenReturn(SeatResponse);
+        when(adminSeatService.saveRedissonLock(eq(1L), any(CreateSeatRequest.class))).thenReturn(seatResponse);
 
         // when & then
         mockMvc.perform(post("/admin/venues/{venueId}/seats/redisson", 1L)
