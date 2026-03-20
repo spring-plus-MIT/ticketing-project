@@ -154,7 +154,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .name("관리자")
                 .phone("010-9999-8888")
                 .role("ADMIN")
-                .status("ACTIVE")
+                .status("PENDING")
                 .build();
 
         given(authService.adminRegister(any(RegisterRequest.class))).willReturn(response);
@@ -169,6 +169,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.id").value(2L))
                 .andExpect(jsonPath("$.data.email").value("admin@test.com"))
                 .andExpect(jsonPath("$.data.role").value("ADMIN"))
+                .andExpect(jsonPath("$.data.status").value("PENDING"))
                 .andDo(restDocsHandler("auth-admin-register"));
     }
 
