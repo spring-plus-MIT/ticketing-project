@@ -278,10 +278,7 @@ PENDING → ACTIVE → DELETED
 
 ## 1️⃣ 검색 API 설계
 
-### 문제 상황
-매 요청마다 여러 테이블을 JOIN하고 LIKE 조건으로 Full Scan에 가까운 쿼리가 실행되어 DB 부하가 발생했습니다.
-
-### 해결 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
+### 검색 전략: QueryDSL 동적 쿼리 + DTO 직접 조회
 
 | 항목 | 내용 |
 |------|------|
