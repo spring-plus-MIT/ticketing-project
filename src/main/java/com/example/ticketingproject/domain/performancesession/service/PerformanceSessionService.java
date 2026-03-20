@@ -44,12 +44,16 @@ public class PerformanceSessionService {
     }
 
     public Page<PerformanceSearchResponse> search(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status, Pageable converted, Long userId) {
-        searchRankingService.recordKeyword(keyword, userId, "performance");
+        if (userId != null) {
+            searchRankingService.recordKeyword(keyword, userId, "performance");
+        }
         return performanceSessionRepository.searchPerformance(keyword, category, startDate, endDate, status, converted);
     }
 
     public Page<PerformanceSearchResponse> searchV2(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status, Pageable converted, Long userId) {
-        searchRankingService.recordKeyword(keyword, userId, "performance");
+        if (userId != null) {
+            searchRankingService.recordKeyword(keyword, userId, "performance");
+        }
 
         List<PerformanceSearchResponse> content = performanceSearchCacheService.getContent(
                 keyword, category, startDate, endDate, status, converted, converted.getPageNumber()
