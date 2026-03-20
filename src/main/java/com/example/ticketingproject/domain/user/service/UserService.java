@@ -83,6 +83,7 @@ public class UserService {
         user.withdraw();
     }
 
+    @Transactional
     public void activateUser(Long adminId) {
         User user = validateUserId(adminId);
         user.activate();
