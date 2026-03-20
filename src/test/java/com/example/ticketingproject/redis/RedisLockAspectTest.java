@@ -7,6 +7,7 @@ import com.example.ticketingproject.domain.performance.repository.PerformanceRep
 import com.example.ticketingproject.domain.performancesession.entity.PerformanceSession;
 import com.example.ticketingproject.domain.performancesession.repository.PerformanceSessionRepository;
 import com.example.ticketingproject.domain.seat.dto.CreateSeatRequest;
+import com.example.ticketingproject.domain.seat.repository.SeatRepository;
 import com.example.ticketingproject.domain.seat.service.AdminSeatService;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.seatgrade.repository.SeatGradeRepository;
@@ -44,6 +45,9 @@ public class RedisLockAspectTest {
     private LockService lockService;
 
     @Autowired
+    private SeatRepository seatRepository;
+
+    @Autowired
     private VenueRepository venueRepository;
 
     @Autowired
@@ -64,6 +68,7 @@ public class RedisLockAspectTest {
 
     @AfterEach
     void tearDown() {
+        seatRepository.deleteAll();
         seatGradeRepository.deleteAll();
         performanceSessionRepository.deleteAll();
         performanceRepository.deleteAll();
