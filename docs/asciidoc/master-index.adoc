@@ -4,3 +4,4 @@
 :source-highlighter: highlightjs
 
 include::user-index.adoc[]
+include::work-index.adoc[]
