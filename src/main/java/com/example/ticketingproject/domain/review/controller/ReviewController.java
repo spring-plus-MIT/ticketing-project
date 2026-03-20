@@ -17,7 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/works/{worksId}/reviews")
+@RequestMapping("/works/{workId}/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
