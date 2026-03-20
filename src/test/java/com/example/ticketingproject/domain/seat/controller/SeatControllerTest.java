@@ -100,6 +100,6 @@ public class SeatControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.gradeName").value("R"))
                 .andExpect(jsonPath("$.data.seatStatus").value("SOLD"))
                 .andExpect(jsonPath("$.data.createdAt").exists())
-                .andDo(restDocsHandler("seat-get-pages"));
+                .andDo(restDocsHandler("seat-get-detail"));
     }
 }
