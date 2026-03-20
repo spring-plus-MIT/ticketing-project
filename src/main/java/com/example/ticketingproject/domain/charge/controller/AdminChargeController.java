@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import static com.example.ticketingproject.common.enums.SuccessStatus.*;
@@ -24,7 +25,7 @@ public class AdminChargeController {
     private final AdminChargeService adminChargeService;
 
     @PostMapping("/{userId}")
-    public ResponseEntity<CommonResponse<ChargeResponse>> charge(@PathVariable(name = "userId") Long userId, @Valid @RequestBody ChargeRequest request, CustomUserDetails customUserDetails) {
+    public ResponseEntity<CommonResponse<ChargeResponse>> charge(@PathVariable(name = "userId") Long userId, @Valid @RequestBody ChargeRequest request, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(CHARGE_SUCCESS, adminChargeService.charge(customUserDetails.getId(), userId, request)));
     }
 
