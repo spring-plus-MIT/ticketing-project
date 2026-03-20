@@ -81,6 +81,6 @@ class PerformanceSearchControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.content[0].status").value("ON_SALE"))
                 .andExpect(jsonPath("$.data.content[0].startDate").exists())
                 .andExpect(jsonPath("$.data.content[0].endDate").exists())
-                .andDo(restDocsHandler("performance-search-v2-"));
+                .andDo(restDocsHandler("performance-search"));
     }
 }
