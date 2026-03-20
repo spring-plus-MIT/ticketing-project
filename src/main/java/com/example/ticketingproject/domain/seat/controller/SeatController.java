@@ -31,7 +31,7 @@ public class SeatController {
     }
 
     @GetMapping("/{seatId}")
-    public ResponseEntity<CommonResponse<SeatResponse>> getOne(@PathVariable(name = "venueId") Long venueId, @PathVariable(name = "seatGradeId") Long seatId) {
+    public ResponseEntity<CommonResponse<SeatResponse>> getOne(@PathVariable(name = "venueId") Long venueId, @PathVariable Long seatId) {
         return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, seatService.findOne(venueId, seatId)));
     }
 }

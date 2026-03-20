@@ -42,7 +42,9 @@ public class PerformanceSearchController {
     ) {
         Pageable converted =  PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
 
-        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.search(keyword, category, startDate, endDate, status, converted, customUserDetails.getId())));
+        Long userId = customUserDetails != null ? customUserDetails.getId() : null;
+
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.search(keyword, category, startDate, endDate, status, converted, userId)));
     }
 
     @GetMapping("/v2")
@@ -57,6 +59,9 @@ public class PerformanceSearchController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         Pageable converted = PageRequest.of(page - 1, pageable.getPageSize(), pageable.getSort());
-        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.searchV2(keyword, category, startDate, endDate, status, converted, customUserDetails.getId())));
+
+        Long userId = customUserDetails != null ? customUserDetails.getId() : null;
+
+        return ResponseEntity.ok(CommonResponse.success(READ_SUCCESS, performanceSessionService.searchV2(keyword, category, startDate, endDate, status, converted, userId)));
     }
 }
