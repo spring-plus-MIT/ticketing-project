@@ -53,7 +53,7 @@ public class AdminReservationController {
     }
 
     @GetMapping("/{userId}/{reservationId}")
-    public ResponseEntity<CommonResponse<ReservationResponse>> getOndReservation (
+    public ResponseEntity<CommonResponse<ReservationResponse>> getOneReservation (
             @PathVariable Long userId,
             @PathVariable Long reservationId
     ) {
