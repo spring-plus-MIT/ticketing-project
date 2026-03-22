@@ -38,6 +38,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -172,7 +174,7 @@ class AdminReservationIntegrationTest {
     }
 
     @Test
-    @DisplayName("고객 예약 불러오기 실패 - 존재하지 않는 고객 ID로 요청 시 빈 페이지 반환")
+    @DisplayName("고객 예약 불러오기 실패 - 존재하지 않는 고객 ID로 요청 시 404 반환")
     void 고객_예약_불러오기_실패_존재하지_않는_고객() throws Exception {
         // given
         String token = createAdminBearerToken();
@@ -181,9 +183,75 @@ class AdminReservationIntegrationTest {
         // when & then
         mockMvc.perform(get("/admin/reservations/users/" + nonExistentUserId)
                         .header("Authorization", token))
+                .andExpect(status().isNotFound());
+    }
+
+    // ===================== 단건 예약 조회 =====================
+
+    @Test
+    @DisplayName("단건 예약 조회 성공 - HTTP 200, code 200_READ_SUCCESS, reservationId로만 조회")
+    void 단건_예약_조회_성공() throws Exception {
+        // given
+        User user = saveUser("user@test.com");
+        Reservation reservation = saveReservation(user, 1);
+        String token = createAdminBearerToken();
+        long ignoredUserId = 99999L; // userId는 URL에 포함되지만 서비스에서 사용되지 않음
+
+        // when & then
+        mockMvc.perform(get("/admin/reservations/" + ignoredUserId + "/" + reservation.getId())
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200_READ_SUCCESS"))
-                .andExpect(jsonPath("$.data.totalElements").value(0))
-                .andExpect(jsonPath("$.data.content").isEmpty());
+                .andExpect(jsonPath("$.data.id").value(reservation.getId()))
+                .andExpect(jsonPath("$.data.userId").value(user.getId()))
+                .andExpect(jsonPath("$.data.status").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("단건 예약 조회 실패 - 존재하지 않는 예약 ID로 요청 시 404 반환")
+    void 단건_예약_조회_실패_존재하지_않는_예약() throws Exception {
+        // given
+        String token = createAdminBearerToken();
+        long nonExistentReservationId = 99999L;
+
+        // when & then
+        mockMvc.perform(get("/admin/reservations/1/" + nonExistentReservationId)
+                        .header("Authorization", token))
+                .andExpect(status().isNotFound());
+    }
+
+    // ===================== 예약 취소 =====================
+
+    @Test
+    @DisplayName("예약 취소 성공 - HTTP 200, code 200_DELETE_SUCCESS, status CANCELLED로 변경")
+    void 예약_취소_성공() throws Exception {
+        // given
+        User user = saveUser("user@test.com");
+        Reservation reservation = saveReservation(user, 1);
+        String token = createAdminBearerToken();
+        long ignoredUserId = 99999L; // userId는 URL에 포함되지만 서비스에서 사용되지 않음
+
+        // when & then - HTTP 응답 검증
+        mockMvc.perform(delete("/admin/reservations/" + ignoredUserId + "/" + reservation.getId())
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200_DELETE_SUCCESS"));
+
+        // DB 직접 검증
+        Reservation cancelled = reservationRepository.findById(reservation.getId()).orElseThrow();
+        assertThat(cancelled.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
+    }
+
+    @Test
+    @DisplayName("예약 취소 실패 - 존재하지 않는 예약 ID로 요청 시 404 반환")
+    void 예약_취소_실패_존재하지_않는_예약() throws Exception {
+        // given
+        String token = createAdminBearerToken();
+        long nonExistentReservationId = 99999L;
+
+        // when & then
+        mockMvc.perform(delete("/admin/reservations/1/" + nonExistentReservationId)
+                        .header("Authorization", token))
+                .andExpect(status().isNotFound());
     }
 }

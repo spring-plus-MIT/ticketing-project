@@ -1,9 +1,7 @@
 package com.example.ticketingproject.domain.reservation.service;
 
-import com.example.ticketingproject.common.enums.ErrorStatus;
 import com.example.ticketingproject.domain.reservation.dto.response.ReservationResponse;
 import com.example.ticketingproject.domain.reservation.entity.Reservation;
-import com.example.ticketingproject.domain.reservation.enums.ReservationStatus;
 import com.example.ticketingproject.domain.reservation.exception.ReservationException;
 import com.example.ticketingproject.domain.reservation.repository.ReservationRepository;
 import com.example.ticketingproject.domain.user.exception.UserException;
@@ -14,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.example.ticketingproject.common.enums.ErrorStatus.RESERVATION_NOT_FOUND;
 import static com.example.ticketingproject.common.enums.ErrorStatus.USER_NOT_FOUND;
 
 @Service
@@ -37,5 +36,20 @@ public class AdminReservationService {
         );
         return reservationRepository.findAllByUserId(userId, pageable)
                 .map(ReservationResponse::from);
+    }
+
+    @Transactional
+    public void cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new ReservationException(RESERVATION_NOT_FOUND)
+        );
+        reservation.cancel();
+    }
+
+    public ReservationResponse getOneReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new ReservationException(RESERVATION_NOT_FOUND)
+        );
+        return ReservationResponse.from(reservation);
     }
 }
