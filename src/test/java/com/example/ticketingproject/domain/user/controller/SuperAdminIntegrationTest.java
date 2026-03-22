@@ -1,4 +1,4 @@
-package com.example.ticketingproject.auth.controller;
+package com.example.ticketingproject.domain.user.controller;
 
 import com.example.ticketingproject.domain.user.entity.User;
 import com.example.ticketingproject.domain.user.enums.UserRole;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class AdminRegisterIntegrationTest {
+class SuperAdminIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,5 +62,13 @@ class AdminRegisterIntegrationTest {
         User savedUser = userRepository.findByEmail("admin@test.com").orElseThrow();
         assertThat(savedUser.getUserRole()).isEqualTo(UserRole.ADMIN);
         assertThat(savedUser.getUserStatus()).isEqualTo(UserStatus.PENDING);
+    }
+
+    @Test
+    void updateUser() {
+    }
+
+    @Test
+    void withdrawUser() {
     }
 }
