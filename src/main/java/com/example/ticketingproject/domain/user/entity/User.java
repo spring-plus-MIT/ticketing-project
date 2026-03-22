@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static com.example.ticketingproject.common.util.Constants.MSG_VALIDATION_NOT_NULL_ERROR;
 
@@ -89,12 +90,11 @@ public class User extends DeletableEntity {
             return null;
         }
 
-        int index = email.indexOf("@");
-        String twoWords = email.substring(0, 2);
-        int maskLength = index - 2;
-        String mask = "*".repeat(maskLength);
-
-        return twoWords + mask + email.substring(index);
+        return UUID.randomUUID()
+                .toString()
+                .replace("-", "")
+                .substring(0, 20)
+                + "@deleted.com";
     }
 
     public String maskPhone(String phone) {
