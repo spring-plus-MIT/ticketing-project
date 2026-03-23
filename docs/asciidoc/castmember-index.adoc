@@ -1,9 +1,9 @@
 = 출연진 관리 API
 :toc: left
-:toclevels: 3
+:toclevels: 2
 :source-highlighter: highlightjs
 
-== 출연진 관리 API (관리자 전용)
+== 관리자용 API
 이 API는 공연 회차별 출연진을 관리하며, **ADMIN 권한**을 가진 사용자만 접근할 수 있습니다.
 
 === 출연진 등록
@@ -39,7 +39,7 @@ include::{snippets}/admin-cast-delete/http-response.adoc[]
 
 ---
 
-== 출연진 조회 API (사용자용)
+== 고객용 API
 이 API는 특정 공연 및 회차에 등록된 출연진 정보를 조회하며, 모든 사용자가 접근할 수 있습니다.
 
 === 출연진 목록 조회
