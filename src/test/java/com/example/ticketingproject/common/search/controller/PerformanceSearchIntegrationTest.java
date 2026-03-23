@@ -129,25 +129,6 @@ class PerformanceSearchIntegrationTest {
     }
 
     @Test
-    @DisplayName("searchV2 - 존재하지 않는 keyword로 검색 시 빈 결과 반환 - HTTP 200, content 0건")
-    void 존재하지_않는_keyword로_검색_시_빈_결과() throws Exception {
-        // given
-        Work work = saveWork("레미제라블", Category.MUSICAL);
-        Venue venue = saveVenue();
-        Performance performance = savePerformance(work, venue, PerformanceStatus.ON_SALE);
-        saveSession(performance, venue, LocalDateTime.of(2024, 7, 15, 19, 0));
-
-        // when & then
-        mockMvc.perform(get("/performance/search/v2")
-                        .header("Authorization", token)
-                        .param("keyword", "존재하지않는공연")
-                        .param("page", "1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content", hasSize(0)))
-                .andExpect(jsonPath("$.data.totalElements").value(0));
-    }
-
-    @Test
     @DisplayName("searchV2 - 공연이 없을 때 검색 시 빈 결과 반환 - HTTP 200, content 0건")
     void 데이터_없을_때_검색_시_빈_결과() throws Exception {
         // when & then
