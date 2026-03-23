@@ -2,7 +2,7 @@
 :toc: left
 :toclevels: 2
 :source-highlighter: highlightjs
----
+
 == 관리자용 API
 이 API는 공연 회차별 출연진을 관리하며, **ADMIN 권한**을 가진 사용자만 접근할 수 있습니다.
 
