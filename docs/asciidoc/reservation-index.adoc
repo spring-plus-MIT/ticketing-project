@@ -6,7 +6,7 @@
 == 관리자용 API
 시스템 내 모든 예매 내역을 관리하며, **ADMIN 권한**을 가진 사용자만 접근할 수 있습니다.
 
-=== 전체 예매 내역 조회
+=== 예매 내역 조회 (전체)
 시스템에 등록된 모든 사용자의 예매 내역을 페이징하여 조회합니다.
 
 ==== Request
@@ -17,7 +17,7 @@ include::{snippets}/admin-reservation-get-all/http-response.adoc[]
 
 ---
 
-=== 사용자별 예매 내역 조회 (모든 사용자)
+=== 예매 내역 조회 (사용자별)
 특정 사용자(User ID)의 모든 예매 내역을 페이징하여 조회합니다.
 
 ==== Request
@@ -28,7 +28,7 @@ include::{snippets}/admin-reservation-get-by-user/http-response.adoc[]
 
 ---
 
-=== 예매 단건 상세 조회 (모든 사용자)
+=== 예매 내역 단건 조회
 특정 사용자의 특정 예매 건에 대한 상세 정보를 조회합니다.
 
 ==== Request
@@ -39,7 +39,7 @@ include::{snippets}/admin-reservation-get-one/http-response.adoc[]
 
 ---
 
-=== 예매 취소 (모든 사용자)
+=== 예매 취소
 관리자 권한으로 특정 사용자의 예매를 강제 취소 처리합니다. 관련된 좌석의 점유 상태도 함께 해제됩니다.
 
 ==== Request
@@ -48,9 +48,7 @@ include::{snippets}/admin-reservation-cancel/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-reservation-cancel/http-response.adoc[]
 
----
-
-== 고객용 API
+== 사용자용 API
 이 API는 일반 사용자가 본인의 예매를 진행하고 관리할 수 있도록 지원합니다. **인증된 사용자**만 접근할 수 있습니다.
 
 === 예매 생성 (좌석 점유)
@@ -64,7 +62,7 @@ include::{snippets}/reservation-create/http-response.adoc[]
 
 ---
 
-=== 본인 예매 상세 조회
+=== 내 예매 조회
 로그인한 사용자가 본인의 특정 예매 건에 대한 상세 정보를 조회합니다.
 
 ==== Request
@@ -75,7 +73,7 @@ include::{snippets}/reservation-get-one/http-response.adoc[]
 
 ---
 
-=== 본인 예매 취소
+=== 내 예매 취소
 로그인한 사용자가 본인의 예매를 취소합니다. 결제 대기 또는 결제 완료 상태의 예매를 취소할 수 있으며, 점유된 좌석이 해제됩니다.
 
 ==== Request

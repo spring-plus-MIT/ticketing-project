@@ -44,10 +44,8 @@ include::{snippets}/admin-users-get/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-users-get/http-response.adoc[]
 
----
-
-== 고객용 API
-이 API는 **USER** 권한 사용자만 접근할 수 있습니다.
+== 사용자용 API
+이 API는 모든 사용자가 접근할 수 있습니다.
 
 ---
 
