@@ -3,31 +3,72 @@
 :toclevels: 2
 :source-highlighter: highlightjs
 
-== 관리자용 API
-이 API는 ADMIN 권한 사용자만 접근할 수 있습니다.
+== 슈퍼 관리자용 API
+이 API는 **SUPER_ADMIN** 권한 사용자만 접근할 수 있습니다.
 
-=== 사용자 조회 (모든 사용자)
+---
+=== 관리자 활성화
+PENDING 상태의 관리자를 ACTIVE 상태로 활성화합니다.
 
 ==== Request
-include::{snippets}/admin-users-get/http-request.adoc[]
+include::{snippets}/super-admin-activate/http-request.adoc[]
+==== Response
+include::{snippets}/super-admin-activate/http-response.adoc[]
 
+---
+
+=== 사용자 정보 수정 (관리자, 고객)
+==== Request
+include::{snippets}/super-admin-update-user/http-request.adoc[]
+==== Response
+include::{snippets}/super-admin-update-user/http-response.adoc[]
+
+---
+
+=== 사용자 삭제 처리 (관리자, 고객)
+==== Request
+include::{snippets}/super-admin-withdraw-user/http-request.adoc[]
+==== Response
+include::{snippets}/super-admin-withdraw-user/http-response.adoc[]
+
+---
+
+== 관리자용 API
+이 API는 **ADMIN** 권한 사용자만 접근할 수 있습니다.
+
+---
+
+=== 유저 조회 (모든 사용자)
+==== Request
+include::{snippets}/admin-users-get/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-users-get/http-response.adoc[]
 
-=== 사용자 정보 수정 (모든 사용자)
-
-==== Request
-include::{snippets}/admin-users-update/http-request.adoc[]
-
-==== Response
-include::{snippets}/admin-users-update/http-response.adoc[]
-
-=== 사용자 삭제 처리 (모든 사용자)
-
-==== Request
-include::{snippets}/admin-users-delete/http-request.adoc[]
-
-==== Response
-include::{snippets}/admin-users-delete/http-response.adoc[]
+---
 
 == 고객용 API
+이 API는 **USER** 권한 사용자만 접근할 수 있습니다.
+
+---
+
+=== 내 정보 조회
+==== Request
+include::{snippets}/user-get-me/http-request.adoc[]
+==== Response
+include::{snippets}/user-get-me/http-response.adoc[]
+
+---
+
+=== 내 정보 수정
+==== Request
+include::{snippets}/user-update-me/http-request.adoc[]
+==== Response
+include::{snippets}/user-update-me/http-response.adoc[]
+
+---
+
+=== 내 정보 삭제 (회원탈퇴)
+==== Request
+include::{snippets}/user-withdraw/http-request.adoc[]
+==== Response
+include::{snippets}/user-withdraw/http-response.adoc[]
