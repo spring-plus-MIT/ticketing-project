@@ -1,13 +1,17 @@
 package com.example.ticketingproject.chat.domain.chat.dto;
 
 import com.example.ticketingproject.chat.domain.chat.entity.ChatMessage;
+import lombok.AllArgsConstructor; // 추가!
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor; // 추가!
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatMessageResponse {
     private Long messageId;
     private Long roomId;

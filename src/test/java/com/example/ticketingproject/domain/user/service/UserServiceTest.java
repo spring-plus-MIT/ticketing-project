@@ -106,7 +106,7 @@ class UserServiceTest {
 
         assertThat(user.getUserStatus()).isEqualTo(UserStatus.DELETED);
         assertThat(user.getName()).isEqualTo("이**");
-        assertThat(user.getEmail()).contains("*");
+        assertThat(user.getEmail()).contains("deleted.com");
         assertThat(user.getPhone()).contains("****");
     }
 

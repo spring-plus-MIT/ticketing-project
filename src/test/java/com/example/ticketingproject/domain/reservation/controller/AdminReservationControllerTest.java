@@ -101,7 +101,7 @@ class AdminReservationControllerTest extends RestDocsSupport {
         Long reservationId = 1L;
         ReservationResponse response = createMockReservationResponse();
 
-        given(reservationService.findOneReservation(userId, reservationId)).willReturn(response);
+        given(adminReservationService.getOneReservation(reservationId)).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/admin/reservations/{userId}/{reservationId}", userId, reservationId)

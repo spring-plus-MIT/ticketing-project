@@ -6,6 +6,7 @@ import com.example.ticketingproject.domain.performancesession.repository.Perform
 import com.example.ticketingproject.domain.work.enums.Category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,9 @@ public class PerformanceSearchCacheService {
             String keyword, Category category,
             LocalDate startDate, LocalDate endDate,
             PerformanceStatus status, Pageable pageable, int pageNumber) {
+
         return performanceSessionRepository
-                .searchPerformance(keyword, category, startDate, endDate, status, pageable)
-                .getContent();
+                .searchPerformanceContent(keyword, category, startDate, endDate, status, pageable);
     }
 
     @Cacheable(

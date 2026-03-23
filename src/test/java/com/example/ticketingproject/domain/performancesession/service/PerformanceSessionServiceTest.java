@@ -136,9 +136,7 @@ class PerformanceSessionServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         PerformanceSearchResponse dto = new PerformanceSearchResponse(
-                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 5, 1, 14, 0),
-                LocalDateTime.of(2025, 5, 1, 17, 0)
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE
         );
         Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
 
@@ -163,9 +161,7 @@ class PerformanceSessionServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         PerformanceSearchResponse dto = new PerformanceSearchResponse(
-                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 5, 1, 14, 0),
-                LocalDateTime.of(2025, 5, 1, 17, 0)
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE
         );
         Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
 
@@ -191,9 +187,7 @@ class PerformanceSessionServiceTest {
         LocalDate startDate = LocalDate.of(2025, 5, 1);
         LocalDate endDate = LocalDate.of(2025, 5, 31);
         PerformanceSearchResponse dto = new PerformanceSearchResponse(
-                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 5, 1, 14, 0),
-                LocalDateTime.of(2025, 5, 1, 17, 0)
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE
         );
         Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
 
@@ -208,10 +202,6 @@ class PerformanceSessionServiceTest {
 
         // then
         assertThat(response.getTotalElements()).isEqualTo(1);
-        assertThat(response.getContent().get(0).getStartDate())
-                .isAfterOrEqualTo(startDate.atStartOfDay());
-        assertThat(response.getContent().get(0).getEndDate())
-                .isBeforeOrEqualTo(endDate.atTime(23, 59, 59));
     }
 
     @Test
@@ -220,9 +210,7 @@ class PerformanceSessionServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         PerformanceSearchResponse dto = new PerformanceSearchResponse(
-                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 5, 1, 14, 0),
-                LocalDateTime.of(2025, 5, 1, 17, 0)
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE
         );
         Page<PerformanceSearchResponse> searchPage = new PageImpl<>(List.of(dto), pageable, 1);
 
@@ -267,9 +255,7 @@ class PerformanceSessionServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         PerformanceSearchResponse dto = new PerformanceSearchResponse(
-                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 5, 1, 14, 0),
-                LocalDateTime.of(2025, 5, 1, 17, 0)
+                1L, "2025 시즌", Category.MUSICAL, PerformanceStatus.ON_SALE
         );
 
         given(performanceSearchCacheService.getContent(
