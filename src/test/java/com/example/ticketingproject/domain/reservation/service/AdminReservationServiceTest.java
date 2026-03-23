@@ -10,6 +10,8 @@ import com.example.ticketingproject.domain.reservation.repository.ReservationRep
 import com.example.ticketingproject.domain.seat.entity.Seat;
 import com.example.ticketingproject.domain.seatgrade.entity.SeatGrade;
 import com.example.ticketingproject.domain.user.entity.User;
+import com.example.ticketingproject.domain.user.exception.UserException;
+import com.example.ticketingproject.domain.user.repository.UserRepository;
 import com.example.ticketingproject.domain.work.entity.Work;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,12 +29,16 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 class AdminReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -130,12 +136,29 @@ class AdminReservationServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Reservation> reservationPage = new PageImpl<>(List.of(reservation));
 
+        when(userRepository.existsById(userId)).thenReturn(true);
         when(reservationRepository.findAllByUserId(userId, pageable)).thenReturn(reservationPage);
 
         Page<ReservationResponse> result = adminReservationService.getReservationsByUser(userId, pageable);
 
         assertThat(result).isNotNull();
+        verify(userRepository, times(1)).existsById(userId);
         verify(reservationRepository, times(1)).findAllByUserId(userId, pageable);
+    }
+
+    @Test
+    @DisplayName("관리자 - 존재하지 않는 유저의 예약 목록 조회 시 UserException 발생")
+    void getReservationsByUser_존재하지_않는_유저_실패() {
+        Long userId = 99L;
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userRepository.existsById(userId)).thenReturn(false);
+
+        assertThatThrownBy(() -> adminReservationService.getReservationsByUser(userId, pageable))
+                .isInstanceOf(UserException.class);
+
+        verify(userRepository, times(1)).existsById(userId);
+        verify(reservationRepository, never()).findAllByUserId(any(), any());
     }
 
     @Test

@@ -53,24 +53,21 @@ public class AdminReservationController {
     }
 
     @GetMapping("/{userId}/{reservationId}")
-    public ResponseEntity<CommonResponse<ReservationResponse>> getOndReservation (
-            @PathVariable Long userId,
+    public ResponseEntity<CommonResponse<ReservationResponse>> getOneReservation (
             @PathVariable Long reservationId
     ) {
        return ResponseEntity.ok(CommonResponse.success(
                SuccessStatus.READ_SUCCESS,
-               reservationService.findOneReservation(userId, reservationId)
+               adminReservationService.getOneReservation(reservationId)
                )
        );
     }
 
-    @DeleteMapping("/{reservationId}/{userId}")
+    @DeleteMapping("/{userId}/{reservationId}")
     public ResponseEntity<CommonResponse<Void>> cancelReservation(
-            @PathVariable Long reservationId,
-            @PathVariable Long userId
+            @PathVariable Long reservationId
     ) {
-        reservationService.cancelReservation(reservationId, userId);
-
+        adminReservationService.cancelReservation(reservationId);
         return ResponseEntity.ok(CommonResponse.success(
                         SuccessStatus.DELETE_SUCCESS,
                         null
