@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,10 +51,9 @@ class PerformanceSearchCacheServiceIntegrationTest {
     void getContent_cacheMiss_callsRepository() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Page<PerformanceSearchResponse> page = new PageImpl<>(List.of());
 
-        doReturn(page).when(performanceSessionRepository)
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+        doReturn(List.of()).when(performanceSessionRepository)
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
 
         // when
         performanceSearchCacheService.getContent(
@@ -61,7 +61,7 @@ class PerformanceSearchCacheServiceIntegrationTest {
 
         // then - repository 1회 호출
         then(performanceSessionRepository).should(times(1))
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -69,10 +69,11 @@ class PerformanceSearchCacheServiceIntegrationTest {
     void getContent_cacheHit_doesNotCallRepository() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Page<PerformanceSearchResponse> page = new PageImpl<>(List.of());
 
-        doReturn(page).when(performanceSessionRepository)
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+        List<PerformanceSearchResponse> emptyList = new ArrayList<>();
+
+        doReturn(emptyList).when(performanceSessionRepository)
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
 
         // when - 동일한 조건으로 2번 호출
         performanceSearchCacheService.getContent(
@@ -82,7 +83,7 @@ class PerformanceSearchCacheServiceIntegrationTest {
 
         // then - repository는 1번만 호출 (두 번째는 캐시 HIT)
         then(performanceSessionRepository).should(times(1))
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -90,10 +91,9 @@ class PerformanceSearchCacheServiceIntegrationTest {
     void getContent_differentConditions_callsRepositoryEachTime() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Page<PerformanceSearchResponse> page = new PageImpl<>(List.of());
 
-        doReturn(page).when(performanceSessionRepository)
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+        doReturn(List.of()).when(performanceSessionRepository)
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
 
         // when - 다른 조건으로 2번 호출
         performanceSearchCacheService.getContent(
@@ -103,7 +103,7 @@ class PerformanceSearchCacheServiceIntegrationTest {
 
         // then - 각각 다른 캐시 키라 repository 2번 호출
         then(performanceSessionRepository).should(times(2))
-                .searchPerformance(any(), any(), any(), any(), any(), any());
+                .searchPerformanceContent(any(), any(), any(), any(), any(), any());
     }
 
     @Test

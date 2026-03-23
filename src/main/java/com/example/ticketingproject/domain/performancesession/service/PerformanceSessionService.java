@@ -55,6 +55,7 @@ public class PerformanceSessionService {
             searchRankingService.recordKeyword(keyword, userId, "performance");
         }
 
+        try {
         List<PerformanceSearchResponse> content = performanceSearchCacheService.getContent(
                 keyword, category, startDate, endDate, status, converted, converted.getPageNumber()
         );
@@ -62,7 +63,11 @@ public class PerformanceSessionService {
         long total = performanceSearchCacheService.getCount(
                 keyword, category, startDate, endDate, status);
 
-        return new PageImpl<>(content, converted, total);
+        List<PerformanceSearchResponse> safeContent = content != null ? content : List.of();
 
+        return new PageImpl<>(safeContent, converted, total);
+        } catch (Exception e) {
+            return new PageImpl<>(List.of(), converted, 0L);
+        }
     }
 }

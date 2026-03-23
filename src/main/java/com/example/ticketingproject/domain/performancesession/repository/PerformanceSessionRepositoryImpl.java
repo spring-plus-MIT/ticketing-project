@@ -37,9 +37,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                         performance.id,
                         performance.season,
                         work.category,
-                        performance.status,
-                        performanceSession.startTime,
-                        performanceSession.endTime
+                        performance.status
                         ))
                 .from(performanceSession)
                 .join(performanceSession.performance, performance)
@@ -50,12 +48,52 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                         dateBetween(startDate, endDate),
                         statusEq(status)
                 )
+                .groupBy(performance.id, performance.season, work.category, performance.status)
                 .offset(converted.getOffset())
                 .limit(converted.getPageSize())
                 .orderBy(performance.startDate.asc())
                 .fetch();
 
-        return new PageImpl<>(result, converted, result.size());
+        JPAQuery<Long> countQuery = queryFactory
+                .select(performance.countDistinct())
+                .from(performanceSession)
+                .join(performanceSession.performance, performance)
+                .join(performance.work, work)
+                .where(
+                        titleLike(keyword),
+                        categoryEq(category),
+                        dateBetween(startDate, endDate),
+                        statusEq(status)
+                );
+
+        return PageableExecutionUtils.getPage(result, converted, countQuery::fetchOne);
+    }
+
+    @Override
+    public List<PerformanceSearchResponse> searchPerformanceContent(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status, Pageable converted) {
+        List<PerformanceSearchResponse> result = queryFactory
+                .select(Projections.constructor(PerformanceSearchResponse.class,
+                        performance.id,
+                        performance.season,
+                        work.category,
+                        performance.status
+                ))
+                .from(performanceSession)
+                .join(performanceSession.performance, performance)
+                .join(performance.work, work)
+                .where(
+                        titleLike(keyword),
+                        categoryEq(category),
+                        dateBetween(startDate, endDate),
+                        statusEq(status)
+                )
+                .groupBy(performance.id, performance.season, work.category, performance.status)
+                .offset(converted.getOffset())
+                .limit(converted.getPageSize())
+                .orderBy(performance.startDate.asc())
+                .fetch();
+
+        return result;
     }
 
     private BooleanExpression titleLike(String keyword) {
@@ -88,7 +126,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
     @Override
     public long countPerformance(String keyword, Category category, LocalDate startDate, LocalDate endDate, PerformanceStatus status) {
         Long count = queryFactory
-                .select(performanceSession.count())
+                .select(performance.countDistinct())
                 .from(performanceSession)
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)

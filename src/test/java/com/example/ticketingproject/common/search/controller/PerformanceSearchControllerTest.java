@@ -43,9 +43,7 @@ class PerformanceSearchControllerTest extends RestDocsSupport {
                 1L,
                 "레미제라블 시즌 1",
                 Category.MUSICAL,
-                PerformanceStatus.ON_SALE,
-                LocalDateTime.of(2025, 1, 1, 10, 0),
-                LocalDateTime.of(2025, 3, 31, 22, 0)
+                PerformanceStatus.ON_SALE
         );
     }
 
@@ -79,8 +77,6 @@ class PerformanceSearchControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.content[0].season").value("레미제라블 시즌 1"))
                 .andExpect(jsonPath("$.data.content[0].category").value("MUSICAL"))
                 .andExpect(jsonPath("$.data.content[0].status").value("ON_SALE"))
-                .andExpect(jsonPath("$.data.content[0].startDate").exists())
-                .andExpect(jsonPath("$.data.content[0].endDate").exists())
                 .andDo(restDocsHandler("performance-search"));
     }
 }
