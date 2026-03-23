@@ -1,30 +1,33 @@
-== 사용자 API
-이 API는 사용자의 권한을 다룹니다.
+= 사용자 관리 API
+:toc: left
+:toclevels: 2
+:source-highlighter: highlightjs
 
-=== 일반 사용자 권한 API
-=== 관리자 권한 API
+== 관리자용 API
 이 API는 ADMIN 권한 사용자만 접근할 수 있습니다.
 
-==== 사용자 조회
+=== 사용자 조회 (모든 사용자)
 
-===== Request
+==== Request
 include::{snippets}/admin-users-get/http-request.adoc[]
 
-===== Response
+==== Response
 include::{snippets}/admin-users-get/http-response.adoc[]
 
-==== 사용자 정보 수정
+=== 사용자 정보 수정 (모든 사용자)
 
-===== Request
+==== Request
 include::{snippets}/admin-users-update/http-request.adoc[]
 
-===== Response
+==== Response
 include::{snippets}/admin-users-update/http-response.adoc[]
 
-==== 사용자 정보 삭제
+=== 사용자 삭제 처리 (모든 사용자)
 
-===== Request
+==== Request
 include::{snippets}/admin-users-delete/http-request.adoc[]
 
-===== Response
+==== Response
 include::{snippets}/admin-users-delete/http-response.adoc[]
+
+== 고객용 API
