@@ -43,6 +43,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)
                 .where(
+                        performanceSession.deleted.isFalse(),
                         titleLike(keyword),
                         categoryEq(category),
                         dateBetween(startDate, endDate),
@@ -60,6 +61,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)
                 .where(
+                        performanceSession.deleted.isFalse(),
                         titleLike(keyword),
                         categoryEq(category),
                         dateBetween(startDate, endDate),
@@ -82,6 +84,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)
                 .where(
+                        performanceSession.deleted.isFalse(),
                         titleLike(keyword),
                         categoryEq(category),
                         dateBetween(startDate, endDate),
@@ -131,6 +134,7 @@ public class PerformanceSessionRepositoryImpl implements PerformanceSessionCusto
                 .join(performanceSession.performance, performance)
                 .join(performance.work, work)
                 .where(
+                        performanceSession.deleted.isFalse(),
                         titleLike(keyword),
                         categoryEq(category),
                         dateBetween(startDate, endDate),
