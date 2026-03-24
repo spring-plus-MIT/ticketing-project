@@ -10,10 +10,10 @@
 특정 장소에 새로운 좌석을 추가합니다.
 
 ==== Request
-include::{snippets}admin-seat-create/http-request.adoc[]
+include::{snippets}/admin-seat-create/http-request.adoc[]
 
 ==== Response
-include::{snippets}admin-seat-create/http-response.adoc[]
+include::{snippets}/admin-seat-create/http-response.adoc
 
 ---
 
@@ -25,18 +25,18 @@ include::{snippets}admin-seat-create/http-response.adoc[]
 === 좌석 조회 (모든 좌석)
 
 ==== Request
-include::{snippets}seat-get-pages/http-request.adoc[]
+include::{snippets}/seat-get-pages/http-request.adoc[]
 
 ==== Response
-include::{snippets}seat-get-pages/http-response.adoc[]
+include::{snippets}/seat-get-pages/http-response.adoc[]
 
 ---
 
 === 좌석 조회
 
 ==== Request
-include::{snippets}seat-get-/http-request.adoc[]
+include::{snippets}/seat-get-detail/http-request.adoc[]
 
 ==== Response
-include::{snippets}seat-get-detail/http-response.adoc[]
+include::{snippets}/seat-get-detail/http-response.adoc[]
 
