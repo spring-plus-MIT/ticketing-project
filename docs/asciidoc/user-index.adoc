@@ -6,7 +6,6 @@
 == 슈퍼 관리자용 API
 이 API는 **SUPER_ADMIN** 권한 사용자만 접근할 수 있습니다.
 
----
 === 관리자 활성화
 PENDING 상태의 관리자를 ACTIVE 상태로 활성화합니다.
 
@@ -31,12 +30,8 @@ include::{snippets}/super-admin-withdraw-user/http-request.adoc[]
 ==== Response
 include::{snippets}/super-admin-withdraw-user/http-response.adoc[]
 
----
-
 == 관리자용 API
 이 API는 **ADMIN** 권한 사용자만 접근할 수 있습니다.
-
----
 
 === 유저 조회 (모든 사용자)
 ==== Request
@@ -44,12 +39,8 @@ include::{snippets}/admin-users-get/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-users-get/http-response.adoc[]
 
----
-
-== 고객용 API
-이 API는 **USER** 권한 사용자만 접근할 수 있습니다.
-
----
+== 사용자용 API
+이 API는 모든 사용자가 접근할 수 있습니다.
 
 === 내 정보 조회
 ==== Request
