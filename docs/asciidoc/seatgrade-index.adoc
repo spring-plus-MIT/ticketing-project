@@ -1,0 +1,63 @@
+= 좌석 등급 관리 API
+:toc: left
+:toclevels: 2
+:source-highlighter: highlightjs
+
+== 관리자용 API
+이 API는 공연의 세부 회차(일정 및 장소)를 관리하며, **ADMIN 권한**을 가진 사용자만 접근할 수 있습니다.
+
+---
+
+=== 좌석 등급 생성
+
+==== Request
+include::{snippets}/admin-seatgrade-create/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-seatgrade-create/http-response.adoc[]
+
+---
+
+=== 좌석 등급 수정
+
+==== Request
+include::{snippets}/admin-seatgrade-update/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-seatgrade-update/http-response.adoc[]
+
+---
+
+=== 좌석 등급 삭제
+
+==== Request
+include::{snippets}/admin-seatgrade-delete/http-request.adoc[]
+
+==== Response
+include::{snippets}/admin-seatgrade-delete/http-response.adoc[]
+
+---
+
+== 사용자용 API
+이 API는 **USER** 권한 사용자만 접근할 수 있습니다.
+
+---
+
+=== 좌석 등급 조회 (모든 좌석 등급)
+
+==== Request
+include::{snippets}/seatgrade-get-pages/http-request.adoc[]
+
+==== Response
+include::{snippets}/seatgrade-get-pages/http-response.adoc[]
+
+---
+
+=== 좌석 등급 조회
+
+==== Request
+include::{snippets}/seatgrade-get-detail/http-request.adoc[]
+
+==== Response
+include::{snippets}/seatgrade-get-detail/http-response.adoc[]
+
