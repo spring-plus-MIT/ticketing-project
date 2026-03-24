@@ -13,7 +13,7 @@
 include::{snippets}/admin-seat-create/http-request.adoc[]
 
 ==== Response
-include::{snippets}/admin-seat-create/http-response.adoc
+include::{snippets}/admin-seat-create/http-response.adoc[]
 
 ---
 
