@@ -1,18 +1,47 @@
 = API 명세서: TicketTopia
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
 :toc: left
 :toclevels: 3
-:source-highlighter: highlightjs
+:sectnums:
+:sectlinks:
 
 == 출연진 (Cast-Members)
+include::castmember-index.adoc[leveloffset=+1]
+
 == 충전 (Charge)
-== 좌석 (Seat)
-== 좌석 등급 (Seat-Grade)
+include::charge-index.adoc[leveloffset=+1]
+
 == 찜 (Like)
-== 공연 회차 (Performance-Session)
-== 공연 (Performance)
+include::like-index.adoc[leveloffset=+1]
+
 == 결제 (Payment)
-== 리뷰 (Review)
+include::payment-index.adoc[leveloffset=+1]
+
+== 공연 회차 (Performance-Session)
+include::performancesession-index.adoc[leveloffset=+1]
+
+== 공연 (Performance)
+include::performance-index.adoc[leveloffset=+1]
+
 == 예약 (Reservation)
+include::reservation-index.adoc[leveloffset=+1]
+
+== 리뷰 (Review)
+include::review-index.adoc[leveloffset=+1]
+
+== 좌석 (Seat)
+include::seat-index.adoc[leveloffset=+1]
+
+== 좌석 등급 (Seat-Grade)
+include::seatgrade-index.adoc[leveloffset=+1]
+
 == 사용자 (User)
+include::user-index.adoc[leveloffset=+1]
+
 == 공연장 (Venue)
+include::venue-index.adoc[leveloffset=+1]
+
 == 작품 (Work)
+include::work-index.adoc[leveloffset=+1]

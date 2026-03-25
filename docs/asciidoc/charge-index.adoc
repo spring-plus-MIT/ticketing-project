@@ -4,5 +4,40 @@
 :source-highlighter: highlightjs
 
 == 관리자용 API
+ADMIN 권한 사용자만 접근할 수 있습니다.
 
-== 고객용 API
+=== 캐시 충전(탑업)
+특정 사용자의 캐시를 탑업합니다
+
+==== Request
+include::{snippets}/admin-charge/http-request.adoc[]
+==== Response
+include::{snippets}/admin-charge/http-response.adoc[]
+
+---
+
+=== 캐시 충전 이력 전체 조회
+모든 캐시 충전 이력을 조회합니다.
+
+==== Request
+include::{snippets}/admin-charge-get-all/http-request.adoc[]
+==== Response
+include::{snippets}/admin-charge-get-all/http-response.adoc[]
+
+---
+
+=== 캐시 충전 이력 단건 조회
+특정 사용자의 캐시 충전 이력을 조회합니다.
+
+==== Request
+include::{snippets}/admin-charge-get-all-by-user-id/http-request.adoc[]
+==== Response
+include::{snippets}/admin-charge-get-all-by-user-id/http-response.adoc[]
+
+== 사용자용 API
+=== 내 캐시 충전 이력 조회
+
+==== Request
+include::{snippets}/charge-find-all/http-request.adoc[]
+==== Response
+include::{snippets}/charge-find-all/http-response.adoc[]

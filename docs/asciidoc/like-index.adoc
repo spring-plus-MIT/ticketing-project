@@ -1,0 +1,25 @@
+= 작품 찜 관리 API
+:toc: left
+:toclevels: 2
+:source-highlighter: highlightjs
+
+공연 찜 정보를 관리합니다.
+
+== 사용자용 API
+이 API는 시스템에 등록된 작품의 대한 찜을 등록 및 삭제하며, 모든 사용자가 접근할 수 있습니다.
+
+=== 작품 찜 등록
+
+==== Request
+include::{snippets}/like-create/http-request.adoc[]
+==== Response
+include::{snippets}/like-create/http-response.adoc[]
+
+---
+
+=== 작품 찜 삭제
+
+==== Request
+include::{snippets}/like-delete/http-request.adoc[]
+==== Response
+include::{snippets}/like-delete/http-response.adoc[]

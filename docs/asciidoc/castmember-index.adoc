@@ -37,9 +37,7 @@ include::{snippets}/admin-cast-delete/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-cast-delete/http-response.adoc[]
 
----
-
-== 고객용 API
+== 사용자용 API
 이 API는 특정 공연 및 회차에 등록된 출연진 정보를 조회하며, 모든 사용자가 접근할 수 있습니다.
 
 === 출연진 목록 조회

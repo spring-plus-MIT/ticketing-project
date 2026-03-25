@@ -37,12 +37,10 @@ include::{snippets}/admin-session-delete/http-request.adoc[]
 ==== Response
 include::{snippets}/admin-session-delete/http-response.adoc[]
 
----
-
-== 고객용 API
+== 사용자용 API
 이 API는 특정 공연에 속한 회차 정보를 조회하며, 모든 사용자가 접근할 수 있습니다.
 
-=== 회차 목록 페이징 조회
+=== 회차 전체 조회
 특정 공연의 전체 회차 목록을 페이징하여 조회합니다.
 
 ==== Request
@@ -53,8 +51,8 @@ include::{snippets}/session-get-pages/http-response.adoc[]
 
 ---
 
-=== 회차 상세 조회
-특정 공연 회차의 상세 정보를 조회합니다.
+=== 회차 단건 조회
+특정 공연 회차의 정보를 조회합니다.
 
 ==== Request
 include::{snippets}/session-get-detail/http-request.adoc[]
